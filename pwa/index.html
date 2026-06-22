@@ -265,14 +265,10 @@
   .bc.lic .lictxt span{display:block;font-size:12px;color:var(--ink2);margin-top:2px}
   .bc.lic .bookbtn{border:0;background:var(--green);color:#fff;font-weight:800;font-size:13px;padding:12px 20px;border-radius:12px;cursor:pointer;white-space:nowrap;flex:none;font-family:inherit}
   @media(max-width:760px){
-    .bento{grid-template-columns:1fr;padding:12px}
-    .bc.hero,.bc.facts,.bc.lic,.bc.price,.bc.prog,.bc.reviews,.bc.safety{grid-column:1;grid-row:auto}
+    .bento{grid-template-columns:1fr}
+    .bc.hero,.bc.facts,.bc.lic{grid-column:1}
+    .bc.price{grid-row:auto}
     .bc.hero{flex-direction:column}
-    .drawer-inner{width:100%;max-width:100%;border-radius:0;max-height:100vh}
-    .drawer{padding:0}
-    .p-hero{height:120px}
-    .p-hero .mono{font-size:44px}
-    .bc.price .bigp{font-size:24px}
   }
   .btn-primary{border:0;background:var(--green);color:#fff;font-weight:800;font-size:15px;
     padding:14px;border-radius:14px;cursor:pointer;transition:.15s;flex:1}
