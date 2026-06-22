@@ -1,0 +1,9 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="108" fill="#1F8A5B"/>
+  <g transform="translate(256,240) scale(5.2)">
+    <path d="M0-20c-9.6-10.4-28-9.2-36 3.2-8.8 13.6-4 34.4 8.8 47.2C-20 37.6-12 44 0 44s20-6.4 27.2-13.6c12.8-12.8 17.6-33.6 8.8-47.2C28-29.2 9.6-30.4 0-20Z" fill="#fff"/>
+    <path d="M0-20c0-9.6 5.6-18.4 16-21.6" stroke="#86C9A0" stroke-width="5.5" stroke-linecap="round" fill="none"/>
+    <path d="M2-33c7.2-1.6 13.6 1.6 16 8-7.2 1.6-13.6-1.6-16-8Z" fill="#86C9A0"/>
+  </g>
+  <text x="256" y="420" text-anchor="middle" font-family="system-ui,-apple-system,sans-serif" font-weight="800" font-size="72" fill="#fff" letter-spacing="-1">САДИКИ</text>
+</svg>

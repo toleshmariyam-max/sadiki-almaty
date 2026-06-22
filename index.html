@@ -1,0 +1,1449 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1F8A5B">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Садики">
+<link rel="apple-touch-icon" href="icons/icon-152x152.png">
+<link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
+<title>Садики Алматы — найдите садик рядом с домом</title>
+<meta name="description" content="Каталог детских садов Алматы: фильтр по району, цене, языку. Честная проверка лицензии и условий. Запись на пробный день.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://a.basemaps.cartocdn.com" crossorigin>
+<link rel="preconnect" href="https://b.basemaps.cartocdn.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root{
+    --bg:#F3F6F0; --paper:#FFFFFF;
+    --ink:#16261D; --ink2:#56685D; --ink3:#8A998F;
+    --line:#E4EADF; --line2:#EEF2EA;
+    --green:#1F8A5B; --green-700:#15704A; --green-soft:#E2F1E8;
+    --apricot:#EE9A2E; --apricot-soft:#FCEBCE;
+    --apple:#E2553D; --apple-soft:#FBE4DE;
+    --slate:#3F6F86; --slate-soft:#E3EEF3;
+    --r:18px; --rs:12px; --rl:26px; --pill:999px;
+    --sh:0 1px 2px rgba(18,40,28,.05),0 10px 26px rgba(18,40,28,.06);
+    --sh-lg:0 18px 50px rgba(18,40,28,.16);
+    --maxw:1180px;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:'Onest',system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.55;
+    -webkit-font-smoothing:antialiased;overflow-x:hidden}
+  h1,h2,h3,h4{margin:0}
+  .disp{font-family:'Outfit','Onest',sans-serif;letter-spacing:-.01em;font-weight:600}
+  a{color:inherit}
+  button{font-family:inherit}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  :focus-visible{outline:3px solid var(--green);outline-offset:2px;border-radius:6px}
+
+  /* ---------- TOPBAR ---------- */
+  .topbar{position:sticky;top:0;z-index:700;background:rgba(243,246,240,.86);
+    backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .topbar-in{max-width:var(--maxw);margin:0 auto;padding:11px 20px;display:flex;align-items:center;gap:18px}
+  .logo{display:inline-flex;align-items:center;gap:9px;font-weight:800;font-size:16px;letter-spacing:-.02em;text-decoration:none;flex:none}
+  .logo .lapple{width:26px;height:26px;flex:none}
+  .logo .light{color:var(--ink2);font-weight:600}
+  .topnav{display:flex;gap:2px;margin-left:6px}
+  .topnav a{font-size:13.5px;font-weight:600;color:var(--ink2);text-decoration:none;padding:8px 12px;border-radius:var(--pill);transition:.15s;white-space:nowrap}
+  .topnav a:hover{background:var(--line2);color:var(--ink)}
+  .topbar-actions{margin-left:auto;display:flex;align-items:center;gap:8px}
+  .reqbtn{font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--paper);
+    color:var(--ink);padding:9px 14px;border-radius:var(--pill);cursor:pointer;display:inline-flex;gap:6px;align-items:center;transition:.15s}
+  .reqbtn:hover{border-color:var(--ink3)}
+  .reqbtn .cnt{color:var(--green);font-weight:800}
+  .ownerbtn{font-size:12.5px;font-weight:600;border:1px dashed var(--ink3);background:none;color:var(--ink2);
+    padding:9px 13px;border-radius:var(--pill);cursor:pointer;transition:.15s;white-space:nowrap}
+  .ownerbtn:hover{color:var(--ink);border-color:var(--ink)}
+  .ownerbtn.on{background:var(--ink);color:#fff;border-style:solid;border-color:var(--ink)}
+
+  /* ---------- HERO ---------- */
+  .hero{position:relative;overflow:hidden}
+  .hero-in{max-width:var(--maxw);margin:0 auto;padding:46px 20px 30px;
+    display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:30px;align-items:center}
+  .eyebrow{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;color:var(--green-700);
+    background:var(--green-soft);padding:6px 13px;border-radius:var(--pill)}
+  .hero h1{font-family:'Outfit',sans-serif;font-weight:600;font-size:clamp(28px,4.4vw,46px);
+    line-height:1.06;letter-spacing:-.02em;margin:16px 0 0;max-width:14ch}
+  .hero h1 em{font-style:normal;color:var(--green)}
+  .lede{font-size:16px;color:var(--ink2);margin:15px 0 0;max-width:48ch;line-height:1.55}
+  .herosearch{margin-top:22px;display:flex;gap:8px;background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--pill);padding:7px 7px 7px 18px;box-shadow:var(--sh);max-width:480px}
+  .herosearch svg{width:20px;height:20px;color:var(--ink3);flex:none;align-self:center}
+  .herosearch input{border:0;outline:0;background:none;flex:1;font:inherit;font-size:15px;color:var(--ink);min-width:0}
+  .herosearch input::placeholder{color:var(--ink3)}
+  .btn-find{border:0;background:var(--green);color:#fff;font-weight:700;font-size:14px;
+    padding:11px 20px;border-radius:var(--pill);cursor:pointer;transition:.15s;white-space:nowrap}
+  .btn-find:hover{background:var(--green-700)}
+  .herochips{margin-top:14px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+  .hchip{font-size:13px;font-weight:600;border:1px solid var(--line);background:var(--paper);
+    color:var(--ink2);padding:7px 13px;border-radius:var(--pill);cursor:pointer;transition:.13s}
+  .hchip:hover{border-color:var(--green);color:var(--green-700)}
+  .hquiz{font-size:13px;font-weight:700;border:0;background:var(--apricot-soft);color:#92560b;
+    padding:8px 15px;border-radius:var(--pill);cursor:pointer;transition:.13s;display:inline-flex;gap:6px;align-items:center}
+  .hquiz:hover{background:#fbdfac}
+  .herostats{margin-top:22px;display:flex;gap:22px;flex-wrap:wrap}
+  .hstat b{font-family:'Outfit',sans-serif;font-weight:600;font-size:21px;display:block;line-height:1;color:var(--ink)}
+  .hstat span{font-size:12.5px;color:var(--ink2)}
+  .hero-art{position:relative}
+  .hero-art svg{width:100%;height:auto;display:block;border-radius:var(--rl);box-shadow:var(--sh)}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  @keyframes drift{0%{transform:translateX(0)}100%{transform:translateX(34px)}}
+  .f-sun{transform-origin:center;animation:floaty 6s ease-in-out infinite}
+  .f-cloud{animation:drift 22s ease-in-out infinite alternate}
+  .f-balloon{transform-origin:bottom;animation:floaty 5s ease-in-out infinite}
+
+  /* ---------- RESULTS WRAPPER ---------- */
+  .results{padding:8px 0 90px}
+  .toolbar{position:sticky;top:57px;z-index:600;background:rgba(243,246,240,.92);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:14px 0 12px;border-bottom:1px solid var(--line)}
+  .toolbar-in{max-width:var(--maxw);margin:0 auto;padding:0 20px}
+  .tb-row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .tb-search{flex:1;min-width:190px;display:flex;align-items:center;gap:8px;background:var(--paper);
+    border:1px solid var(--line);border-radius:var(--pill);padding:9px 16px}
+  .tb-search svg{width:17px;height:17px;color:var(--ink3);flex:none}
+  .tb-search input{border:0;outline:0;background:none;flex:1;font:inherit;font-size:14px;min-width:0}
+  .selwrap{position:relative}
+  select.sortsel{font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--line);
+    background:var(--paper);color:var(--ink);border-radius:var(--pill);padding:10px 34px 10px 15px;cursor:pointer;appearance:none}
+  .selwrap::after{content:"▾";position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--ink3);pointer-events:none;font-size:11px}
+  .viewtog{display:none;border:1px solid var(--line);border-radius:var(--pill);overflow:hidden;background:var(--paper)}
+  .viewtog button{border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--ink2);padding:9px 15px;cursor:pointer}
+  .viewtog button.on{background:var(--green);color:#fff}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;align-items:center}
+  .chipgroup{display:flex;gap:6px;flex-wrap:wrap}
+  .fchip{font-size:12.5px;font-weight:600;padding:7px 13px;border-radius:var(--pill);border:1px solid var(--line);
+    background:var(--paper);color:var(--ink2);cursor:pointer;user-select:none;transition:.12s;display:inline-flex;align-items:center;gap:5px}
+  .fchip:hover{border-color:var(--ink3)}
+  .fchip.on{background:var(--green);color:#fff;border-color:var(--green)}
+  .fchip.fav.on{background:var(--apple);border-color:var(--apple)}
+  .fchip.gos.on{background:var(--green-700);border-color:var(--green-700)}
+  .sep{width:1px;align-self:stretch;background:var(--line);margin:0 3px}
+  .reset{border-style:dashed;color:var(--ink3)}
+  .countline{font-size:13px;color:var(--ink2);margin:16px 0 0;font-weight:600}
+  .countline b{color:var(--ink);font-weight:800}
+
+  /* ---------- LAYOUT ---------- */
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 416px;gap:24px;align-items:start;margin-top:14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .mapcol{position:sticky;top:132px}
+
+  /* ---------- CARD ---------- */
+  .card{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:22px;
+    overflow:hidden;cursor:pointer;transition:.2s;display:flex;flex-direction:column;box-shadow:var(--sh)}
+  .card:hover{transform:translateY(-3px);box-shadow:var(--sh-lg);border-color:#d3ddd0}
+  .card-photo{position:relative;height:128px;display:grid;place-items:center;overflow:hidden}
+  .card-photo .mono{font-family:'Outfit',sans-serif;font-weight:600;font-size:46px;color:rgba(255,255,255,.95);
+    text-shadow:0 2px 14px rgba(0,0,0,.16)}
+  .card-photo .pat{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.16) 1.7px,transparent 1.8px);background-size:18px 18px}
+  .fav{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:0;
+    background:rgba(255,255,255,.92);backdrop-filter:blur(4px);cursor:pointer;display:grid;place-items:center;
+    transition:.15s;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  .fav:hover{transform:scale(1.1)}
+  .fav svg{width:19px;height:19px}
+  .trust{font-size:11px;font-weight:700;padding:4px 10px;border-radius:var(--pill);
+    display:inline-flex;align-items:center;gap:4px}
+  .trust svg{width:12px;height:12px}
+  .trust.ver{color:var(--green-700);background:var(--green-soft)}
+  .trust.unv{color:var(--ink2);background:var(--line2)}
+  .trust.non{color:var(--apple);background:var(--apple-soft)}
+  .card-body{padding:14px 15px 0;display:flex;flex-direction:column;gap:7px;flex:1}
+  .cname{font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.18}
+  .cmeta{font-size:12.5px;color:var(--ink2);display:flex;gap:6px;align-items:flex-start}
+  .cmeta svg{width:13px;height:13px;flex:none;margin-top:2px;color:var(--ink3)}
+  .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
+  .gospill{font-size:11px;font-weight:700;color:var(--green-700);background:var(--green-soft);
+    padding:3px 9px;border-radius:var(--pill);display:inline-flex;align-items:center;gap:4px}
+  .facts{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px 7px}
+  .facts li{font-size:11.5px;font-weight:600;color:var(--ink2);background:var(--bg);border:1px solid var(--line2);
+    padding:3px 9px;border-radius:8px;display:inline-flex;align-items:center;gap:4px}
+  .card-foot{margin-top:auto;padding:13px 15px;border-top:1px solid var(--line2);display:flex;align-items:center;
+    justify-content:space-between;gap:8px;background:var(--bg)}
+  .price{font-weight:800;font-size:15px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:62%}
+  .price small{font-weight:600;color:var(--ink3);font-size:10px}
+  .price.req{font-weight:700;font-size:13px;color:var(--ink3)}
+  .gobtn{border:0;background:var(--green);color:#fff;font-weight:700;font-size:13px;
+    padding:9px 16px;border-radius:var(--pill);cursor:pointer;transition:.15s;white-space:nowrap}
+  .gobtn:hover{background:var(--green-700)}
+  .card.editable::after{content:"✎";position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:8px;
+    background:var(--ink);color:#fff;display:grid;place-items:center;font-size:14px;z-index:2;opacity:0;transition:.15s}
+  .card.editable:hover::after{opacity:.92}
+
+  /* ---------- MAP ---------- */
+  .mappanel{background:var(--paper);border:1px solid var(--line);border-radius:var(--r);padding:13px;box-shadow:var(--sh)}
+  .maptitle{font-weight:800;font-size:15px;margin:2px 2px 11px;display:flex;align-items:center;gap:7px}
+  .maptitle svg{width:17px;height:17px;color:var(--green)}
+  #map{height:min(62vh,540px);border-radius:14px;overflow:hidden;border:1px solid var(--line);z-index:1;background:#e9efe6}
+  .maptools{display:flex;gap:13px;align-items:center;flex-wrap:wrap;margin:11px 3px 0;font-size:11.5px;color:var(--ink2)}
+  .leg{display:inline-flex;align-items:center;gap:5px;font-weight:600}
+  .dot{width:11px;height:11px;border-radius:50%;display:inline-block;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}
+  .nearbtn{margin-left:auto;border:1px solid var(--line);background:var(--paper);color:var(--ink);
+    font-weight:700;font-size:12px;padding:7px 12px;border-radius:var(--pill);cursor:pointer}
+  .nearbtn:hover{border-color:var(--green)}
+  .leaflet-popup-content{font-family:'Onest',sans-serif;font-size:13px;line-height:1.5}
+  .leaflet-popup-content b{font-weight:800}
+  .leaflet-popup-content .popbtn{font-family:inherit;font-size:12px;font-weight:700;border:0;background:var(--green);
+    color:#fff;border-radius:8px;padding:6px 12px;cursor:pointer;margin-top:7px}
+  .empty{grid-column:1/-1;text-align:center;color:var(--ink2);padding:54px 20px;background:var(--paper);
+    border:1px dashed var(--line);border-radius:var(--r)}
+  .empty b{display:block;font-size:16px;color:var(--ink);margin-bottom:6px}
+
+  /* ---------- OVERLAY (profile + editor) ---------- */
+  .scrim{position:fixed;inset:0;background:rgba(16,30,22,.5);opacity:0;pointer-events:none;transition:.22s;z-index:1000}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .drawer{position:fixed;inset:0;z-index:1001;display:flex;align-items:center;justify-content:center;padding:20px;
+    opacity:0;pointer-events:none;transition:.25s cubic-bezier(.4,0,.2,1)}
+  .drawer.on{opacity:1;pointer-events:auto}
+  .drawer-inner{background:var(--paper);border-radius:28px;width:min(1020px,100%);max-height:90vh;overflow:hidden;
+    box-shadow:0 24px 70px rgba(0,0,0,.26);display:flex;flex-direction:column}
+  .dbody{overflow:auto;flex:1}
+  .x{border:0;background:rgba(255,255,255,.88);width:40px;height:40px;border-radius:14px;cursor:pointer;
+    font-size:18px;color:var(--ink);flex:none;display:grid;place-items:center;backdrop-filter:blur(4px);transition:.15s}
+  .x:hover{background:#fff;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+  /* profile read view — bento grid */
+  .p-hero{position:relative;height:200px;display:grid;place-items:center;overflow:hidden}
+  .p-hero .mono{font-family:'Outfit',sans-serif;font-weight:600;font-size:72px;color:rgba(255,255,255,.95);text-shadow:0 2px 14px rgba(0,0,0,.18)}
+  .p-hero .pat{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.16) 2px,transparent 2px);background-size:20px 20px}
+  .p-hero .x{position:absolute;top:16px;right:16px}
+  .p-hero .ptrust{position:absolute;left:18px;bottom:16px;font-size:13px;font-weight:700;padding:6px 14px;border-radius:var(--pill);background:rgba(255,255,255,.94);display:inline-flex;gap:6px;align-items:center}
+  .p-hero .ptrust svg{width:14px;height:14px}
+  .p-hero img.plogo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .bento{display:grid;grid-template-columns:1fr 1fr 320px;gap:12px;padding:18px}
+  .bc{background:var(--paper);border:1px solid var(--line2);border-radius:18px;padding:16px 18px}
+  .bc h4{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--green-700);margin:0 0 10px}
+  .bc.hero{grid-column:1/3;padding:0;overflow:hidden;display:flex;border:0;background:none}
+  .bc.hero .hinfo{padding:18px 20px;flex:1;display:flex;flex-direction:column}
+  .bc.hero h2{font-family:'Outfit',sans-serif;font-weight:600;font-size:22px;line-height:1.1}
+  .bc.hero .sub{font-size:13px;color:var(--ink2);margin-top:4px}
+  .bc.hero .addr{font-size:13px;color:var(--ink2);margin-top:10px;display:flex;gap:6px;align-items:center}
+  .bc.hero .addr svg{width:14px;height:14px;flex:none;color:var(--green)}
+  .bc.hero .htrust{margin-top:auto;font-size:12px;font-weight:700;padding:5px 12px;border-radius:var(--pill);background:var(--line2);color:var(--ink2);display:inline-flex;gap:5px;align-items:center;width:fit-content}
+  .bc.hero .htrust.ver{background:var(--green-soft);color:var(--green-700)}
+  .bc.hero .htrust.non{background:var(--apple-soft);color:var(--apple)}
+  .bc.price{grid-column:3;grid-row:1/3;display:flex;flex-direction:column;gap:11px}
+  .bc.price .bigp{font-family:'Outfit',sans-serif;font-weight:600;font-size:28px;line-height:1.15;word-break:break-word}
+  .bc.price .bigp small{display:block;font-size:12px;color:var(--ink2);margin-top:3px;font-family:'Onest',sans-serif;font-weight:600}
+  .bc.price .bookbtn{width:100%;border:0;background:var(--green);color:#fff;font-weight:800;font-size:14px;padding:15px;border-radius:14px;cursor:pointer;font-family:inherit;white-space:normal;line-height:1.3}
+  .bc.price .bookbtn:hover{background:var(--green-700)}
+  .bc.price .contactbtn{width:100%;border:1px solid var(--line);background:var(--paper);color:var(--ink);font-weight:700;font-size:13px;padding:11px;border-radius:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;font-family:inherit}
+  .bc.price .contactbtn:hover{border-color:var(--green);color:var(--green-700)}
+  .bc.price .iglink{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border:1px solid var(--line2);border-radius:12px;text-decoration:none;color:var(--ink);font-size:12px;font-weight:600;transition:.15s;overflow:hidden}
+  .bc.price .iglink:hover{border-color:#E1306C;background:#fdf2f5}
+  .bc.price .igdot{width:28px;height:28px;border-radius:8px;background:linear-gradient(45deg,#f09433,#dc2743,#bc1888);display:grid;place-items:center;flex:none}
+  .bc.price .igdot svg{width:16px;height:16px;color:#fff}
+  .bc.price .avail{font-size:12px;font-weight:700;color:var(--green-700);background:var(--green-soft);padding:9px 12px;border-radius:10px;margin-top:auto}
+  .bc.price .favrow{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--ink2);cursor:pointer;border:0;background:none;padding:0;font-family:inherit;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bc.price .favrow:hover{color:var(--apple)}
+  .bc.price .favrow svg{width:18px;height:18px}
+  .bc.facts{grid-column:1/3}
+  .factflow{display:flex;gap:7px;flex-wrap:wrap}
+  .fpill{display:inline-flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--line2);border-radius:10px;padding:7px 11px;font-size:12.5px;font-weight:600}
+  .bc.prog .progbox{background:var(--green-soft);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.5}
+  .bc.prog .tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+  .bc.prog .tags span{font-size:11px;font-weight:600;padding:4px 9px;border-radius:var(--pill);background:var(--paper);border:1px solid var(--line2);color:var(--ink2)}
+  .bc.reviews .stars{font-size:20px;margin-bottom:6px}
+  .bc.reviews .rtext{font-size:13px;color:var(--ink2);line-height:1.5}
+  .bc.reviews b{color:var(--ink)}
+  .bc.safety .slist{font-size:13px;color:var(--ink);line-height:1.9}
+  .bc.safety .slist span{display:flex;align-items:center;gap:7px}
+  .bc.lic{grid-column:1/4;display:flex;gap:14px;align-items:center;padding:14px 20px}
+  .bc.lic .licicon{width:38px;height:38px;border-radius:12px;background:var(--line2);display:grid;place-items:center;flex:none;font-size:18px}
+  .bc.lic .licicon.ver{background:var(--green-soft)}
+  .bc.lic .licicon.non{background:var(--apple-soft)}
+  .bc.lic .lictxt{flex:1}
+  .bc.lic .lictxt b{font-weight:800}
+  .bc.lic .lictxt span{display:block;font-size:12px;color:var(--ink2);margin-top:2px}
+  .bc.lic .bookbtn{border:0;background:var(--green);color:#fff;font-weight:800;font-size:13px;padding:12px 20px;border-radius:12px;cursor:pointer;white-space:nowrap;flex:none;font-family:inherit}
+  @media(max-width:760px){
+    .bento{grid-template-columns:1fr}
+    .bc.hero,.bc.facts,.bc.lic{grid-column:1}
+    .bc.price{grid-row:auto}
+    .bc.hero{flex-direction:column}
+  }
+  .btn-primary{border:0;background:var(--green);color:#fff;font-weight:800;font-size:15px;
+    padding:14px;border-radius:14px;cursor:pointer;transition:.15s;flex:1}
+  .btn-primary:hover{background:var(--green-700)}
+  .editlink{font-size:12.5px;font-weight:700;color:var(--ink3);background:none;border:0;cursor:pointer;text-decoration:underline;padding:8px}
+  .editlink:hover{color:var(--ink)}
+
+  /* editor form (owner mode) */
+  .ehead{padding:18px 22px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .ehead h2{font-size:19px;font-weight:800}
+  .ehead .sub{font-size:12.5px;color:var(--ink2);margin-top:3px}
+  .grp{padding:18px 22px 0}
+  .grp h3{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--green-700);margin-bottom:11px;font-weight:800}
+  .f{margin-bottom:11px}
+  .f label{display:block;font-size:12px;font-weight:600;color:var(--ink2);margin-bottom:5px}
+  .f input,.f select,.f textarea{width:100%;font:inherit;font-size:13.5px;border:1px solid var(--line);
+    border-radius:var(--rs);padding:10px 12px;color:var(--ink);background:#FBFDFA;outline:0}
+  .f input:focus,.f textarea:focus,.f select:focus{border-color:var(--green);background:#fff}
+  .f textarea{resize:vertical;min-height:56px}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .licedit{border-radius:var(--rs);padding:13px;background:var(--line2)}
+  .licedit.verified{background:var(--green-soft)}
+  .hint{font-size:11.5px;color:var(--ink2);background:var(--bg);border:1px solid var(--line2);border-radius:9px;padding:9px 12px;margin-top:8px;line-height:1.45}
+  .efoot{padding:14px 22px;border-top:1px solid var(--line);display:flex;gap:9px;align-items:center}
+  .saved{font-size:12px;font-weight:700;color:var(--green);opacity:0;transition:.2s}
+  .saved.show{opacity:1}
+  .btn-ghost{font:inherit;font-size:13px;font-weight:700;border:1px solid var(--line);background:var(--paper);
+    color:var(--ink);padding:11px 15px;border-radius:11px;cursor:pointer}
+  .btn-ghost:hover{border-color:var(--ink3)}
+  .btn-ghost.danger{color:var(--apple);border-color:var(--apple-soft)}
+  .compbar{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2);margin:0 22px 14px}
+  .compbar .meter{flex:1;height:7px;background:var(--line2);border-radius:5px;overflow:hidden}
+  .compbar .meter i{display:block;height:100%;background:var(--green)}
+
+  /* ---------- MODAL ---------- */
+  .mscrim{position:fixed;inset:0;background:rgba(16,30,22,.5);display:none;align-items:center;justify-content:center;z-index:1100;padding:18px}
+  .mscrim.on{display:flex}
+  .modal{background:var(--paper);border-radius:24px;width:min(440px,100%);max-height:88vh;overflow:auto;box-shadow:var(--sh-lg);padding:26px}
+  .modal h2{font-family:'Outfit',sans-serif;font-weight:600;font-size:22px;letter-spacing:-.01em}
+  .modal .sub{font-size:13.5px;color:var(--ink2);margin-top:6px}
+  .qprog{font-size:11.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--apricot);}
+  .qprogbar{height:6px;background:var(--line2);border-radius:5px;overflow:hidden;margin:10px 0 4px}
+  .qprogbar i{display:block;height:100%;background:var(--apricot);transition:.3s}
+  .qopts{display:flex;flex-direction:column;gap:8px;margin:16px 0}
+  .qopt{border:1px solid var(--line);border-radius:var(--rs);padding:13px 15px;cursor:pointer;font-size:14px;
+    font-weight:600;background:#FBFDFA;transition:.12s;text-align:left}
+  .qopt:hover{border-color:var(--green);background:var(--green-soft)}
+  .qbar{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px}
+  .bk-grid .f label{font-weight:700}
+  .reqcard{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:9px}
+  .reqcard b{font-weight:800}
+
+  
+  /* ---------- LANGUAGE TOGGLE ---------- */
+  .langtog{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--pill);overflow:hidden;background:var(--paper);margin-right:4px}
+  .langtog button{border:0;background:none;font:inherit;font-size:12px;font-weight:700;color:var(--ink2);padding:7px 12px;cursor:pointer;transition:.12s}
+  .langtog button.on{background:var(--green);color:#fff}
+
+  /* ---------- LOGO ON CARD ---------- */
+  .card-photo img.clogo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .p-hero img.plogo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+
+  /* ---------- AUTH ---------- */
+  .auth-form{display:flex;flex-direction:column;gap:12px;margin-top:16px}
+  .auth-form input{width:100%;font:inherit;font-size:14px;border:1px solid var(--line);
+    border-radius:var(--rs);padding:12px 14px;color:var(--ink);background:#FBFDFA}
+  .auth-form input:focus{border-color:var(--green);outline:0;background:#fff}
+  .auth-tabs{display:flex;gap:0;border:1px solid var(--line);border-radius:var(--pill);overflow:hidden;margin-bottom:4px}
+  .auth-tabs button{flex:1;border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--ink2);padding:10px;cursor:pointer}
+  .auth-tabs button.on{background:var(--green);color:#fff}
+  .userbtn{font-size:13px;font-weight:700;border:1px solid var(--green-soft);background:var(--green-soft);
+    color:var(--green-700);padding:9px 14px;border-radius:var(--pill);cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+  .userbtn:hover{background:var(--green);color:#fff;border-color:var(--green)}
+
+  /* ---------- FOOTER ---------- */
+  .foot{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--ink2);font-size:13px}
+  .foot-in{max-width:var(--maxw);margin:0 auto;padding:0 20px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+  .foot a{color:var(--green-700);text-decoration:none;font-weight:600}
+
+  /* ---------- RESPONSIVE ---------- */
+  @media(max-width:980px){
+    .layout{grid-template-columns:1fr}
+    .mapcol{position:static}
+    #map{height:62vh}
+    .viewtog{display:inline-flex;margin-left:auto}
+    .layout.show-list .mapcol{display:none}
+    .layout.show-map .left{display:none}
+  }
+  @media(max-width:760px){
+    .hero-in{grid-template-columns:1fr;padding:28px 20px 22px;gap:22px}
+    .hero-art{order:-1;max-width:440px}
+    .topnav{display:none}
+    .herostats{gap:18px}
+    .kv{grid-template-columns:1fr}
+    .p-split{grid-template-columns:1fr}
+    .p-side{border-left:0;border-top:1px solid var(--line)}
+    .p-hero{height:150px}
+    .p-hero .mono{font-size:50px}
+    .drawer-inner{max-height:95vh;border-radius:20px}
+  }
+  @media(max-width:420px){
+    .herosearch{flex-wrap:wrap;border-radius:20px;padding:10px 14px}
+    .btn-find{width:100%}
+  }
+  @media(prefers-reduced-motion:reduce){
+    *{animation:none!important;scroll-behavior:auto!important;transition:none!important}
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== TOPBAR ===================== -->
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="logo" href="#top">
+      <svg class="lapple" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <path d="M16 9c-2.4-2.6-7-2.3-9 .8-2.2 3.4-1 8.6 2.2 11.8 1.8 1.9 4 3.4 6.8 3.4s5-1.5 6.8-3.4c3.2-3.2 4.4-8.4 2.2-11.8-2-3.1-6.6-3.4-9-.8Z" fill="#1F8A5B"/>
+        <path d="M16 9c0-2.4 1.4-4.6 4-5.4" stroke="#15704A" stroke-width="2" stroke-linecap="round"/>
+        <path d="M16.5 5.5c1.8-.4 3.4.4 4 2-1.8.4-3.4-.4-4-2Z" fill="#86A96B"/>
+      </svg>
+      Садики<span class="light">&nbsp;Алматы</span>
+    </a>
+    <nav class="topnav">
+      <a href="#results">Каталог</a>
+      <a href="#map" id="navMap">На карте</a>
+      <a href="#" id="navQuiz">Подобрать садик</a>
+    </nav>
+    <div class="topbar-actions">
+      <div class="langtog" id="langTog"><button id="langRu" class="on">Рус</button><button id="langKz">Қаз</button></div>
+      <button class="reqbtn" id="reqBtn">Мои заявки <span class="cnt" id="reqCount">0</span></button>
+      <button class="userbtn" id="authBtn">👤 Войти</button>
+      <button class="ownerbtn" id="ownerBtn" title="Режим для владельцев каталога: добавление и редактирование">Режим владельца</button>
+    </div>
+  </div>
+</header>
+
+<!-- ===================== HERO ===================== -->
+<section class="hero" id="top">
+  <div class="hero-in">
+    <div class="hero-copy">
+      <span class="eyebrow">🍎 Детские сады Алматы</span>
+      <h1>Найдите садик, где ребёнку будет <em>хорошо</em></h1>
+      <p class="lede">Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и запишитесь на пробный день.</p>
+      <div class="herosearch">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input id="heroq" placeholder="Название или адрес — например, «Капитошка» или «Мирас»" aria-label="Поиск садика">
+        <button class="btn-find" id="heroFind">Показать</button>
+      </div>
+      <div class="herochips" id="heroChips"></div>
+      <div class="herostats">
+        <div class="hstat"><b id="stTotal">0</b><span>садиков в каталоге</span></div>
+        <div class="hstat"><b id="stDistricts">5</b><span>районов города</span></div>
+        <div class="hstat"><b>Бесплатно</b><span>подбор и заявка</span></div>
+      </div>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 600 460" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Двор детского сада: горы Алатау, яблоня, дети">
+        <defs>
+          <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#CDEAF6"/><stop offset="0.6" stop-color="#E6F3EA"/><stop offset="1" stop-color="#F2F7EC"/>
+          </linearGradient>
+          <linearGradient id="mtn" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#9DB9C9"/><stop offset="1" stop-color="#C3D6DE"/>
+          </linearGradient>
+          <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#9CC57E"/><stop offset="1" stop-color="#7FB266"/>
+          </linearGradient>
+        </defs>
+        <rect width="600" height="460" rx="26" fill="url(#sky)"/>
+        <!-- sun -->
+        <circle class="f-sun" cx="500" cy="92" r="34" fill="#FCE08A"/>
+        <circle class="f-sun" cx="500" cy="92" r="46" fill="#FCE08A" opacity="0.28"/>
+        <!-- clouds -->
+        <g class="f-cloud" fill="#ffffff" opacity="0.92">
+          <ellipse cx="120" cy="80" rx="44" ry="17"/><ellipse cx="158" cy="72" rx="30" ry="13"/><ellipse cx="86" cy="74" rx="26" ry="12"/>
+        </g>
+        <!-- mountains Alatau -->
+        <path d="M0 250 L90 150 L150 210 L240 120 L320 220 L400 150 L470 230 L540 170 L600 240 V300 H0 Z" fill="url(#mtn)"/>
+        <g fill="#ffffff" opacity="0.92">
+          <path d="M240 120 L262 150 L250 152 L240 142 L230 152 L218 150 Z"/>
+          <path d="M400 150 L420 180 L408 182 L400 172 L392 182 L380 180 Z"/>
+          <path d="M90 150 L108 178 L97 180 L90 172 L83 180 L72 178 Z"/>
+        </g>
+        <!-- hills -->
+        <path d="M0 300 Q150 270 320 296 T600 290 V460 H0 Z" fill="#BFD9A6"/>
+        <rect x="0" y="338" width="600" height="122" fill="url(#grass)"/>
+        <!-- sadik house -->
+        <g>
+          <rect x="60" y="300" width="150" height="78" rx="8" fill="#FBE3DF"/>
+          <path d="M52 302 L135 256 L218 302 Z" fill="#E2553D"/>
+          <rect x="124" y="252" width="6" height="22" fill="#E2553D"/>
+          <path d="M130 252 l22 8 l-22 8 Z" fill="#EE9A2E"/>
+          <rect x="84" y="328" width="32" height="50" rx="5" fill="#7FB7E6"/>
+          <rect x="150" y="324" width="40" height="32" rx="5" fill="#FCE08A"/>
+          <line x1="170" y1="324" x2="170" y2="356" stroke="#fff" stroke-width="2"/><line x1="150" y1="340" x2="190" y2="340" stroke="#fff" stroke-width="2"/>
+        </g>
+        <!-- apple tree -->
+        <g>
+          <rect x="468" y="300" width="16" height="78" rx="6" fill="#6B5341"/>
+          <circle cx="476" cy="270" r="56" fill="#7FA567"/>
+          <circle cx="436" cy="288" r="38" fill="#8FB173"/>
+          <circle cx="516" cy="288" r="40" fill="#90B173"/>
+          <circle cx="476" cy="240" r="40" fill="#93B377"/>
+          <g fill="#E2553D">
+            <circle cx="450" cy="270" r="7"/><circle cx="500" cy="258" r="7"/><circle cx="476" cy="296" r="7"/>
+            <circle cx="514" cy="288" r="6"/><circle cx="440" cy="300" r="6"/><circle cx="492" cy="232" r="6"/>
+          </g>
+          <circle cx="442" cy="372" r="6" fill="#E2553D"/><circle cx="512" cy="374" r="5" fill="#E2553D"/>
+        </g>
+        <!-- balloon -->
+        <g class="f-balloon">
+          <line x1="300" y1="372" x2="306" y2="318" stroke="#9aa79c" stroke-width="1.5"/>
+          <ellipse cx="306" cy="304" rx="16" ry="19" fill="#EE9A2E"/>
+          <path d="M306 323 l-4 6 h8 Z" fill="#EE9A2E"/>
+        </g>
+        <!-- GIRL -->
+        <g>
+          <ellipse cx="270" cy="400" rx="15" ry="5" fill="#16261D" opacity="0.08"/>
+          <rect x="262" y="368" width="6" height="30" rx="3" fill="#E7B98C"/><rect x="274" y="368" width="6" height="30" rx="3" fill="#E7B98C"/>
+          <path d="M254 370 L248 326 Q271 314 294 326 L288 370 Z" fill="#E2553D"/>
+          <circle cx="271" cy="308" r="16" fill="#F4CDA6"/>
+          <path d="M255 306 Q254 284 271 282 Q288 284 287 306 Q280 296 271 297 Q262 296 255 306 Z" fill="#7A4B2A"/>
+          <circle cx="266" cy="309" r="1.7" fill="#3A2A1C"/><circle cx="276" cy="309" r="1.7" fill="#3A2A1C"/>
+          <path d="M267 315 Q271 318 275 315" stroke="#B5705A" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        </g>
+        <!-- BOY -->
+        <g>
+          <ellipse cx="342" cy="402" rx="15" ry="5" fill="#16261D" opacity="0.08"/>
+          <rect x="334" y="372" width="6" height="30" rx="3" fill="#5E6B7A"/><rect x="346" y="372" width="6" height="30" rx="3" fill="#5E6B7A"/>
+          <rect x="330" y="334" width="26" height="42" rx="8" fill="#1F8A5B"/>
+          <circle cx="343" cy="318" r="16" fill="#EFC39A"/>
+          <path d="M328 316 Q328 297 343 296 Q359 297 358 316 Q350 307 343 308 Q336 307 328 316 Z" fill="#33271A"/>
+          <circle cx="338" cy="319" r="1.7" fill="#3A2A1C"/><circle cx="348" cy="319" r="1.7" fill="#3A2A1C"/>
+          <path d="M339 325 Q343 328 347 325" stroke="#B5825A" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+        </g>
+        <!-- little flowers -->
+        <g><circle cx="120" cy="410" r="4" fill="#EE9A2E"/><circle cx="120" cy="410" r="1.6" fill="#fff"/>
+           <circle cx="560" cy="416" r="4" fill="#E2553D"/><circle cx="560" cy="416" r="1.6" fill="#fff"/>
+           <circle cx="400" cy="420" r="4" fill="#7FB7E6"/><circle cx="400" cy="420" r="1.6" fill="#fff"/></g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== RESULTS ===================== -->
+<main class="results" id="results">
+  <div class="toolbar">
+    <div class="toolbar-in">
+      <div class="tb-row">
+        <div class="tb-search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input id="q" placeholder="Поиск по названию или адресу…" aria-label="Поиск">
+        </div>
+        <div class="selwrap">
+          <select id="sort" class="sortsel" aria-label="Сортировка">
+            <option value="reco">Сначала рекомендуем</option>
+            <option value="price">Сначала дешевле</option>
+            <option value="name">По названию</option>
+          </select>
+        </div>
+        <div class="viewtog" role="tablist" aria-label="Вид">
+          <button id="viewList" class="on">Список</button>
+          <button id="viewMap">Карта</button>
+        </div>
+        <button class="hquiz" id="quizBtn">✨ Подобрать за меня</button>
+        <button class="btn-ghost owner-only" id="addBtn" style="display:none">+ Добавить садик</button>
+        <button class="btn-ghost owner-only" id="exportBtn" style="display:none">⤓ Экспорт JSON</button>
+      </div>
+      <div class="chips" id="filters"></div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <p class="countline" id="countline"></p>
+    <div class="layout show-list" id="layout">
+      <div class="left">
+        <div class="grid" id="grid"></div>
+      </div>
+      <aside class="mapcol">
+        <div class="mappanel">
+          <div class="maptitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3Z"/><path d="M9 3v15M15 6v15"/></svg> Садики на карте</div>
+          <div id="map"></div>
+          <div class="maptools">
+            <span class="leg"><i class="dot" style="background:#1F8A5B"></i> лицензия проверена</span>
+            <span class="leg"><i class="dot" style="background:#8A998F"></i> уточняется</span>
+            <span class="leg"><i class="dot" style="background:#E2553D"></i> нет</span>
+            <button class="nearbtn" id="geoBtn">📍 Рядом со мной</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <span>Садики Алматы — независимый каталог детских садов. Данные носят справочный характер, проверяйте перед записью.</span>
+    <span>Лицензию проверяйте в реестре <a href="https://elicense.kz" target="_blank" rel="noopener">elicense.kz</a></span>
+  </div>
+</footer>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer" aria-label="Карточка садика"></aside>
+<div class="mscrim" id="mscrim"><div class="modal" id="modal"></div></div>
+
+<script>
+const TYPES={sadik:'садик полного дня',center:'центр развития',preschool:'предшкольная подготовка','school-sadik':'школа-садик'};
+const LIC={unverified:'лицензия уточняется',verified:'лицензия проверена',none:'лицензии нет'};
+const DISTRICTS=['Бостандыкский','Медеуский','Наурызбайский','Алмалинский','Ауэзовский'];
+const KEY='sadiki_almaty_v3';
+const FAVKEY='sadiki_favs_v1';
+const BKEY='sadiki_bookings_v1';
+
+const SEED=[
+ {id:'zayka',instagram:'@zaikasadik.kz',igFollowers:'25K',cameras:'онлайн-доступ 24/7',medic:'в штате',playground:'своя, огорожена',parking:'есть',adaptation:'2 недели, психолог',summer:'работает, летняя программа',availability:'есть места 2-3 года',extraClasses:'танцы, робототехника, плавание',food:'5-разовое, халяль',logo:'https://zaikasadik.kz/images/logo.png',name:'Сеть «Zayka»',type:'sadik',district:'Бостандыкский',address:'ул. Ходжанова, 77/5 (+ сеть филиалов)',hours:'07:30–19:00',lang:'каз/рус/англ',age:'1,6–7 лет',price:'коммерч. 140 000 / по госзаказу 120 000 ₸/мес',fee:'30 000 ₸/год',discounts:'',food:'',transport:'да (утро/вечер)',ratio:'15–18 детей',program:'ГОСО + IB + Shichida + STEAM',gosorder:true,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.1 (23)',contacts:'zaikasadik.kz · IG @zaikasadik.kz',notes:'Сеть 5 филиалов. Принимают по госзаказу «Балапан» → лицензия вероятна.',source:'сайт/2ГИС/Pandaland'},
+ {id:'kapitoshka',instagram:'@kapitoshka_sadik_almaty',igFollowers:'1 240',cameras:'онлайн-доступ',medic:'в штате',playground:'своя, резиновое покрытие',parking:'есть, 10 мест',adaptation:'мягкая, 2 недели',summer:'работает всё лето',availability:'есть места 3-4 года',extraClasses:'ИЗО, робототехника, шахматы, айкидо',food:'5-разовое',logo:'https://www.kapitoshkasadik.kz/img/inst.png',name:'«Капитошка»',type:'sadik',district:'Бостандыкский',address:'ул. Болтирикова, 15 (мкр Нур Алатау)',hours:'08:00–20:00',lang:'рус/англ',age:'1,5–7 лет',price:'65 000 ₸/мес',fee:'без взноса',discounts:'',food:'',transport:'',ratio:'до 12 (≈1:12)',program:'английский, айкидо, шахматы, летом бассейн',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.8 (77)',contacts:'kapitoshkasadik.kz',notes:'Домашняя атмосфера, предгорья.',source:'сайт/2ГИС'},
+ {id:'balazhan',name:'«Балажан»',type:'sadik',district:'Бостандыкский',address:'ул. Жандосова, 14',hours:'08:00–19:00',lang:'казахский',age:'',price:'депозит 150 000 + 150 000 ₸/мес (по отзыву)',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.5 (12)',contacts:'',notes:'Цена только из отзыва — переподтвердить.',source:'2ГИС'},
+ {id:'bolashak',name:'«Bolashak»',type:'sadik',district:'Бостандыкский',address:'пр. Сейфуллина, 544',hours:'',lang:'',age:'',price:'оплата по дням посещения',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'плавание, английский, танцы',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 5.0 (25)',contacts:'',notes:'Граница Бостандык/Алмалинский.',source:'карты/отзывы'},
+ {id:'sparks',instagram:'@sparks_kz',igFollowers:'850',cameras:'есть',medic:'приходящий',playground:'своя',parking:'есть',adaptation:'по Сингапурской методике',summer:'летний лагерь',availability:'',extraClasses:'STEAM, английский',food:'3-разовое',logo:'https://sparks.kz/wp-content/uploads/2020/01/logo.png',name:'Sparks Preschool',type:'sadik',district:'Бостандыкский',address:'мкр Мирас, 160',hours:'08:00–18:00',lang:'',age:'от 2 лет',price:'от 120 000 ₸/мес',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'сингапурские практики, художеств.-эстетич. уклон',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.2 (10) · Zoon 2.0',contacts:'+7 708 705 1885',notes:'Рейтинги расходятся.',source:'Yandex/2ГИС'},
+ {id:'fastrackids',instagram:'@fastrackids.almaty',igFollowers:'3 200',cameras:'онлайн-доступ',medic:'в штате',playground:'своя',parking:'есть',adaptation:'есть',summer:'работает',availability:'набор открыт',extraClasses:'8 интеллектов, нейроподход',food:'4-разовое',logo:'https://www.fastrackids.kz/images/logo_ftk.png',name:'FasTracKids',type:'sadik',district:'Бостандыкский',address:'ул. Нахимова, 37б (+ Аскарова)',hours:'08:00–19:00',lang:'',age:'от 2 лет',price:'от 100 000 ₸/мес',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'международная программа FasTracKids',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 5.0 (15)',contacts:'fastrackids.kz',notes:'Франшиза; садик + раннее развитие.',source:'сайт/2ГИС'},
+ {id:'indigo',instagram:'@indigo_almaty',igFollowers:'2 100',cameras:'видеонаблюдение',medic:'в штате',playground:'большая территория',parking:'своя парковка',adaptation:'мягкая',summer:'работает',availability:'',extraClasses:'музыка, хореография, английский',food:'5-разовое, диетическое',logo:'https://indigo-almaty.kz/local/templates/main/img/logo.svg',name:'Indigo',type:'sadik',district:'Наурызбайский',address:'ул. Кенесары хана, 122/4',hours:'08:00–19:00',lang:'казахский',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'малочисленные группы',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.6 (49)',contacts:'',notes:'⚠ Несколько разных садов под именем Indigo — не путать. Координаты уточнить.',source:'2ГИС/Zoon'},
+ {id:'first',name:'First',type:'preschool',district:'Бостандыкский',address:'мкр Мирас, 59',hours:'08:00–17:30',lang:'',age:'5–7 лет',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'предшкольная подготовка',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Предшкольная подготовка, не полный садик.',source:'2ГИС'},
+ {id:'wonderland',name:'Wonderland',type:'center',district:'Бостандыкский',address:'мкр Коктем-1, 30А',hours:'09:00–18:00',lang:'',age:'от 5 лет',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'5–7 в группе',program:'Монтессори, подготовка к школе (полдня)',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 4.8 (36)',contacts:'wland.kz',notes:'Центр развития, не садик полного дня.',source:'2ГИС/Zoon'},
+ {id:'ikids',name:'IKIDS',type:'center',district:'Бостандыкский',address:'мкр Орбита-3, 4А',hours:'10:00–19:00',lang:'каз/рус/англ',age:'1–7 лет',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'раннее развитие, мини-садик 3ч, продлёнка',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 4.0 (15)',contacts:'ikidskz.kz',notes:'Центр/мини-садик, не полный садик.',source:'сайт'},
+ {id:'montessori',name:'Montessori Klass',type:'center',district:'Бостандыкский',address:'ул. Сатпаева, 30а (ЖК Тенгиз Тауэрс)',hours:'08:30–18:30',lang:'англ/каз/рус',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'Монтессори, языки, ментальная арифметика, продлёнка',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'+7 727 328 27 07',notes:'Дошкольный центр/курсы, не садик.',source:'2ГИС/orgpage'},
+ {id:'oxford',name:'Oxford Academy',type:'sadik',district:'Медеуский',address:'ул. Затаевича, 77 (мкр Горный Гигант)',hours:'08:30–18:00',lang:'только английский',age:'1–6 лет',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'британская дошкольная, бассейн; 40% иностранцев',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.7 (25)',contacts:'oaa.kz',notes:'Адрес исправлен (был ошибочно Шашкина/Бостандык). Координаты уточнить.',source:'сайт/2ГИС'},
+ {id:'radost',name:'«Радость»',type:'sadik',district:'Бостандыкский',address:'ул. Тажибаевой, 180',hours:'08:00–18:30',lang:'',age:'',price:'',fee:'',discounts:'',food:'диета по необходимости',transport:'',ratio:'',program:'логопед, йога, лепка/рисование',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 5.0 (4)',contacts:'',notes:'В городе есть вторая «Радость» (Розыбакиева 29А) — проверить.',source:'карты/отзывы'},
+ {id:'homeacademy',name:'Home Academy',type:'sadik',district:'Медеуский',address:'ул. Кыз Жибек, 119 (мкр Кок-Тобе-2)',hours:'08:00–18:00',lang:'англ/рус',age:'с раннего',price:'',fee:'',discounts:'',food:'хорошее (по отзыву)',transport:'',ratio:'',program:'англоязычный; арт, прогулки',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 4.8 (12)',contacts:'',notes:'= «Kids Academy» по тому же адресу. Это Медеуский, не Бостандык.',source:'2ГИС/Yandex'},
+ {id:'bebright',name:'«Be Bright»',type:'sadik',district:'Бостандыкский',address:'ул. Рыскулбекова, 28/1',hours:'07:30–19:00',lang:'',age:'от 2 лет',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'раннее развитие',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 5.0 (3)',contacts:'',notes:'',source:'карты'},
+ {id:'akuna',name:'«Akuna Matata»',type:'sadik',district:'Бостандыкский',address:'ул. Катаева, 179',hours:'07:45–19:00',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 5.0 (1)',contacts:'',notes:'',source:'карты'},
+ {id:'atakent',name:'ДУВЦ «Атакент Kids»',type:'center',district:'Бостандыкский',address:'ул. Клочкова, 167',hours:'08:00–19:00',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 5.0 (2)',contacts:'',notes:'Уточнить: садик или центр.',source:'карты'},
+ {id:'zerdesh',name:'«Zerdesh»',type:'school-sadik',district:'Бостандыкский',address:'ул. Жарокова, 356',hours:'07:30–21:00',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'школа+садик; кружки за доплату',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 3.0 (4)',contacts:'',notes:'',source:'карты/отзывы'},
+ {id:'toddler',name:'«Toddler Preschool»',type:'sadik',district:'Бостандыкский',address:'ул. Сатпаева, 90/36',hours:'08:30–19:00',lang:'иностр. языки',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'иностр. языки, тхэквондо, пение',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 3.5 (6)',contacts:'',notes:'',source:'карты/отзыв'},
+ {id:'kaisar',name:'«Кайсар»',type:'sadik',district:'Бостандыкский',address:'ул. Тажибаевой, 176',hours:'08:00–20:00',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Длинный день и суббота.',source:'карты'},
+ {id:'happyclub',name:'«Happy Club for Kids»',type:'sadik',district:'Бостандыкский',address:'мкр Алмагуль, 33а',hours:'08:00–19:00',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'карты'},
+ {id:'bebisiti',name:'«Bebi Siti»',type:'sadik',district:'Бостандыкский',address:'мкр Алмагуль, 31а',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'карты'},
+];
+const COORDS={zayka:[43.20810,76.91131],kapitoshka:[43.18446,76.90380],balazhan:[43.23408,76.90781],bolashak:[43.23894,76.93505],sparks:[43.19012,76.87050],fastrackids:[43.22613,76.93437],first:[43.18672,76.87757],wonderland:[43.23083,76.92432],ikids:[43.20046,76.87919],montessori:[43.23525,76.92154],radost:[43.21208,76.89130],homeacademy:[43.21502,76.97420],bebright:[43.20311,76.87153],akuna:[43.22489,76.89265],atakent:[43.22920,76.90304],zerdesh:[43.20240,76.91055],toddler:[43.23140,76.87411],kaisar:[43.21222,76.89142],happyclub:[43.20470,76.90257],bebisiti:[43.20480,76.90168]};
+SEED.forEach(s=>{const c=COORDS[s.id]; if(c){s.lat=c[0];s.lng=c[1];}});
+
+let data=[], favs=[], bookings=[];
+let filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',fav:false};
+let admin=false, map=null, markersLayer=null;
+
+/* ---------- helpers ---------- */
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function priceNum(p){const m=(p||'').match(/\d[\d\s]*/);return m?parseInt(m[0].replace(/\s/g,'')):null;}
+function fv(id){const e=document.getElementById(id);return e?e.value.trim():'';}
+function monogram(name){return (name.replace(/[«»"'().]/g,'').trim().charAt(0)||'С').toUpperCase();}
+const GRADS=[['#1F8A5B','#43B27E'],['#3F6F86','#5FA0B8'],['#EE9A2E','#F6BE63'],['#E2553D','#EE7E63'],['#6E54E0','#9079EE'],['#2C7DA0','#57A8C5'],['#7FA567','#9FC585']];
+function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;}
+function grad(s){const g=GRADS[hash(s.id)%GRADS.length];return `linear-gradient(135deg,${g[0]},${g[1]})`;}
+
+const COMPLETE_FIELDS=['type','district','address','hours','lang','age','price','food','transport','ratio','program','license','reviews','contacts'];
+function completeness(s){let f=0;COMPLETE_FIELDS.forEach(k=>{const v=s[k];if(k==='license'){if(v==='verified')f++;}else if(v&&String(v).trim())f++;});return Math.round(f/COMPLETE_FIELDS.length*100);}
+
+const SHIELD_VER='<svg viewBox="0 0 24 24" fill="none" stroke="#15704A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 9.5C8 19 5 15.5 5 11V6z"/><path d="m9 12 2 2 4-4"/></svg>';
+const SHIELD_UNV='<svg viewBox="0 0 24 24" fill="none" stroke="#56685D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 9.5C8 19 5 15.5 5 11V6z"/><path d="M12 9v4"/><circle cx="12" cy="16" r=".6" fill="#56685D"/></svg>';
+const SHIELD_NON='<svg viewBox="0 0 24 24" fill="none" stroke="#E2553D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 9.5C8 19 5 15.5 5 11V6z"/><path d="m9.5 9.5 5 5M14.5 9.5l-5 5"/></svg>';
+function trust(lic){
+  if(lic==='verified')return {cls:'ver',label:t('licVer'),svg:SHIELD_VER};
+  if(lic==='none')return {cls:'non',label:t('licNon'),svg:SHIELD_NON};
+  return {cls:'unv',label:t('licUnv'),svg:SHIELD_UNV};
+}
+const APPLE_OUTLINE='<svg viewBox="0 0 24 24" fill="none" stroke="#E2553D" stroke-width="2"><path d="M12 8.5C10.6 6.8 7.8 7 6.5 9c-1.4 2.1-.6 5.4 1.4 7.4C9 17.6 10.4 18.5 12 18.5s3-.9 4.1-2.1c2-2 2.8-5.3 1.4-7.4C16.2 7 13.4 6.8 12 8.5Z"/><path d="M12 8.5c0-1.5.9-2.9 2.5-3.4" stroke-linecap="round"/></svg>';
+const APPLE_FILL='<svg viewBox="0 0 24 24" fill="#E2553D" stroke="#E2553D" stroke-width="1.4"><path d="M12 8.5C10.6 6.8 7.8 7 6.5 9c-1.4 2.1-.6 5.4 1.4 7.4C9 17.6 10.4 18.5 12 18.5s3-.9 4.1-2.1c2-2 2.8-5.3 1.4-7.4C16.2 7 13.4 6.8 12 8.5Z"/><path d="M12 8.5c0-1.5.9-2.9 2.5-3.4" fill="none" stroke-linecap="round"/></svg>';
+const PIN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>';
+
+/* ---------- storage ---------- */
+async function load(){
+  let stored=null;
+  try{const r=await window.storage.get(KEY);if(r&&r.value)stored=JSON.parse(r.value);}catch(e){}
+  if(!Array.isArray(stored)){data=structuredClone(SEED);try{await save();}catch(_){}return;}
+  const byId={};stored.forEach(s=>byId[s.id]=s);
+  SEED.forEach(seed=>{
+    if(byId[seed.id]){if(byId[seed.id].lat==null&&seed.lat!=null){byId[seed.id].lat=seed.lat;byId[seed.id].lng=seed.lng;}}
+    else byId[seed.id]=structuredClone(seed);
+  });
+  data=Object.values(byId);
+  try{await save();}catch(_){}
+}
+async function save(){try{await window.storage.set(KEY,JSON.stringify(data));}catch(e){}}
+async function loadFavs(){try{const r=await window.storage.get(FAVKEY);if(r&&r.value)favs=JSON.parse(r.value);}catch(e){favs=[];}}
+async function saveFavs(){try{await window.storage.set(FAVKEY,JSON.stringify(favs));}catch(e){}}
+function isFav(id){return favs.includes(id);}
+async function toggleFav(id){favs=isFav(id)?favs.filter(x=>x!==id):[...favs,id];await saveFavs();updateFavCount();}
+function updateFavCount(){const c=document.querySelector('.fchip.fav .favn');if(c)c.textContent=favs.length?` (${favs.length})`:'';}
+
+/* ---------- filtering ---------- */
+function getFiltered(){
+  const q=(document.getElementById('q').value||'').trim().toLowerCase();
+  const sort=document.getElementById('sort').value;
+  let list=data.filter(s=>{
+    if(filters.fav&&!isFav(s.id))return false;
+    if(filters.type&&s.type!==filters.type)return false;
+    if(filters.district&&s.district!==filters.district)return false;
+    if(filters.license&&s.license!==filters.license)return false;
+    if(filters.gosorder&&!s.gosorder)return false;
+    if(filters.lang&&!(s.lang||'').toLowerCase().includes(filters.lang.toLowerCase()))return false;
+    if(filters.maxPrice){const p=priceNum(s.price);if(p!=null&&p>filters.maxPrice)return false;}
+    if(q&&!(s.name.toLowerCase().includes(q)||(s.address||'').toLowerCase().includes(q)))return false;
+    return true;
+  });
+  list.sort((a,b)=>{
+    if(sort==='name')return a.name.localeCompare(b.name,'ru');
+    if(sort==='price'){const pa=priceNum(a.price)??9e9,pb=priceNum(b.price)??9e9;return pa-pb;}
+    const sc=s=>(s.license==='verified'?1000:0)+(s.gosorder?250:0)+completeness(s);
+    return sc(b)-sc(a);
+  });
+  return list;
+}
+
+/* ---------- render cards ---------- */
+function fact(icon,val){return val&&String(val).trim()?`<li>${icon} ${esc(val)}</li>`:'';}
+function render(){
+  const list=getFiltered();
+  const grid=document.getElementById('grid');
+  if(!list.length){
+    grid.innerHTML=`<div class="empty"><b>Ничего не нашлось</b>Попробуйте смягчить фильтры или сбросить их — садиков в этом наборе пока нет.</div>`;
+  }else{
+    grid.innerHTML=list.map(s=>{
+      const t=trust(s.license);
+      const fav=isFav(s.id);
+      const addr=(s.address||'').split('(')[0].trim();
+      const priceTxt=s.price?`<span class="price" title="${esc(s.price)}">${esc(s.price)}</span>`:`<span class="price req">Цена по запросу</span>`;
+      return `<article class="card${admin?' editable':''}" data-id="${s.id}" data-type="${s.type}" tabindex="0">
+        <div class="card-photo" style="background:${grad(s)}">
+          <span class="pat"></span>
+          ${s.logo?'<img class="clogo" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" onerror="this.outerHTML=\'<span class=mono>'+esc(monogram(s.name))+'</span>\'">':'<span class="mono">'+esc(monogram(s.name))+'</span>'}
+          <button class="fav" data-fav="${s.id}" aria-label="${fav?'Убрать из избранного':'В избранное'}">${fav?APPLE_FILL:APPLE_OUTLINE}</button>
+        </div>
+        <div class="card-body">
+          <h3 class="cname">${esc(s.name)}</h3>
+          <div class="cmeta">${PIN}<span>${esc(s.district||'район уточняется')}${addr?' · '+esc(addr):''}</span></div>
+          <div class="tags">
+            <span class="trust ${t.cls}">${t.svg}${t.label}</span>
+            ${s.gosorder?'<span class="gospill">🍃 Госзаказ</span>':''}
+          </div>
+          <ul class="facts">${fact('⏰',s.hours)}${fact('👶',s.age)}${fact('🗣',s.lang)}</ul>
+        </div>
+        <div class="card-foot">${priceTxt}<button class="gobtn">Подробнее →</button></div>
+      </article>`;
+    }).join('');
+  }
+  // stats
+  document.getElementById('stTotal').textContent=data.length;
+  document.getElementById('stDistricts').textContent=new Set(data.map(s=>s.district).filter(Boolean)).size||DISTRICTS.length;
+  const cl=document.getElementById('countline');
+  cl.innerHTML=`Найдено <b>${list.length}</b> ${plural(list.length,'садик','садика','садиков')}${activeFilterText()}`;
+  // bind
+  grid.querySelectorAll('.card').forEach(c=>{
+    const open=()=>admin?openEditor(c.dataset.id):openProfile(c.dataset.id);
+    c.onclick=e=>{if(e.target.closest('.fav'))return;open();};
+    c.onkeydown=e=>{if(e.key==='Enter')open();};
+  });
+  grid.querySelectorAll('.fav').forEach(b=>b.onclick=async e=>{
+    e.stopPropagation();await toggleFav(b.dataset.fav);render();
+  });
+  updateFavCount();
+}
+function plural(n,a,b,c){const m=n%100,d=n%10;if(m>10&&m<20)return c;if(d===1)return a;if(d>=2&&d<=4)return b;return c;}
+function activeFilterText(){
+  const bits=[];
+  if(filters.district)bits.push(filters.district.replace(/ский$/,'ский р-н'));
+  if(filters.fav)bits.push('избранное');
+  if(filters.license==='verified')bits.push('с проверенной лицензией');
+  if(filters.gosorder)bits.push('госзаказ');
+  return bits.length?` · ${bits.join(', ')}`:'';
+}
+
+/* ---------- map ---------- */
+function initMap(){
+  map=L.map('map',{scrollWheelZoom:true}).setView([43.215,76.895],12);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap, © CARTO'}).addTo(map);
+  markersLayer=L.layerGroup().addTo(map);
+}
+function renderMap(fit){
+  if(typeof L==='undefined')return setTimeout(()=>renderMap(fit),60);
+  if(!map)initMap();
+  markersLayer.clearLayers();
+  const list=getFiltered().filter(s=>s.lat&&s.lng);
+  const bounds=[];
+  list.forEach(s=>{
+    const color=s.license==='verified'?'#1F8A5B':s.license==='none'?'#E2553D':'#8A998F';
+    const m=L.circleMarker([s.lat,s.lng],{radius:9,color:'#fff',weight:2,fillColor:color,fillOpacity:.96});
+    const price=s.price?esc(s.price):'цена по запросу';
+    m.bindPopup(`<b>${esc(s.name)}</b><br>${TYPES[s.type]} · ${esc(s.district||'')}<br>${price}<br><span style="color:${color};font-weight:700">${LIC[s.license]}</span><br><button class="popbtn" onclick="openProfile('${s.id}')">Открыть карточку</button>`);
+    m.addTo(markersLayer);bounds.push([s.lat,s.lng]);
+  });
+  if(fit&&bounds.length)map.fitBounds(bounds,{padding:[36,36],maxZoom:14});
+  setTimeout(()=>map.invalidateSize(),60);
+}
+function refresh(fit){render();renderMap(fit);}
+
+/* ---------- profile (read view) ---------- */
+function kv(label,val){return val&&String(val).trim()?`<div class="kvitem"><div class="k">${label}</div><div class="vv">${esc(val)}</div></div>`:'';}
+function openProfile(id){
+  const s=data.find(x=>x.id===id);if(!s)return;
+  closeModal();
+  if(map&&s.lat&&s.lng)map.panTo([s.lat,s.lng]);
+  const t_=trust(s.license);const fav=isFav(id);
+  const rawPrice=s.price?esc(s.price):'по запросу';
+  const priceDisplay=rawPrice.replace(/\s*\/\s*/g,'<br>');
+  const longPrice=rawPrice.length>20;
+  const veryLongPrice=rawPrice.length>35;
+  const priceSub=[s.fee?'взнос: '+esc(s.fee):'',s.discounts?'скидки: '+esc(s.discounts):''].filter(Boolean).join(' · ')||'уточняйте при записи';
+  const licDesc=s.license==='verified'?t('licDescVer'):s.license==='none'?t('licDescNon'):t('licDescUnv');
+  const igUser=s.instagram||'';
+  const igLink=igUser?'https://instagram.com/'+igUser.replace('@',''):'';
+  // quick facts
+  const qf=(icon,label,val)=>val&&String(val).trim()?`<span class="fpill">${icon} ${esc(val)}</span>`:'';
+  const facts=[
+    qf('⏰',t('regime'),s.hours), qf('👶',t('age'),s.age), qf('🗣',t('language'),s.lang),
+    qf('👥',t('group'),s.ratio), qf('🍽',t('food'),s.food), qf('📹','',s.cameras),
+    qf('🏥','',s.medic?'медработник: '+s.medic:''), qf('🌳','',s.playground),
+    qf('🚗','',s.parking?'парковка: '+s.parking:''), qf('🚐','',s.transport?'развозка: '+s.transport:''),
+    qf('☀️','',s.summer)
+  ].filter(Boolean).join('');
+  // extra classes as tags
+  const classTags=(s.extraClasses||'').split(',').map(c=>c.trim()).filter(Boolean).map(c=>`<span>${esc(c)}</span>`).join('');
+  // safety checklist
+  const checks=[];
+  if(s.playground)checks.push('✅ '+esc(s.playground));
+  if(s.cameras)checks.push('✅ Камеры: '+esc(s.cameras));
+  if(s.medic)checks.push('✅ Медработник: '+esc(s.medic));
+  if(s.adaptation)checks.push('✅ Адаптация: '+esc(s.adaptation));
+  const safetyHtml=checks.map(c=>`<span>${c}</span>`).join('');
+
+  const d=document.getElementById('drawer');
+  d.innerHTML=`<div class="drawer-inner">
+    <div class="dbody">
+      <div class="p-hero" style="background:${grad(s)}">
+        <span class="pat"></span>
+        ${s.logo?'<img class="plogo" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" onerror="this.outerHTML=\'<span class=mono>'+esc(monogram(s.name))+'</span>\'">':'<span class="mono">'+esc(monogram(s.name))+'</span>'}
+        <button class="x" id="closeX" aria-label="Закрыть">✕</button>
+        <span class="ptrust">${t_.svg}${t_.label}</span>
+      </div>
+      <div class="bento">
+        <!-- Hero card -->
+        <div class="bc hero">
+          <div class="hinfo">
+            <h2>${esc(s.name)}</h2>
+            <div class="sub">${TYPES[s.type]||s.type}${s.gosorder?' · '+t('gosFull'):''}</div>
+            ${s.address?`<div class="addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>${esc(s.district?s.district+', ':'')}${esc(s.address)}</span></div>`:''}
+            <span class="htrust ${t_.cls}">${t_.svg}${t_.label}</span>
+          </div>
+        </div>
+        <!-- Price card -->
+        <div class="bc price">
+          <h4>${t('cost')}</h4>
+          <div class="bigp"${veryLongPrice?' style="font-size:16px;line-height:1.35"':longPrice?' style="font-size:20px"':''}>${priceDisplay}<small>${priceSub}</small></div>
+          <button class="bookbtn" id="pBook">${t('book')}</button>
+          <button class="contactbtn" id="pContact">✉️ ${lang==='kz'?'Балабақшамен байланысу':'Связаться с садиком'}</button>
+          ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
+          <button class="favrow" id="pFav">${fav?APPLE_FILL:APPLE_OUTLINE} ${fav?t('inFav'):t('saveFav')}</button>
+          ${s.availability?`<div class="avail">✓ ${esc(s.availability)}</div>`:''}
+        </div>
+        <!-- Facts strip -->
+        ${facts?`<div class="bc facts"><h4>${lang==='kz'?'Қысқаша':'Коротко о садике'}</h4><div class="factflow">${facts}</div></div>`:''}
+        <!-- Program -->
+        ${s.program||classTags?`<div class="bc prog"><h4>${t('program')}</h4>${s.program?`<div class="progbox">${esc(s.program)}</div>`:''}${classTags?`<div class="tags">${classTags}</div>`:''}</div>`:''}
+        <!-- Reviews -->
+        ${s.reviews?`<div class="bc reviews"><h4>${t('reviews')}</h4><div class="stars">⭐⭐⭐⭐⭐</div><div class="rtext"><b>${esc(s.reviews)}</b></div></div>`:''}
+        <!-- Safety -->
+        ${safetyHtml?`<div class="bc safety"><h4>${lang==='kz'?'Қауіпсіздік':'Безопасность'}</h4><div class="slist">${safetyHtml}</div></div>`:''}
+        <!-- License bar -->
+        <div class="bc lic">
+          <div class="licicon ${t_.cls}">🛡</div>
+          <div class="lictxt"><b>${t_.label}</b><span>${licDesc}${s.licenseNo?' № '+esc(s.licenseNo):''}</span></div>
+          <button class="bookbtn" id="pBook2">${lang==='kz'?'Жазылу →':'Записаться →'}</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+  openDrawer();
+  d.querySelector('#closeX').onclick=closeDrawer;
+  d.querySelector('#pBook').onclick=()=>openBooking(id);
+  d.querySelector('#pBook2').onclick=()=>openBooking(id);
+  d.querySelector('#pContact').onclick=()=>openBooking(id);
+  d.querySelector('#pFav').onclick=async()=>{await toggleFav(id);d.querySelector('#pFav').innerHTML=(isFav(id)?APPLE_FILL:APPLE_OUTLINE)+' '+(isFav(id)?t('inFav'):t('saveFav'));render();};
+}
+
+/* ---------- editor (owner mode) ---------- */
+function efield(label,key,s,ph=''){return `<div class="f"><label>${label}</label><input data-k="${key}" value="${esc(s[key]||'')}" placeholder="${ph||'нет данных'}"></div>`;}
+function earea(label,key,s){return `<div class="f"><label>${label}</label><textarea data-k="${key}" placeholder="нет данных">${esc(s[key]||'')}</textarea></div>`;}
+function openEditor(id){
+  const s=data.find(x=>x.id===id);if(!s)return;
+  if(map&&s.lat&&s.lng)map.panTo([s.lat,s.lng]);
+  const verified=s.license==='verified';const c=completeness(s);
+  const d=document.getElementById('drawer');
+  d.innerHTML=`<div class="drawer-inner" style="max-width:540px">
+    <div class="ehead">
+      <div><h2>${esc(s.name)}</h2><p class="sub">Режим владельца — поля сохраняются автоматически</p></div>
+      <button class="x" id="closeX" aria-label="Закрыть">✕</button>
+    </div>
+    <div class="dbody">
+      <div class="compbar">полнота карточки ${c}% <span class="meter"><i style="width:${c}%"></i></span></div>
+      <div class="grp"><h3>Основное</h3>
+        <div class="f"><label>Название</label><input data-k="name" value="${esc(s.name)}"></div>
+        <div class="two">
+          <div class="f"><label>Тип</label><select data-k="type">${Object.entries(TYPES).map(([k,l])=>`<option value="${k}" ${s.type===k?'selected':''}>${l}</option>`).join('')}</select></div>
+          <div class="f"><label>Район</label><select data-k="district"><option value="">— район? —</option>${DISTRICTS.map(x=>`<option ${s.district===x?'selected':''}>${x}</option>`).join('')}</select></div>
+        </div>
+        <div class="f"><label>Адрес</label><input data-k="address" value="${esc(s.address||'')}"></div>
+        <div class="two">${efield('Режим (часы)','hours',s,'08:00–19:00')}${efield('Язык','lang',s)}</div>
+        <div class="f"><label>Возраст</label><input data-k="age" value="${esc(s.age||'')}" placeholder="напр. 1,5–7 лет"></div>
+        <div class="two">${efield('Широта (lat)','lat',s,'43.21')}${efield('Долгота (lng)','lng',s,'76.89')}</div>
+      </div>
+      <div class="grp"><h3>Доверие · лицензия</h3>
+        <div class="licedit ${verified?'verified':''}" id="licbox">
+          <div class="f" style="margin-bottom:8px"><label>Статус лицензии</label><select data-k="license" id="licSel">${Object.entries(LIC).map(([k,l])=>`<option value="${k}" ${s.license===k?'selected':''}>${l}</option>`).join('')}</select></div>
+          <div class="two">${efield('Номер лицензии','licenseNo',s,'KZ…')}<div class="f"><label>Дата проверки</label><input type="date" data-k="licenseDate" value="${esc(s.licenseDate||'')}"></div></div>
+          <label style="display:flex;gap:8px;align-items:center;font-size:13px;color:var(--ink)"><input type="checkbox" data-k="gosorder" ${s.gosorder?'checked':''}> принимает по госзаказу «Балапан»</label>
+          <div class="hint">«Проверена» ставьте только после сверки в реестре elicense.kz или прямого подтверждения — это и есть ценность каталога.</div>
+        </div>
+      </div>
+      <div class="grp"><h3>Деньги</h3>
+        <div class="f"><label>Цена</label><input data-k="price" value="${esc(s.price||'')}" placeholder="напр. 120 000 ₸/мес"></div>
+        <div class="two">${efield('Вступительный взнос','fee',s)}${efield('Скидки','discounts',s)}</div>
+      </div>
+      <div class="grp"><h3>Условия</h3>
+        <div class="two">${efield('Питание','food',s)}${efield('Развозка','transport',s)}</div>
+        <div class="f"><label>Размер группы</label><input data-k="ratio" value="${esc(s.ratio||'')}" placeholder="напр. до 12 (1:12)"></div>
+        ${earea('Программа / уклон','program',s)}
+      </div>
+      <div class="grp"><h3>Контакты и заметки</h3>
+        <div class="f"><label>Контакты / сайт</label><input data-k="contacts" value="${esc(s.contacts||'')}"></div>
+        <div class="f"><label>Отзывы (мнения)</label><input data-k="reviews" value="${esc(s.reviews||'')}" placeholder="2ГИС 4.x (N)"></div>
+        ${earea('Заметки / флаги','notes',s)}
+        ${efield('Источник','source',s)}
+      </div>
+      <div style="height:8px"></div>
+    </div>
+    <div class="efoot">
+      <span class="saved" id="saved">✓ сохранено</span>
+      <div style="display:flex;gap:8px;margin-left:auto">
+        <button class="btn-ghost danger" id="delBtn">Удалить</button>
+        <button class="btn-primary" style="flex:none;padding:11px 18px" id="doneBtn">Готово</button>
+      </div>
+    </div>
+  </div>`;
+  openDrawer();
+  d.querySelector('#closeX').onclick=closeDrawer;
+  d.querySelector('#doneBtn').onclick=()=>{closeDrawer();refresh(false);};
+  d.querySelector('#delBtn').onclick=async()=>{if(confirm('Удалить «'+s.name+'»?')){data=data.filter(x=>x.id!==id);await save();refresh(true);closeDrawer();}};
+  d.querySelector('#licSel').onchange=e=>document.getElementById('licbox').classList.toggle('verified',e.target.value==='verified');
+  d.querySelectorAll('[data-k]').forEach(el=>{
+    const ev=el.type==='checkbox'||el.tagName==='SELECT'?'change':'input';
+    el.addEventListener(ev,()=>autoSave(id));
+  });
+}
+let saveTimer;
+async function autoSave(id){
+  const s=data.find(x=>x.id===id);if(!s)return;
+  document.querySelectorAll('#drawer [data-k]').forEach(el=>{
+    const k=el.dataset.k;let val=el.type==='checkbox'?el.checked:el.value;
+    if(k==='lat'||k==='lng')val=val===''?null:parseFloat(val);
+    s[k]=val;
+  });
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(async()=>{await save();const sv=document.getElementById('saved');if(sv){sv.classList.add('show');setTimeout(()=>sv.classList.remove('show'),1200);}},350);
+}
+function openDrawer(){document.getElementById('scrim').classList.add('on');document.getElementById('drawer').classList.add('on');document.getElementById('scrim').onclick=closeDrawer;document.getElementById('drawer').onclick=e=>{if(e.target===document.getElementById('drawer'))closeDrawer();};}
+function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('scrim').classList.remove('on');}
+
+
+/* ---------- i18n ---------- */
+const LANG_KEY='sadiki_lang_v1';
+let lang='ru';
+const T={
+  ru:{
+    heroTitle:'Найдите садик, где ребёнку будет <em>хорошо</em>',
+    lede:'Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и запишитесь на пробный день.',
+    searchPh:'Название или адрес — например, «Капитошка» или «Мирас»',
+    show:'Показать',
+    catalog:'Каталог', onMap:'На карте', pickSadik:'Подобрать садик',
+    myReqs:'Мои заявки', ownerMode:'Режим владельца', ownerModeOn:'✓ Режим владельца',
+    login:'Войти', register:'Регистрация', logout:'Выйти',
+    searchPh2:'Поиск по названию или адресу…',
+    sortReco:'Сначала рекомендуем', sortPrice:'Сначала дешевле', sortName:'По названию',
+    list:'Список', map:'Карта', pick:'✨ Подобрать за меня',
+    addSadik:'+ Добавить садик', exportJson:'⤓ Экспорт JSON',
+    found:'Найдено', sadik1:'садик', sadik2:'садика', sadik5:'садиков',
+    more:'Подробнее →', priceReq:'Цена по запросу',
+    book:'Записаться на пробный день', saveFav:'Сохранить в избранное', inFav:'В избранном',
+    conditions:'Условия', cost:'Стоимость', program:'Программа и занятия',
+    trust:'Доверие', reviews:'Что говорят', important:'Важно знать', contacts:'Контакты',
+    licVer:'Лицензия проверена', licUnv:'Лицензия уточняется', licNon:'Лицензии нет',
+    licDescVer:'Лицензию мы сверили в реестре или получили прямое подтверждение.',
+    licDescUnv:'Лицензию пока не сверили — уточните напрямую перед записью.',
+    licDescNon:'Действующей лицензии на дошкольное образование не найдено.',
+    gos:'Госзаказ',gosFull:'Госзаказ «Балапан»',
+    empty:'Ничего не нашлось', emptyDesc:'Попробуйте смягчить фильтры или сбросить их.',
+    free:'Бесплатно', freeDesc:'подбор и заявка',
+    sadikiInCatalog:'садиков в каталоге', districts:'районов города',
+    trialDay:'Пробный день', trialDesc:'оставьте заявку, садик свяжется.',
+    yourName:'Ваше имя', phone:'Телефон', date:'Желаемая дата', childAge:'Возраст ребёнка',
+    comment:'Комментарий', cancel:'Отмена', send:'Отправить заявку',
+    saved:'Заявка сохранена ✓', close:'Закрыть', clear:'Очистить',
+    noReqs:'Заявок пока нет.',
+    fav:'Избранное', reset:'Сбросить ✕', withLic:'С лицензией',
+    regime:'Режим', age:'Возраст', language:'Язык', group:'Группа',
+    food:'Питание', transport:'Развозка', fee:'Вступительный взнос', discounts:'Скидки',
+    authTitle:'Вход / Регистрация', authPhone:'По телефону', authEmail:'По почте',
+    authPhonePh:'+7 (___) ___-__-__', authEmailPh:'email@example.com',
+    authNamePh:'Ваше имя', authSubmit:'Продолжить',
+    authWelcome:'Добро пожаловать',profile:'Профиль',
+    firstName:'Имя',lastName:'Фамилия',
+    password:'Пароль',passwordPh:'Минимум 6 символов',
+    childName:'Имя ребёнка',childBday:'Дата рождения ребёнка',
+    verifyCode:'Код подтверждения',codeSent:'Код отправлен',
+    codePhoneSent:'СМС-код отправлен на ',codeEmailSent:'Код отправлен на ',
+    step:'Шаг',of:' из ',next:'Далее',back:'Назад',finish:'Завершить',
+    regComplete:'Регистрация завершена!',
+    regCompleteDesc:'Теперь вы можете записаться на пробный день.',
+    year:'Год',month:'Месяц',day:'День',
+  },
+  kz:{
+    heroTitle:'Балаңызға <em>жақсы</em> болатын балабақша табыңыз',
+    lede:'Бағаны, жағдайды және режимді салыстырамыз. Лицензияны адал белгілейміз. Үйге жақын балабақша таңдап, сынақ күніне жазылыңыз.',
+    searchPh:'Атауы немесе мекенжайы — мысалы, «Капитошка»',
+    show:'Көрсету',
+    catalog:'Каталог',onMap:'Картада',pickSadik:'Балабақша таңдау',
+    myReqs:'Менің өтінімдерім',ownerMode:'Иесі режимі',ownerModeOn:'✓ Иесі режимі',
+    login:'Кіру',register:'Тіркелу',logout:'Шығу',
+    searchPh2:'Атауы немесе мекенжайы бойынша іздеу…',
+    sortReco:'Алдымен ұсынылатын',sortPrice:'Алдымен арзан',sortName:'Атауы бойынша',
+    list:'Тізім',map:'Карта',pick:'✨ Маған таңда',
+    addSadik:'+ Балабақша қосу',exportJson:'⤓ JSON экспорт',
+    found:'Табылды',sadik1:'балабақша',sadik2:'балабақша',sadik5:'балабақша',
+    more:'Толығырақ →',priceReq:'Бағасы сұрау бойынша',
+    book:'Сынақ күніне жазылу',saveFav:'Таңдаулыға сақтау',inFav:'Таңдаулыда',
+    conditions:'Жағдайлар',cost:'Құны',program:'Бағдарлама және сабақтар',
+    trust:'Сенімділік',reviews:'Пікірлер',important:'Маңызды ақпарат',contacts:'Байланыс',
+    licVer:'Лицензия тексерілді',licUnv:'Лицензия нақтыланбаған',licNon:'Лицензия жоқ',
+    licDescVer:'Лицензияны тізілімде тексердік.',
+    licDescUnv:'Лицензия әлі тексерілмеді — жазылу алдында нақтылаңыз.',
+    licDescNon:'Мектепке дейінгі білім берудің лицензиясы табылмады.',
+    gos:'Мемтапсырыс',gosFull:'Мемтапсырыс «Балапан»',
+    empty:'Ештеңе табылмады',emptyDesc:'Сүзгілерді жұмсартып көріңіз.',
+    free:'Тегін',freeDesc:'іріктеу және өтінім',
+    sadikiInCatalog:'каталогтағы балабақша',districts:'қала аудандары',
+    trialDay:'Сынақ күні',trialDesc:'өтінім қалдырыңыз, балабақша хабарласады.',
+    yourName:'Атыңыз',phone:'Телефон',date:'Қалаулы күн',childAge:'Бала жасы',
+    comment:'Пікір',cancel:'Болдырмау',send:'Өтінім жіберу',
+    saved:'Өтінім сақталды ✓',close:'Жабу',clear:'Тазалау',
+    noReqs:'Әзірше өтінім жоқ.',
+    fav:'Таңдаулылар',reset:'Қалпына келтіру ✕',withLic:'Лицензиясы бар',
+    regime:'Режим',age:'Жас',language:'Тіл',group:'Топ',
+    food:'Тамақтану',transport:'Жеткізу',fee:'Алғашқы жарна',discounts:'Жеңілдіктер',
+    authTitle:'Кіру / Тіркелу',authPhone:'Телефон арқылы',authEmail:'Пошта арқылы',
+    authPhonePh:'+7 (___) ___-__-__',authEmailPh:'email@example.com',
+    authNamePh:'Атыңыз',authSubmit:'Жалғастыру',
+    authWelcome:'Қош келдіңіз',profile:'Профиль',
+    firstName:'Аты',lastName:'Тегі',
+    password:'Құпия сөз',passwordPh:'Кемінде 6 таңба',
+    childName:'Баланың аты',childBday:'Баланың туған күні',
+    verifyCode:'Растау коды',codeSent:'Код жіберілді',
+    codePhoneSent:'СМС код жіберілді: ',codeEmailSent:'Код поштаға жіберілді: ',
+    step:'Қадам',of:'/',next:'Келесі',back:'Артқа',finish:'Аяқтау',
+    regComplete:'Тіркелу аяқталды!',
+    regCompleteDesc:'Енді балабақшаға сынақ күніне жазыла аласыз.',
+    year:'Жыл',month:'Ай',day:'Күн',
+  }
+};
+function t(key){return T[lang][key]||T.ru[key]||key;}
+
+async function loadLang(){try{const r=await window.storage.get(LANG_KEY);if(r&&r.value)lang=r.value;}catch(e){}applyLang();}
+async function setLang(l){lang=l;try{await window.storage.set(LANG_KEY,lang);}catch(e){}applyLang();refresh(false);}
+function applyLang(){
+  document.getElementById('langRu').classList.toggle('on',lang==='ru');
+  document.getElementById('langKz').classList.toggle('on',lang==='kz');
+  // update static UI text
+  const h1=document.querySelector('.hero h1');if(h1)h1.innerHTML=t('heroTitle');
+  const lede=document.querySelector('.lede');if(lede)lede.textContent=t('lede');
+  const hq=document.getElementById('heroq');if(hq)hq.placeholder=t('searchPh');
+  document.getElementById('heroFind').textContent=t('show');
+  document.getElementById('q').placeholder=t('searchPh2');
+  // sort options
+  const sort=document.getElementById('sort');
+  sort.options[0].text=t('sortReco');sort.options[1].text=t('sortPrice');sort.options[2].text=t('sortName');
+  // nav
+  const navLinks=document.querySelectorAll('.topnav a');
+  if(navLinks[0])navLinks[0].textContent=t('catalog');
+  if(navLinks[1])navLinks[1].textContent=t('onMap');
+  if(navLinks[2])navLinks[2].textContent=t('pickSadik');
+  // buttons
+  document.getElementById('quizBtn').innerHTML=t('pick');
+  document.getElementById('viewList').textContent=t('list');
+  document.getElementById('viewMap').textContent=t('map');
+  // hero stats
+  const stats=document.querySelectorAll('.hstat span');
+  if(stats[0])stats[0].textContent=t('sadikiInCatalog');
+  if(stats[1])stats[1].textContent=t('districts');
+  if(stats[2])stats[2].textContent=t('freeDesc');
+  // owner btn
+  if(!admin)document.getElementById('ownerBtn').textContent=t('ownerMode');
+  // auth btn
+  updateAuthBtn();
+}
+document.getElementById('langRu').onclick=()=>setLang('ru');
+document.getElementById('langKz').onclick=()=>setLang('kz');
+
+/* ---------- auth ---------- */
+const AUTH_KEY='sadiki_auth_v1';
+let currentUser=null;
+async function loadAuth(){try{const r=await window.storage.get(AUTH_KEY);if(r&&r.value)currentUser=JSON.parse(r.value);}catch(e){}updateAuthBtn();}
+async function saveAuth(){try{await window.storage.set(AUTH_KEY,JSON.stringify(currentUser));}catch(e){}}
+function updateAuthBtn(){
+  const btn=document.getElementById('authBtn');
+  if(currentUser){
+    btn.textContent='👤 '+currentUser.name;
+    btn.onclick=openUserMenu;
+  }else{
+    btn.textContent='👤 '+t('login');
+    btn.onclick=openAuthModal;
+  }
+}
+function openAuthModal(){
+  let mode='phone',step=1,regData={},fakeCode='';
+  function gen4(){return String(1000+Math.floor(Math.random()*9000));}
+  function renderStep(){
+    const total=4;
+    const prog=Math.round((step-1)/total*100);
+    let body='';
+    if(step===1){
+      body=`<div class="auth-tabs"><button class="${mode==='phone'?'on':''}" id="atPhone">${t('authPhone')}</button><button class="${mode==='email'?'on':''}" id="atEmail">${t('authEmail')}</button></div>
+      <div class="auth-form">
+        ${mode==='phone'?`<input id="aContact" placeholder="${t('authPhonePh')}" type="tel" value="${regData.contact||''}">`:`<input id="aContact" placeholder="${t('authEmailPh')}" type="email" value="${regData.contact||''}">`}
+      </div>`;
+    }else if(step===2){
+      body=`<p class="sub">${mode==='phone'?t('codePhoneSent'):t('codeEmailSent')}<b>${esc(regData.contact)}</b></p>
+      <div class="auth-form"><input id="aCode" placeholder="${t('verifyCode')}" maxlength="4" style="text-align:center;font-size:24px;font-weight:800;letter-spacing:8px"></div>
+      <p class="sub" style="margin-top:8px;color:var(--ink3)">${lang==='kz'?'Демо-код:':'Демо-код:'} <b>${fakeCode}</b></p>`;
+    }else if(step===3){
+      body=`<div class="auth-form">
+        <div class="two"><div class="f"><label>${t('firstName')}</label><input id="aFirst" value="${regData.firstName||''}"></div><div class="f"><label>${t('lastName')}</label><input id="aLast" value="${regData.lastName||''}"></div></div>
+        <div class="f"><label>${t('password')}</label><input id="aPass" type="password" placeholder="${t('passwordPh')}"></div>
+      </div>`;
+    }else if(step===4){
+      const yOpts=Array.from({length:10},(_,i)=>2026-i).map(y=>`<option value="${y}" ${regData.childYear==y?'selected':''}>${y}</option>`).join('');
+      const mOpts=Array.from({length:12},(_,i)=>i+1).map(m=>`<option value="${m}" ${regData.childMonth==m?'selected':''}>${String(m).padStart(2,'0')}</option>`).join('');
+      const dOpts=Array.from({length:31},(_,i)=>i+1).map(d=>`<option value="${d}" ${regData.childDay==d?'selected':''}>${String(d).padStart(2,'0')}</option>`).join('');
+      body=`<div class="auth-form">
+        <div class="f"><label>${t('childName')}</label><input id="aChild" value="${regData.childName||''}"></div>
+        <div class="f"><label>${t('childBday')}</label>
+          <div class="two" style="grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <select id="aBdayY" class="sortsel">${'<option value="">'+t('year')+'</option>'+yOpts}</select>
+            <select id="aBdayM" class="sortsel">${'<option value="">'+t('month')+'</option>'+mOpts}</select>
+            <select id="aBdayD" class="sortsel">${'<option value="">'+t('day')+'</option>'+dOpts}</select>
+          </div>
+        </div>
+      </div>`;
+    }
+    const stepTitle=step<=2?t('authTitle'):step===3?(lang==='kz'?'Сіз туралы':'О вас'):(lang==='kz'?'Балаңыз туралы':'О вашем ребёнке');
+    openModal(`
+      <div class="qprog">${t('step')} ${step}${t('of')}${total}</div>
+      <div class="qprogbar"><i style="width:${prog}%"></i></div>
+      <h2 style="margin-top:10px">${stepTitle}</h2>
+      ${body}
+      <div class="qbar" style="margin-top:14px">
+        ${step>1?`<button class="btn-ghost" id="aBack">${t('back')}</button>`:`<button class="btn-ghost" onclick="closeModal()">${t('cancel')}</button>`}
+        <button class="btn-primary" style="flex:none;padding:12px 24px" id="aNext">${step===total?t('finish'):t('next')}</button>
+      </div>
+    `);
+    if(step===1){
+      document.getElementById('atPhone').onclick=()=>{mode='phone';renderStep();};
+      document.getElementById('atEmail').onclick=()=>{mode='email';renderStep();};
+    }
+    const backBtn=document.getElementById('aBack');
+    if(backBtn)backBtn.onclick=()=>{step--;renderStep();};
+    document.getElementById('aNext').onclick=handleNext;
+  }
+  function handleNext(){
+    if(step===1){
+      const c=(document.getElementById('aContact').value||'').trim();
+      if(!c){alert(lang==='kz'?'Телефон немесе поштаңызды жазыңыз':'Введите телефон или почту');return;}
+      regData.contact=c;regData.mode=mode;
+      fakeCode=gen4();step=2;renderStep();
+    }else if(step===2){
+      const code=(document.getElementById('aCode').value||'').trim();
+      if(code!==fakeCode){alert(lang==='kz'?'Код дұрыс емес':'Неверный код');return;}
+      step=3;renderStep();
+    }else if(step===3){
+      const f=(document.getElementById('aFirst').value||'').trim();
+      const l=(document.getElementById('aLast').value||'').trim();
+      const p=(document.getElementById('aPass').value||'');
+      if(!f){alert(lang==='kz'?'Атыңызды жазыңыз':'Введите имя');return;}
+      if(p.length<6){alert(lang==='kz'?'Құпия сөз кемінде 6 таңба':'Пароль минимум 6 символов');return;}
+      regData.firstName=f;regData.lastName=l;regData.password=p;
+      step=4;renderStep();
+    }else if(step===4){
+      regData.childName=(document.getElementById('aChild').value||'').trim();
+      regData.childYear=document.getElementById('aBdayY').value;
+      regData.childMonth=document.getElementById('aBdayM').value;
+      regData.childDay=document.getElementById('aBdayD').value;
+      currentUser={
+        name:regData.firstName+' '+regData.lastName,
+        firstName:regData.firstName,lastName:regData.lastName,
+        contact:regData.contact,mode:regData.mode,
+        child:{name:regData.childName,year:regData.childYear,month:regData.childMonth,day:regData.childDay},
+        created:new Date().toISOString()
+      };
+      saveAuth();updateAuthBtn();
+      openModal(`<h2>${t('regComplete')} 🎉</h2><p class="sub">${t('authWelcome')}, ${esc(regData.firstName)}! ${t('regCompleteDesc')}</p><div class="qbar"><span></span><button class="btn-primary" style="flex:none;padding:11px 20px" onclick="closeModal()">${t('close')}</button></div>`);
+    }
+  }
+  renderStep();
+}
+function openUserMenu(){
+  const child=currentUser.child||{};
+  const bdayStr=child.year&&child.month&&child.day?String(child.day).padStart(2,'0')+'.'+String(child.month).padStart(2,'0')+'.'+child.year:'';
+  openModal(`
+    <h2>${t('profile')}</h2>
+    <div style="margin:14px 0">
+      <b>${esc(currentUser.name)}</b><br><span class="sub">${esc(currentUser.contact)}</span>
+      ${child.name?'<div style="margin-top:12px;padding:12px 14px;background:var(--bg);border:1px solid var(--line2);border-radius:14px"><div style="font-size:12px;font-weight:700;color:var(--ink3);text-transform:uppercase">'+t('childName')+'</div><div style="font-weight:700;margin-top:3px">'+esc(child.name)+(bdayStr?' · '+bdayStr:'')+'</div></div>':''}
+    </div>
+    <div class="qbar"><button class="btn-ghost" id="uLogout">${t('logout')}</button><button class="btn-primary" style="flex:none;padding:11px 20px" onclick="closeModal()">${t('close')}</button></div>
+  `);
+  document.getElementById('uLogout').onclick=async()=>{currentUser=null;try{await window.storage.delete(AUTH_KEY);}catch(e){}updateAuthBtn();closeModal();};
+}
+document.getElementById('authBtn').onclick=openAuthModal;
+
+/* ---------- filters UI ---------- */
+function buildFilters(){
+  const wrap=document.getElementById('filters');
+  const presentDistricts=DISTRICTS.filter(d=>data.some(s=>s.district===d));
+  const dlist=presentDistricts.length?presentDistricts:DISTRICTS;
+  const districtChips=dlist.map(d=>`<span class="fchip" data-g="district" data-v="${d}">${d}</span>`).join('');
+  const priceChips=[[80000,'до 80 000 ₸'],[120000,'до 120 000 ₸'],[200000,'до 200 000 ₸']].map(([v,l])=>`<span class="fchip" data-g="maxPrice" data-v="${v}">${l}</span>`).join('');
+  const langChips=[['казах','Казахский'],['рус','Русский'],['англ','Английский']].map(([v,l])=>`<span class="fchip" data-g="lang" data-v="${v}">${l}</span>`).join('');
+  const typeChips=Object.entries(TYPES).map(([k,l])=>`<span class="fchip" data-g="type" data-v="${k}">${l}</span>`).join('');
+  wrap.innerHTML=
+    `<span class="fchip fav" data-g="fav" data-v="1">${APPLE_OUTLINE}Избранное<span class="favn"></span></span>`+
+    `<span class="sep"></span>`+
+    `<span class="chipgroup">${districtChips}</span><span class="sep"></span>`+
+    `<span class="chipgroup">${priceChips}</span><span class="sep"></span>`+
+    `<span class="chipgroup">${langChips}</span><span class="sep"></span>`+
+    `<span class="chipgroup">${typeChips}</span><span class="sep"></span>`+
+    `<span class="fchip gos" data-g="gosorder" data-v="1">🍃 Госзаказ</span>`+
+    `<span class="fchip" data-g="license" data-v="verified">🛡 С лицензией</span>`+
+    `<span class="fchip reset" data-reset="1">Сбросить ✕</span>`;
+  wrap.querySelectorAll('.fchip').forEach(ch=>ch.onclick=()=>{
+    if(ch.dataset.reset)return resetAll();
+    const g=ch.dataset.g,val=ch.dataset.v;
+    if(g==='fav')filters.fav=!filters.fav;
+    else if(g==='gosorder')filters.gosorder=!filters.gosorder;
+    else if(g==='maxPrice')filters.maxPrice=(filters.maxPrice==+val)?null:+val;
+    else filters[g]=filters[g]===val?'':val;
+    syncChips();refresh(true);
+  });
+  // hero district chips
+  const hc=document.getElementById('heroChips');
+  hc.innerHTML=dlist.map(d=>`<span class="hchip" data-d="${d}">📍 ${d}</span>`).join('');
+  hc.querySelectorAll('.hchip').forEach(c=>c.onclick=()=>{
+    filters.district=filters.district===c.dataset.d?'':c.dataset.d;
+    syncChips();refresh(true);scrollResults();
+  });
+  updateFavCount();
+}
+function syncChips(){
+  document.querySelectorAll('#filters .fchip').forEach(x=>{
+    if(x.dataset.reset)return;
+    const g=x.dataset.g,vv=x.dataset.v;let on=false;
+    if(g==='fav')on=filters.fav;else if(g==='gosorder')on=!!filters.gosorder;
+    else if(g==='maxPrice')on=filters.maxPrice==+vv;else on=filters[g]===vv;
+    x.classList.toggle('on',on);
+  });
+}
+function resetAll(){
+  filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',fav:false};
+  document.getElementById('q').value='';document.getElementById('heroq').value='';
+  document.getElementById('sort').value='reco';
+  syncChips();refresh(true);
+}
+function scrollResults(){document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});}
+
+/* ---------- bookings ---------- */
+async function loadBookings(){try{const r=await window.storage.get(BKEY);if(r&&r.value)bookings=JSON.parse(r.value);}catch(e){bookings=[];}updateReqCount();}
+async function saveBookings(){try{await window.storage.set(BKEY,JSON.stringify(bookings));}catch(e){}}
+function updateReqCount(){const el=document.getElementById('reqCount');if(el)el.textContent=bookings.length;}
+function openModal(html){const m=document.getElementById('modal');m.innerHTML=html;document.getElementById('mscrim').classList.add('on');}
+function closeModal(){document.getElementById('mscrim').classList.remove('on');}
+function openBooking(id){
+  const s=data.find(x=>x.id===id);if(!s)return;
+  openModal(`
+    <h2>Пробный день</h2>
+    <p class="sub">${esc(s.name)} — оставьте заявку, садик свяжется и запишет на пробное посещение или экскурсию.</p>
+    <div class="bk-grid" style="margin-top:16px">
+      <div class="f"><label>${t("yourName")}</label><input id="bk_parent" value="${currentUser?esc(currentUser.name):''}" placeholder="${t("yourName")}"></div>
+      <div class="f"><label>${t("phone")}</label><input id="bk_phone" value="${currentUser?esc(currentUser.contact):''}" placeholder="+7…"></div>
+      <div class="two"><div class="f"><label>Желаемая дата</label><input id="bk_date" type="date"></div><div class="f"><label>Возраст ребёнка</label><input id="bk_age" placeholder="напр. 3 года"></div></div>
+      <div class="f"><label>Комментарий</label><textarea id="bk_note"></textarea></div>
+    </div>
+    <div class="qbar"><button class="btn-ghost" onclick="closeModal()">Отмена</button><button class="btn-primary" style="flex:none;padding:11px 20px" id="bk_submit">Отправить заявку</button></div>
+  `);
+  document.getElementById('bk_submit').onclick=()=>submitBooking(id);
+}
+function submitBooking(id){
+  const s=data.find(x=>x.id===id);const parent=fv('bk_parent'),phone=fv('bk_phone');
+  if(!parent||!phone){alert('Заполните имя и телефон');return;}
+  bookings.unshift({id:'bk'+Date.now(),sadikId:id,sadikName:s.name,parent,phone,date:fv('bk_date'),child:fv('bk_age'),note:fv('bk_note'),created:new Date().toISOString()});
+  saveBookings();updateReqCount();
+  openModal(`<h2>Заявка сохранена ✓</h2><p class="sub">«${esc(s.name)}» — запрос на пробный день записан. Это демо: заявки лежат в разделе «Мои заявки» вверху.</p><div class="qbar"><span></span><button class="btn-primary" style="flex:none;padding:11px 20px" onclick="closeModal()">Готово</button></div>`);
+}
+function openRequests(){
+  const rows=bookings.length?bookings.map(b=>`<div class="reqcard"><b>${esc(b.sadikName)}</b><br>${esc(b.parent)} · ${esc(b.phone)}<br><span class="sub">дата: ${esc(b.date||'—')} · ребёнок: ${esc(b.child||'—')}</span>${b.note?`<div class="sub">${esc(b.note)}</div>`:''}</div>`).join(''):'<p class="sub">Заявок пока нет. Откройте садик → «Записаться на пробный день».</p>';
+  openModal(`<h2>Мои заявки</h2><div style="margin-top:14px;max-height:50vh;overflow:auto">${rows}</div><div class="qbar"><button class="btn-ghost" onclick="clearBookings()">Очистить</button><button class="btn-primary" style="flex:none;padding:11px 20px" onclick="closeModal()">Закрыть</button></div>`);
+}
+function clearBookings(){if(confirm('Очистить все заявки?')){bookings=[];saveBookings();updateReqCount();closeModal();}}
+
+/* ---------- quiz ---------- */
+const QUIZ=[
+ {key:'district',q:'В каком районе ищете садик?',opts:[['','Любой район']].concat(DISTRICTS.map(d=>[d,d]))},
+ {key:'maxPrice',q:'Какой бюджет в месяц?',opts:[[null,'Не важно'],[80000,'до 80 000 ₸'],[120000,'до 120 000 ₸'],[200000,'до 200 000 ₸']]},
+ {key:'lang',q:'На каком языке группа?',opts:[['','Любой'],['казах','Казахский'],['англ','Английский'],['рус','Русский']]},
+ {key:'type',q:'Что именно нужно?',opts:[['','Любой формат'],['sadik','Садик полного дня'],['center','Центр развития'],['preschool','Предшкольная подготовка']]},
+ {key:'sort',q:'Что важнее в выдаче?',opts:[['reco','Сначала проверенные'],['price','Сначала дешевле'],['name','По названию']]},
+];
+let quizStep=0,quizAns={};
+function openQuiz(){quizStep=0;quizAns={};filters.district='';filters.maxPrice=null;filters.lang='';filters.type='';syncChips();renderQuiz();}
+function renderQuiz(){
+  const st=QUIZ[quizStep];const pct=Math.round((quizStep)/QUIZ.length*100);
+  openModal(`
+    <div class="qprog">Шаг ${quizStep+1} из ${QUIZ.length}</div>
+    <div class="qprogbar"><i style="width:${pct}%"></i></div>
+    <h2 style="margin-top:10px;font-size:20px">${st.q}</h2>
+    <div class="qopts">${st.opts.map((o,i)=>`<button class="qopt" data-i="${i}">${o[1]}</button>`).join('')}</div>
+    <div class="qbar"><button class="btn-ghost" onclick="closeModal()">Закрыть</button></div>
+  `);
+  document.querySelectorAll('#modal .qopt').forEach(el=>el.onclick=()=>{
+    quizAns[st.key]=st.opts[+el.dataset.i][0];
+    if(quizStep<QUIZ.length-1){quizStep++;renderQuiz();}else applyQuiz();
+  });
+}
+function applyQuiz(){
+  filters.district=quizAns.district||'';
+  filters.maxPrice=(quizAns.maxPrice==null?null:quizAns.maxPrice);
+  filters.lang=quizAns.lang||'';filters.type=quizAns.type||'';
+  if(quizAns.sort)document.getElementById('sort').value=quizAns.sort;
+  syncChips();closeModal();refresh(true);scrollResults();
+}
+
+/* ---------- owner mode, add, export, geo ---------- */
+function setAdmin(on){
+  admin=on;
+  document.getElementById('ownerBtn').classList.toggle('on',on);
+  document.getElementById('ownerBtn').textContent=on?'✓ Режим владельца':'Режим владельца';
+  document.querySelectorAll('.owner-only').forEach(b=>b.style.display=on?'':'none');
+  render();
+}
+function addNew(){
+  const id='new'+Date.now();
+  data.unshift({id,name:'Новый садик',type:'sadik',district:'',address:'',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'',lat:null,lng:null});
+  save();render();openEditor(id);
+}
+function exportJSON(){
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='sadiki_almaty.json';a.click();
+}
+function geolocate(){
+  if(!navigator.geolocation){alert('Геолокация недоступна.');return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const{latitude,longitude}=pos.coords;if(!map)initMap();
+    L.circleMarker([latitude,longitude],{radius:8,color:'#16261D',weight:2,fillColor:'#16261D',fillOpacity:1}).addTo(markersLayer).bindPopup('Вы здесь').openPopup();
+    map.setView([latitude,longitude],13);
+  },()=>alert('Геолокацию не удалось получить — листайте карту вручную.'));
+}
+
+/* ---------- wiring ---------- */
+function syncHero(){const h=document.getElementById('heroq'),q=document.getElementById('q');q.value=h.value;refresh(false);}
+document.getElementById('heroq').addEventListener('input',()=>{document.getElementById('q').value=document.getElementById('heroq').value;refresh(false);});
+document.getElementById('heroFind').onclick=()=>{syncHero();scrollResults();};
+document.getElementById('heroq').addEventListener('keydown',e=>{if(e.key==='Enter'){syncHero();scrollResults();}});
+document.getElementById('q').addEventListener('input',()=>{document.getElementById('heroq').value=document.getElementById('q').value;refresh(false);});
+document.getElementById('sort').addEventListener('change',()=>refresh(false));
+document.getElementById('quizBtn').onclick=openQuiz;
+document.getElementById('reqBtn').onclick=openRequests;
+document.getElementById('geoBtn').onclick=geolocate;
+document.getElementById('addBtn').onclick=addNew;
+document.getElementById('exportBtn').onclick=exportJSON;
+document.getElementById('ownerBtn').onclick=()=>setAdmin(!admin);
+document.getElementById('navQuiz').onclick=e=>{e.preventDefault();openQuiz();};
+document.getElementById('navMap').onclick=e=>{if(window.innerWidth<=980){setView('map');}};
+document.getElementById('mscrim').addEventListener('click',e=>{if(e.target.id==='mscrim')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();closeModal();}});
+window.addEventListener('resize',()=>{if(map)map.invalidateSize();});
+// mobile view toggle
+function setView(v){
+  const L=document.getElementById('layout');
+  L.classList.toggle('show-map',v==='map');L.classList.toggle('show-list',v==='list');
+  document.getElementById('viewList').classList.toggle('on',v==='list');
+  document.getElementById('viewMap').classList.toggle('on',v==='map');
+  if(v==='map')setTimeout(()=>{if(map){map.invalidateSize();renderMap(true);}},80);
+}
+document.getElementById('viewList').onclick=()=>setView('list');
+document.getElementById('viewMap').onclick=()=>setView('map');
+
+/* ---------- init ---------- */
+buildFilters();
+loadFavs().then(()=>load().then(()=>{buildFilters();render();renderMap(true);}));
+loadBookings();
+loadLang();
+loadAuth();
+</script>
+
+<!-- PWA: Service Worker + Install Prompt -->
+<style>
+  .install-banner{position:fixed;bottom:0;left:0;right:0;z-index:2000;background:var(--paper);
+    border-top:1px solid var(--line);box-shadow:0 -8px 30px rgba(0,0,0,.12);padding:16px 20px;
+    display:none;align-items:center;gap:14px;animation:slideUp .3s ease}
+  .install-banner.show{display:flex}
+  .install-banner .ib-icon{width:52px;height:52px;border-radius:14px;flex:none;overflow:hidden}
+  .install-banner .ib-icon img{width:100%;height:100%}
+  .install-banner .ib-text{flex:1}
+  .install-banner .ib-text b{font-size:15px;display:block}
+  .install-banner .ib-text span{font-size:12.5px;color:var(--ink2)}
+  .install-banner .ib-install{border:0;background:var(--green);color:#fff;font-weight:800;
+    font-size:14px;padding:12px 22px;border-radius:12px;cursor:pointer;white-space:nowrap;font-family:inherit}
+  .install-banner .ib-install:hover{background:var(--green-700)}
+  .install-banner .ib-close{border:0;background:none;font-size:20px;color:var(--ink3);cursor:pointer;padding:4px}
+  @keyframes slideUp{from{transform:translateY(100%)}to{transform:none}}
+</style>
+<div class="install-banner" id="installBanner">
+  <div class="ib-icon"><img src="icons/icon-192x192.png" alt="Садики Алматы"></div>
+  <div class="ib-text"><b>Садики Алматы</b><span>Установить приложение на телефон</span></div>
+  <button class="ib-install" id="installBtn">Установить</button>
+  <button class="ib-close" id="installClose">✕</button>
+</div>
+<script>
+// Service Worker Registration
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').then(r=>console.log('SW registered',r.scope)).catch(e=>console.log('SW failed',e));
+}
+// Install Prompt
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  const banner=document.getElementById('installBanner');
+  // Show banner after 3 seconds if not dismissed
+  if(!localStorage.getItem('pwa_dismissed')){
+    setTimeout(()=>banner.classList.add('show'),3000);
+  }
+});
+document.getElementById('installBtn').onclick=async()=>{
+  if(!deferredPrompt)return;
+  deferredPrompt.prompt();
+  const result=await deferredPrompt.userChoice;
+  console.log('Install:',result.outcome);
+  deferredPrompt=null;
+  document.getElementById('installBanner').classList.remove('show');
+};
+document.getElementById('installClose').onclick=()=>{
+  document.getElementById('installBanner').classList.remove('show');
+  localStorage.setItem('pwa_dismissed','1');
+};
+// Hide banner if already installed
+window.addEventListener('appinstalled',()=>{
+  document.getElementById('installBanner').classList.remove('show');
+  deferredPrompt=null;
+});
+// iOS detection - show manual install hint
+if(/iPhone|iPad/.test(navigator.userAgent)&&!window.navigator.standalone){
+  const banner=document.getElementById('installBanner');
+  const txt=banner.querySelector('.ib-text');
+  txt.innerHTML='<b>Садики Алматы</b><span>Нажмите <b>Поделиться ↑</b> → <b>На экран «Домой»</b></span>';
+  banner.querySelector('.ib-install').textContent='Понятно';
+  banner.querySelector('.ib-install').onclick=()=>banner.classList.remove('show');
+  if(!localStorage.getItem('pwa_dismissed')){
+    setTimeout(()=>banner.classList.add('show'),3000);
+  }
+}
+</script>
+
+</body>
+</html>
