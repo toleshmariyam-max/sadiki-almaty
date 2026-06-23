@@ -135,48 +135,38 @@
 
   /* ---------- LAYOUT ---------- */
   .layout{display:grid;grid-template-columns:minmax(0,1fr) 416px;gap:24px;align-items:start;margin-top:14px}
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+  .grid{display:flex;flex-direction:column;gap:16px}
   .mapcol{position:sticky;top:132px}
 
-  /* ---------- CARD ---------- */
-  .card{position:relative;background:var(--paper);border:1px solid var(--line);border-radius:22px;
-    overflow:hidden;cursor:pointer;transition:.2s;display:flex;flex-direction:column;box-shadow:var(--sh)}
-  .card:hover{transform:translateY(-3px);box-shadow:var(--sh-lg);border-color:#d3ddd0}
-  .card-photo{position:relative;height:128px;display:grid;place-items:center;overflow:hidden}
-  .card-photo .mono{font-family:'Outfit',sans-serif;font-weight:600;font-size:46px;color:rgba(255,255,255,.95);
-    text-shadow:0 2px 14px rgba(0,0,0,.16)}
-  .card-photo .pat{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.16) 1.7px,transparent 1.8px);background-size:18px 18px}
-  .fav{position:absolute;top:10px;right:10px;width:36px;height:36px;border-radius:50%;border:0;
-    background:rgba(255,255,255,.92);backdrop-filter:blur(4px);cursor:pointer;display:grid;place-items:center;
-    transition:.15s;z-index:2;box-shadow:0 2px 8px rgba(0,0,0,.12)}
-  .fav:hover{transform:scale(1.1)}
-  .fav svg{width:19px;height:19px}
-  .trust{font-size:11px;font-weight:700;padding:4px 10px;border-radius:var(--pill);
+  /* ---------- CARD (full-width photo) ---------- */
+  .card{position:relative;border-radius:22px;overflow:hidden;cursor:pointer;transition:.2s;
+    height:200px;display:flex;align-items:flex-end;background-size:cover;background-position:center;background-color:var(--ink)}
+  .card:hover{transform:scale(1.01);box-shadow:var(--sh-lg)}
+  .card .card-bg{position:absolute;inset:0;display:grid;place-items:center;overflow:hidden}
+  .card .card-bg .pat{position:absolute;inset:0;background:radial-gradient(circle,rgba(255,255,255,.12) 2px,transparent 2px);background-size:20px 20px}
+  .card .card-bg .mono{font-family:'Outfit',sans-serif;font-weight:600;font-size:72px;color:rgba(255,255,255,.25);position:relative;z-index:1}
+  .card .card-bg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .card .card-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.2) 40%,rgba(0,0,0,.05) 100%)}
+  .card .card-content{position:relative;z-index:2;padding:18px 20px;width:100%;color:#fff}
+  .card .card-content .cname{font-family:'Outfit';font-weight:700;font-size:21px;line-height:1.12;text-shadow:0 1px 10px rgba(0,0,0,.35)}
+  .card .card-content .crow{display:flex;justify-content:space-between;align-items:flex-end;margin-top:7px;gap:10px}
+  .card .card-content .cmeta{font-size:12.5px;opacity:.88;line-height:1.4}
+  .card .card-content .cprice{font-family:'Outfit';font-weight:700;font-size:19px;text-align:right;white-space:nowrap;text-shadow:0 1px 8px rgba(0,0,0,.3)}
+  .card .card-content .cprice small{font-size:10px;opacity:.7;display:block;font-family:'Onest'}
+  .fav{position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;border:0;
+    background:rgba(255,255,255,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);cursor:pointer;display:grid;place-items:center;
+    transition:.15s;z-index:3}
+  .fav:hover{transform:scale(1.1);background:rgba(255,255,255,.3)}
+  .fav svg{width:20px;height:20px}
+  .badge{position:absolute;top:14px;left:14px;font-size:11px;font-weight:700;padding:6px 14px;border-radius:var(--pill);
+    background:rgba(255,255,255,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;z-index:3;
     display:inline-flex;align-items:center;gap:4px}
-  .trust svg{width:12px;height:12px}
-  .trust.ver{color:var(--green-700);background:var(--green-soft)}
-  .trust.unv{color:var(--ink2);background:var(--line2)}
-  .trust.non{color:var(--apple);background:var(--apple-soft)}
-  .card-body{padding:14px 15px 0;display:flex;flex-direction:column;gap:7px;flex:1}
-  .cname{font-size:16px;font-weight:800;letter-spacing:-.01em;line-height:1.18}
-  .cmeta{font-size:12.5px;color:var(--ink2);display:flex;gap:6px;align-items:flex-start}
-  .cmeta svg{width:13px;height:13px;flex:none;margin-top:2px;color:var(--ink3)}
-  .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}
-  .gospill{font-size:11px;font-weight:700;color:var(--green-700);background:var(--green-soft);
-    padding:3px 9px;border-radius:var(--pill);display:inline-flex;align-items:center;gap:4px}
-  .facts{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:5px 7px}
-  .facts li{font-size:11.5px;font-weight:600;color:var(--ink2);background:var(--bg);border:1px solid var(--line2);
-    padding:3px 9px;border-radius:8px;display:inline-flex;align-items:center;gap:4px}
-  .card-foot{margin-top:auto;padding:13px 15px;border-top:1px solid var(--line2);display:flex;align-items:center;
-    justify-content:space-between;gap:8px;background:var(--bg)}
-  .price{font-weight:800;font-size:15px;color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:62%}
-  .price small{font-weight:600;color:var(--ink3);font-size:10px}
-  .price.req{font-weight:700;font-size:13px;color:var(--ink3)}
-  .gobtn{border:0;background:var(--green);color:#fff;font-weight:700;font-size:13px;
-    padding:9px 16px;border-radius:var(--pill);cursor:pointer;transition:.15s;white-space:nowrap}
-  .gobtn:hover{background:var(--green-700)}
-  .card.editable::after{content:"✎";position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:8px;
-    background:var(--ink);color:#fff;display:grid;place-items:center;font-size:14px;z-index:2;opacity:0;transition:.15s}
+  .badge.gos{background:rgba(31,138,91,.85)}
+  .badge.ver{background:rgba(31,138,91,.85)}
+  .badge.unv{background:rgba(255,255,255,.15)}
+  .badge.non{background:rgba(226,85,61,.7)}
+  .card.editable::after{content:"✎";position:absolute;top:14px;left:14px;width:30px;height:30px;border-radius:8px;
+    background:var(--ink);color:#fff;display:grid;place-items:center;font-size:14px;z-index:4;opacity:0;transition:.15s}
   .card.editable:hover::after{opacity:.92}
 
   /* ---------- MAP ---------- */
@@ -703,23 +693,23 @@ function render(){
       const t=trust(s.license);
       const fav=isFav(s.id);
       const addr=(s.address||'').split('(')[0].trim();
-      const priceTxt=s.price?`<span class="price" title="${esc(s.price)}">${esc(s.price)}</span>`:`<span class="price req">Цена по запросу</span>`;
-      return `<article class="card${admin?' editable':''}" data-id="${s.id}" data-type="${s.type}" tabindex="0">
-        <div class="card-photo" style="background:${grad(s)}">
-          <span class="pat"></span>
-          ${s.logo?'<img class="clogo" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" onerror="this.outerHTML=\'<span class=mono>'+esc(monogram(s.name))+'</span>\'">':'<span class="mono">'+esc(monogram(s.name))+'</span>'}
-          <button class="fav" data-fav="${s.id}" aria-label="${fav?'Убрать из избранного':'В избранное'}">${fav?APPLE_FILL:APPLE_OUTLINE}</button>
-        </div>
-        <div class="card-body">
+      const shortPrice=s.price?esc(s.price).replace(/\s*\/.*$/,''):'по запросу';
+      const priceSub=s.price&&s.price.includes('/')?esc(s.price.split('/').pop().trim()):'';
+      const bgStyle=s.logo?`background-image:url(${esc(s.logo)});background-color:${GRADS[hash(s)%GRADS.length][0]}`:`background:${grad(s)}`;
+      const badgeTxt=s.gosorder?'🍃 Госзаказ':s.license==='verified'?'🛡 Лицензия проверена':'';
+      const badgeCls=s.gosorder?'gos':s.license==='verified'?'ver':s.license==='none'?'non':'unv';
+      return `<article class="card${admin?' editable':''}" data-id="${s.id}" style="${bgStyle}" tabindex="0">
+        <div class="card-bg"><span class="pat"></span><span class="mono">${esc(monogram(s.name))}</span>${s.logo?'<img src="'+esc(s.logo)+'" alt="" onerror="this.remove()">':''}</div>
+        <div class="card-overlay"></div>
+        <button class="fav" data-fav="${s.id}" aria-label="${fav?'Убрать':'В избранное'}">${fav?APPLE_FILL:APPLE_OUTLINE}</button>
+        ${badgeTxt?`<span class="badge ${badgeCls}">${badgeTxt}</span>`:''}
+        <div class="card-content">
           <h3 class="cname">${esc(s.name)}</h3>
-          <div class="cmeta">${PIN}<span>${esc(s.district||'район уточняется')}${addr?' · '+esc(addr):''}</span></div>
-          <div class="tags">
-            <span class="trust ${t.cls}">${t.svg}${t.label}</span>
-            ${s.gosorder?'<span class="gospill">🍃 Госзаказ</span>':''}
+          <div class="crow">
+            <span class="cmeta">📍 ${esc(s.district||'')}${s.lang?' · '+esc(s.lang):''}${s.age?' · '+esc(s.age):''}</span>
+            <span class="cprice">${shortPrice}${priceSub?'<small>'+priceSub+'</small>':''}</span>
           </div>
-          <ul class="facts">${fact('⏰',s.hours)}${fact('👶',s.age)}${fact('🗣',s.lang)}</ul>
         </div>
-        <div class="card-foot">${priceTxt}<button class="gobtn">Подробнее →</button></div>
       </article>`;
     }).join('');
   }
