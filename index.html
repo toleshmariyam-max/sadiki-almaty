@@ -440,6 +440,26 @@
   .recent-item .ri-photo .mono{font-family:'Outfit';font-weight:600;font-size:24px;color:rgba(0,0,0,.1)}
   .recent-item .ri-name{font-size:11px;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
+
+  .backbtn{position:absolute;top:14px;left:14px;z-index:10;border:0;background:rgba(255,255,255,.9);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#1a1a1a;font-weight:700;font-size:14px;
+    padding:8px 16px;border-radius:20px;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+  .backbtn:hover{background:#fff}
+
+
+  .reset-chip{background:#fee2e2!important;color:#dc2626!important;border-color:#fecaca!important}
+  .reset-chip:hover{background:#fecaca!important}
+
+
+  .filter-dropdown{position:absolute;top:100%;left:0;margin-top:6px;background:#fff;border:1px solid #e8e8e8;border-radius:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.12);padding:8px;z-index:100;display:none;min-width:180px}
+  .filter-dropdown.show{display:block}
+  .filter-dropdown .dd-item{display:block;width:100%;text-align:left;border:0;background:none;padding:10px 14px;
+    font-size:13px;font-weight:600;color:#555;cursor:pointer;border-radius:10px;font-family:inherit}
+  .filter-dropdown .dd-item:hover{background:#f5f5f5}
+  .filter-dropdown .dd-item.on{background:#E8F5E9;color:#166534}
+  .chips{position:relative}
+
 </style>
 </head>
 <body>
@@ -667,7 +687,7 @@ const FAVKEY='sadiki_favs_v1';
 const BKEY='sadiki_bookings_v1';
 
 const SEED=[
- {id:'zayka',logo:'logos/zayka.jpg',instagram:'@zaikasadik.kz',igFollowers:'25K',cameras:'онлайн-доступ 24/7',medic:'в штате',playground:'своя, огорожена',parking:'есть',adaptation:'2 недели, психолог',summer:'работает, летняя программа',availability:'есть места 2-3 года',extraClasses:'танцы, робототехника, плавание',food:'5-разовое, халяль',logo:'logos/zayka.jpg',name:'Сеть «Zayka»',type:'sadik',district:'Бостандыкский',address:'ул. Ходжанова, 77/5 (+ сеть филиалов)',hours:'07:30–19:00',lang:'каз/рус/англ',age:'1,6–7 лет',price:'коммерч. 140 000 / по госзаказу 120 000 ₸/мес',fee:'30 000 ₸/год',discounts:'',food:'',transport:'да (утро/вечер)',ratio:'15–18 детей',program:'ГОСО + IB + Shichida + STEAM',gosorder:true,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.1 (23)',contacts:'zaikasadik.kz · IG @zaikasadik.kz',notes:'Сеть 5 филиалов. Принимают по госзаказу «Балапан» → лицензия вероятна.',source:'сайт/2ГИС/Pandaland'},
+ {id:'zayka',logo:'logos/zayka.jpg',instagram:'@zaikasadik.kz',igFollowers:'25K',cameras:'онлайн-доступ 24/7',medic:'в штате',playground:'своя, огорожена',parking:'есть',adaptation:'2 недели, психолог',summer:'работает, летняя программа',availability:'есть места 2-3 года',extraClasses:'танцы, робототехника, плавание',food:'5-разовое, халяль',logo:'logos/zayka.jpg',name:'Сеть «Zayka»',type:'sadik',district:'Бостандыкский',address:'ул. Ходжанова, 77/5 (+ сеть филиалов)',hours:'07:30–19:00',lang:'каз/рус/англ',age:'1,6–7 лет',price:'185 000 ₸/мес',fee:'30 000 ₸/год',discounts:'',food:'',transport:'да (утро/вечер)',ratio:'15–18 детей',program:'ГОСО + IB + Shichida + STEAM',gosorder:true,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.1 (23)',contacts:'zaikasadik.kz · IG @zaikasadik.kz',notes:'Сеть 5 филиалов. Принимают по госзаказу «Балапан» → лицензия вероятна.',source:'сайт/2ГИС/Pandaland'},
  {id:'kapitoshka',instagram:'@kapitoshka_sadik_almaty',igFollowers:'1 240',cameras:'онлайн-доступ',medic:'в штате',playground:'своя, резиновое покрытие',parking:'есть, 10 мест',adaptation:'мягкая, 2 недели',summer:'работает всё лето',availability:'есть места 3-4 года',extraClasses:'ИЗО, робототехника, шахматы, айкидо',food:'5-разовое',name:'«Капитошка»',type:'sadik',district:'Бостандыкский',address:'ул. Болтирикова, 15 (мкр Нур Алатау)',hours:'08:00–20:00',lang:'рус/англ',age:'1,5–7 лет',price:'65 000 ₸/мес',fee:'без взноса',discounts:'',food:'',transport:'',ratio:'до 12 (≈1:12)',program:'английский, айкидо, шахматы, летом бассейн',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.8 (77)',contacts:'kapitoshkasadik.kz',notes:'Домашняя атмосфера, предгорья.',source:'сайт/2ГИС'},
  {id:'balazhan',name:'«Балажан»',type:'sadik',district:'Бостандыкский',address:'ул. Жандосова, 14',hours:'08:00–19:00',lang:'казахский',age:'',price:'депозит 150 000 + 150 000 ₸/мес (по отзыву)',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'2ГИС 4.5 (12)',contacts:'',notes:'Цена только из отзыва — переподтвердить.',source:'2ГИС'},
  {id:'bolashak',name:'«Bolashak»',type:'sadik',district:'Бостандыкский',address:'пр. Сейфуллина, 544',hours:'',lang:'',age:'',price:'оплата по дням посещения',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'плавание, английский, танцы',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'Google 5.0 (25)',contacts:'',notes:'Граница Бостандык/Алмалинский.',source:'карты/отзывы'},
@@ -689,21 +709,23 @@ const SEED=[
  {id:'kaisar',name:'«Кайсар»',type:'sadik',district:'Бостандыкский',address:'ул. Тажибаевой, 176',hours:'08:00–20:00',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Длинный день и суббота.',source:'карты'},
  {id:'happyclub',name:'«Happy Club for Kids»',type:'sadik',district:'Бостандыкский',address:'мкр Алмагуль, 33а',hours:'08:00–19:00',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'карты'},
 
- {id:'elitekids',logo:'logos/elitekids.jpg',instagram:'@Elitekids_sairan',cameras:'камеры везде',medic:'штатная медсестра',playground:'выходят в парк',parking:'на улице рядом',adaptation:'нет специального периода',summer:'работает всё лето',availability:'уточните',extraClasses:'англ, каз, подготовка к школе',food:'5-разовое, кейтеринг, инд. аллергенное меню, халяль',name:'EliteKids',type:'sadik',district:'Ауэзовский',address:'Толе би 273/5',hours:'08:00–18:30',lang:'три языка',age:'2–7 лет',price:'',fee:'',discounts:'детям из одной семьи',transport:'',ratio:'12 детей',program:'Стандартная гос. программа, подготовка к школе',gosorder:false,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'+77016397505',notes:'Логопед и психолог приходящие. Камеры без доступа для родителей.',source:'анкета 2026'},
- {id:'teams',logo:'logos/teams.jpg',instagram:'',cameras:'онлайн-доступ через приложение',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'своя парковка',adaptation:'всё индивидуально',summer:'работает всё лето',availability:'уточните',extraClasses:'англ, каз, подготовка к школе',food:'5-разовое, своя кухня, гипоаллергенное, халяль',name:'Teams',type:'sadik',district:'Бостандыкский',address:'Жанакорган 25/1 блок',hours:'08:00–18:00',lang:'казахский',age:'1,5–7 лет',price:'240 000 ₸/мес',fee:'100 000 ₸',discounts:'детям из одной семьи, за предоплату',transport:'',ratio:'16 детей',program:'Стандартная гос. программа, штатный логопед, подготовка к школе',gosorder:true,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'+7 707 628 4510',notes:'Есть продлёнка. Суббота по запросу за доплату. Работает 3–5 лет.',source:'анкета 2026'},
- {id:'sadok',logo:'logos/sadok.jpg',instagram:'',cameras:'камеры везде, по запросу родителям',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'на улице рядом',adaptation:'гибко — родитель остаётся сколько нужно',summer:'работает всё лето',availability:'есть места',extraClasses:'англ, каз, кружки за доплату',food:'5-разовое, своя кухня, гипоаллергенное, халяль',name:'Садок',type:'sadik',district:'Ауэзовский',address:'Алмас 172',hours:'08:00–18:00',lang:'русский',age:'1–7 лет',price:'',fee:'200 000 ₸',discounts:'детям из одной семьи',transport:'за доп. плату',ratio:'20 детей',program:'Авторская программа, штатный логопед и психолог, подготовка к школе',gosorder:false,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'+77017809396',notes:'Круглосуточная охрана. Есть продлёнка. Работает 13 лет! Вместимость 120 детей.',source:'анкета 2026'},
- {id:'dameli',instagram:'@Dameli.mk',cameras:'камеры везде, по запросу',medic:'приходящий медработник',playground:'своя огороженная площадка',parking:'нет',adaptation:'1–2 недели постепенного привыкания',summer:'работает всё лето',availability:'есть места',extraClasses:'гимнастика, логопед, карате',food:'4-разовое, своя кухня, халяль',name:'Детский сад «Дамели»',type:'sadik',district:'Ауэзовский',address:'Мкр. Жетысу 3, дом 58',hours:'08:00–18:30',lang:'рус/каз',age:'1,8–7 лет',price:'',fee:'',discounts:'детям из одной семьи',transport:'',ratio:'25 детей',program:'Стандартная гос. программа, англ, каз, подготовка к школе',gosorder:true,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'87771017728',notes:'Лицензия в процессе получения. Госсубсидия. Слоган: «Любовь каждому ребёнку». Вместимость 95 детей.',source:'анкета 2026'},
+ {id:'elitekids',logo:'logos/elitekids.jpg',instagram:'@Elitekids_sairan',cameras:'камеры везде (без доступа для родителей)',medic:'штатная медсестра',playground:'выходят в парк',parking:'на улице рядом',adaptation:'нет специального периода',summer:'работает всё лето',availability:'',extraClasses:'англ, каз, музыка, ИЗО, физкультура, танцы, математика, развитие речи, ЛФК',food:'5-разовое, кейтеринг, инд. аллергенное меню, халяль',name:'EliteKids',type:'sadik',district:'Ауэзовский',address:'Толе би 273/5',hours:'08:00–18:30',lang:'три языка',age:'2–7 лет',price:'100 000 ₸/мес',fee:'',discounts:'детям из одной семьи',transport:'',ratio:'12 детей',program:'Стандартная гос. программа, подготовка к школе',gosorder:false,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'+77016397505',notes:'Логопед и психолог приходящие. Камеры без доступа для родителей.',source:'анкета 2026'},
+ {id:'teams',logo:'logos/teams.jpg',instagram:'@teams.almaty',cameras:'онлайн-доступ через приложение',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'своя парковка',adaptation:'всё индивидуально',summer:'работает всё лето',availability:'уточните',extraClasses:'англ, каз, подготовка к школе',food:'5-разовое, своя кухня, гипоаллергенное, халяль',name:'Teams',type:'sadik',district:'Бостандыкский',address:'Жанакорган 25/1 блок',hours:'08:00–18:00',lang:'казахский',age:'1,5–7 лет',price:'240 000 ₸/мес',fee:'100 000 ₸',discounts:'детям из одной семьи, за предоплату',transport:'',ratio:'16 детей',program:'Стандартная гос. программа, штатный логопед, подготовка к школе',gosorder:true,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'+7 707 628 4510',notes:'Есть продлёнка. Суббота по запросу за доплату. Работает 3–5 лет.',source:'анкета 2026'},
+ {id:'sadok',logo:'logos/sadok.jpg',instagram:'@detskiysad_sadok',cameras:'камеры везде, по запросу родителям',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'на улице рядом',adaptation:'гибко — родитель остаётся сколько нужно',summer:'работает всё лето',availability:'есть места',extraClasses:'англ, каз, музыка, ИЗО, физкультура, танцы, математика, развитие речи, логопед, ЛФК',food:'5-разовое, своя кухня, гипоаллергенное, халяль',name:'Садок',type:'sadik',district:'Ауэзовский',address:'Алмас 172',hours:'08:00–18:00',lang:'русский',age:'1–7 лет',price:'240 000 ₸/мес',fee:'200 000 ₸',discounts:'детям из одной семьи',transport:'за доп. плату',ratio:'20 детей',program:'Авторская программа, штатный логопед и психолог, подготовка к школе',gosorder:false,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'+77017809396',notes:'Круглосуточная охрана. Есть продлёнка. Работает 13 лет! Вместимость 120 детей.',source:'анкета 2026'},
+ {id:'dameli',instagram:'@Dameli.mk',cameras:'камеры везде, по запросу',medic:'приходящий медработник',playground:'своя огороженная площадка',parking:'нет',adaptation:'1–2 недели постепенного привыкания',summer:'работает всё лето',availability:'есть места',extraClasses:'англ, музыка, ИЗО, танцы, математика, развитие речи, робототехника',food:'4-разовое, своя кухня, халяль',name:'Детский сад «Дамели»',type:'sadik',district:'Ауэзовский',address:'Мкр. Жетысу 3, дом 58',hours:'08:00–18:30',lang:'рус/каз',age:'1,8–7 лет',price:'85 000 ₸/мес',fee:'',discounts:'детям из одной семьи',transport:'',ratio:'25 детей',program:'Стандартная гос. программа, англ, каз, подготовка к школе',gosorder:true,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'87771017728',notes:'Лицензия в процессе получения. Госсубсидия. Слоган: «Любовь каждому ребёнку». Вместимость 95 детей.',source:'анкета 2026'},
 
- {id:'koktobe',logo:'logos/koktobe.jpg',name:'Koktobe Private School',type:'sadik',district:'Медеуский',address:'ул. Асета Найманбаева, 95',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Премиум школа и садик.',source:'логотип'},
- {id:'ivushka',logo:'logos/ivushka.jpg',name:'Ивушка',type:'sadik',district:'',address:'',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Дошкольное образовательное учреждение.',source:'логотип'},
- {id:'ayluna',logo:'logos/ayluna.jpg',name:'Айлуна',type:'sadik',district:'',address:'',hours:'',lang:'каз',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Бөбекжай бақша.',source:'логотип'},
- {id:'almaland',logo:'logos/almaland.jpg',name:'AlmaLand',type:'sadik',district:'',address:'',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'логотип'},
- {id:'merma',logo:'logos/merma.jpg',name:'Merma',type:'sadik',district:'',address:'',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'логотип'},
- {id:'zere',logo:'logos/zere.jpg',name:'Зере балабақшасы',type:'sadik',district:'',address:'',hours:'',lang:'каз',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'логотип'},
- {id:'kamila',logo:'logos/kamila.jpg',name:'Kids Academy Kamila',type:'center',district:'',address:'',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'логотип'},
+ {id:'koktobe',logo:'logos/koktobe.jpg',instagram:'@koktobebala',cameras:'камеры везде',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'своя парковка',adaptation:'гибко — родитель остаётся сколько нужно',summer:'работает всё лето',availability:'',extraClasses:'плавание, логопед и шахматы за доплату',contacts:'77776431133',name:'Koktobe Private School',type:'sadik',district:'Медеуский',address:'Найманбаева 95',hours:'08:00–18:00',lang:'рус/каз',age:'1,8–6 лет',price:'от 310 000 ₸/мес',fee:'450 000 ₸',discounts:'детям из одной семьи, за предоплату, многодетным',food:'5-разовое, своя кухня',transport:'',ratio:'15 детей',program:'англ, каз, музыка, ИЗО, физкультура, математика, плавание',gosorder:true,license:'none',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Премиум школа и садик.',source:'логотип'},
+ {id:'ivushka',logo:'logos/ivushka.jpg',instagram:'@Ivushka_sadik',cameras:'камеры везде, по запросу',medic:'врач-педиатр',playground:'своя огороженная площадка',parking:'своя парковка',adaptation:'1–2 недели',summer:'работает всё лето',availability:'',extraClasses:'ЛФК, вокал, таэквондо, фортепиано за доплату',contacts:'87023931826',name:'Ивушка',type:'sadik',district:'Алмалинский',address:'Сейфуллина 516',hours:'07:00–19:00',lang:'с англ. носителем',age:'от 2 лет',price:'150 000 ₸ (с ваучером) / 205 000 ₸',fee:'есть',discounts:'детям из одной семьи',food:'5-разовое, своя кухня, халяль',transport:'',ratio:'18–25 детей',program:'англ с носителем, каз, музыка, ИЗО, физкультура, танцы, логопед, плавание',gosorder:true,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Дошкольное образовательное учреждение.',source:'логотип'},
+ {id:'ayluna',logo:'logos/ayluna.jpg',instagram:'@ailuna_balabaksa',cameras:'камеры везде',medic:'штатный врач',playground:'своя огороженная площадка',parking:'на улице рядом',adaptation:'1–2 недели',summer:'работает всё лето',availability:'',contacts:'77071069069',name:'Айлуна',type:'sadik',district:'Наурызбайский',address:'Айбергенова 145',hours:'07:30–18:00',lang:'казахский',age:'1,8–6 лет',price:'50 000 ₸/мес',fee:'10 000 ₸',discounts:'детям из одной семьи',food:'5-разовое, своя кухня, халяль',transport:'',ratio:'20 детей',program:'англ, музыка, танцы, логопед',gosorder:true,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'Бөбекжай бақша.',source:'логотип'},
+ {id:'almaland',logo:'logos/almaland.jpg',cameras:'камеры везде',medic:'',playground:'своя огороженная площадка',parking:'на улице рядом',adaptation:'',summer:'закрыт летом',availability:'',contacts:'77787959955',name:'AlmaLand',type:'sadik',district:'Жетысуский',address:'Огородная 8',hours:'08:30–18:30',lang:'русский',age:'1,5–6 лет',price:'180 000 ₸/мес',fee:'65 000 ₸',discounts:'детям из одной семьи, многодетным',food:'5-разовое, своя кухня, халяль, меню от нутрициолога',transport:'',ratio:'до 16 детей',program:'англ, каз, музыка, хореография',gosorder:false,license:'none',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'логотип'},
+ {id:'merma',logo:'logos/merma.jpg',instagram:'@mechta_kids.ala',cameras:'камеры везде',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'своя парковка',adaptation:'1–2 недели',summer:'работает всё лето',availability:'',contacts:'77016102596',name:'Детский сад «Мечта»',type:'sadik',district:'Жетысуский',address:'ул. Минина 24а',hours:'08:00–18:00',lang:'рус/каз',age:'2–6 лет',price:'150 000 ₸/мес',fee:'50 000 ₸',discounts:'-10% на второго ребёнка',food:'5-разовое, своя кухня',transport:'',ratio:'18 детей',program:'каз, музыка, ИЗО, физкультура, развитие речи',gosorder:true,license:'none',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'логотип'},
+ {id:'zere',logo:'logos/zere.jpg',instagram:'@zere_balabaqshasi2024',cameras:'онлайн-доступ через приложение',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'своя парковка',adaptation:'1–2 недели',summer:'работает всё лето',availability:'',extraClasses:'робототехника',contacts:'87777500369',name:'Зере балабақшасы',type:'sadik',district:'Наурызбайский',address:'Жунисова 65',hours:'07:30–18:00',lang:'казахский',age:'1,8–6 лет',price:'70 000–80 000 ₸/мес',fee:'',discounts:'детям из одной семьи',food:'5-разовое, своя кухня, халяль',transport:'',ratio:'25 детей',program:'музыка, физкультура, танцы, робототехника',gosorder:true,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'логотип'},
+ {id:'kamila',logo:'logos/kamila.jpg',instagram:'@kids.academy.kamila',cameras:'камеры везде, по запросу',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'на улице рядом',adaptation:'1–2 недели',summer:'работает всё лето',availability:'',extraClasses:'робототехника и шахматы за доплату',contacts:'87772249408',name:'Kids Academy Kamila',type:'center',district:'Ауэзовский',address:'ул. Утеген батыра 122 (оз. Сайран)',hours:'08:00–18:00',lang:'рус/каз',age:'2–7 лет',price:'120 000 ₸/мес',fee:'50 000 ₸',discounts:'',food:'4-разовое, своя кухня, халяль',transport:'',ratio:'16 детей',program:'англ, каз, музыка, физкультура, танцы, математика, развитие речи',gosorder:true,license:'verified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'логотип'},
+
+ {id:'kozybaeva',instagram:'',cameras:'онлайн-доступ через приложение',medic:'штатная медсестра',playground:'своя огороженная площадка',parking:'своя парковка',adaptation:'1–2 недели',summer:'работает всё лето',availability:'',extraClasses:'англ, каз, музыка, физкультура, танцы, шахматы, логопед',food:'4-разовое, своя кухня, халяль',contacts:'87053857594',name:'Садик на Козыбаева',type:'sadik',district:'Бостандыкский',address:'Козыбаева 26',hours:'07:40–18:00',lang:'рус/каз',age:'1,8–7 лет',price:'120 000 ₸/мес',fee:'',discounts:'детям из одной семьи, за предоплату, многодетным',transport:'',ratio:'16 детей',program:'англ, каз, музыка, физкультура, танцы, математика, развитие речи, шахматы, логопед',gosorder:true,license:'verified',licenseNo:'',licenseDate:'',reviews:'',notes:'Домбра и ИЗО за доплату. Выездные мероприятия. Атмосфера как дома.',source:'анкета 2026'},
  {id:'bebisiti',name:'«Bebi Siti»',type:'sadik',district:'Бостандыкский',address:'мкр Алмагуль, 31а',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'карты'},
 ];
-const COORDS={zayka:[43.20810,76.91131],kapitoshka:[43.18446,76.90380],balazhan:[43.23408,76.90781],bolashak:[43.23894,76.93505],sparks:[43.19012,76.87050],fastrackids:[43.22613,76.93437],first:[43.18672,76.87757],wonderland:[43.23083,76.92432],ikids:[43.20046,76.87919],montessori:[43.23525,76.92154],radost:[43.21208,76.89130],homeacademy:[43.21502,76.97420],bebright:[43.20311,76.87153],akuna:[43.22489,76.89265],atakent:[43.22920,76.90304],zerdesh:[43.20240,76.91055],toddler:[43.23140,76.87411],kaisar:[43.21222,76.89142],happyclub:[43.20470,76.90257],bebisiti:[43.20480,76.90168],indigo:[43.22800,76.85400],elitekids:[43.24670,76.89300],teams:[43.21300,76.92500],sadok:[43.23500,76.86500],dameli:[43.23900,76.88700],koktobe:[43.24100,76.95800],ivushka:[43.22000,76.89000],ayluna:[43.23000,76.87000],almaland:[43.21500,76.91000],merma:[43.22500,76.88500],zere:[43.23200,76.90000],kamila:[43.21800,76.92000]};
+const COORDS={zayka:[43.20810,76.91131],kapitoshka:[43.18446,76.90380],balazhan:[43.23408,76.90781],bolashak:[43.23894,76.93505],sparks:[43.19012,76.87050],fastrackids:[43.22613,76.93437],first:[43.18672,76.87757],wonderland:[43.23083,76.92432],ikids:[43.20046,76.87919],montessori:[43.23525,76.92154],radost:[43.21208,76.89130],homeacademy:[43.21502,76.97420],bebright:[43.20311,76.87153],akuna:[43.22489,76.89265],atakent:[43.22920,76.90304],zerdesh:[43.20240,76.91055],toddler:[43.23140,76.87411],kaisar:[43.21222,76.89142],happyclub:[43.20470,76.90257],bebisiti:[43.20480,76.90168],indigo:[43.22800,76.85400],elitekids:[43.24670,76.89300],teams:[43.21300,76.92500],sadok:[43.23500,76.86500],dameli:[43.23900,76.88700],koktobe:[43.24100,76.95800],ivushka:[43.22000,76.89000],ayluna:[43.23000,76.87000],almaland:[43.21500,76.91000],merma:[43.22500,76.88500],zere:[43.23200,76.90000],kamila:[43.21800,76.92000],kozybaeva:[43.22100,76.93200]};
 SEED.forEach(s=>{const c=COORDS[s.id]; if(c){s.lat=c[0];s.lng=c[1];}});
 
 let data=[], favs=[], bookings=[];
@@ -824,9 +846,17 @@ function render(){
     e.stopPropagation();await toggleFav(b.dataset.fav);render();
   });
 
-  // Nearby button - sorts by distance from user
+  // Nearby button - toggleable
   const nearbyChip=wrap.querySelector('.nearby');
   if(nearbyChip)nearbyChip.onclick=()=>{
+    if(nearbyChip.classList.contains('on')){
+      // Turn off - reset distances
+      data.forEach(s=>{delete s._dist;});
+      nearbyChip.textContent='📍 Рядом';
+      nearbyChip.classList.remove('on');
+      refresh(true);
+      return;
+    }
     if(!navigator.geolocation){alert('Геолокация недоступна');return;}
     nearbyChip.textContent='📍 Ищу...';
     navigator.geolocation.getCurrentPosition(pos=>{
@@ -837,7 +867,6 @@ function render(){
           s._dist=Math.round(d*10)/10;
         }else{s._dist=999;}
       });
-      document.getElementById('sort').value='reco';
       data.sort((a,b)=>(a._dist||999)-(b._dist||999));
       nearbyChip.textContent='📍 Рядом ✓';
       nearbyChip.classList.add('on');
@@ -847,7 +876,21 @@ function render(){
       alert('Не удалось определить местоположение');
     });
   };
+  // Reset chip
+  const resetChip=document.getElementById('resetChip');
+  if(resetChip)resetChip.onclick=()=>{
+    filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',fav:false};
+    data.forEach(s=>{delete s._dist;});
+    document.getElementById('q').value='';
+    const nb=wrap.querySelector('.nearby');if(nb){nb.textContent='📍 Рядом';nb.classList.remove('on');}
+    syncChips();refresh(true);updateResetChip();
+  };
   updateFavCount();
+}
+function updateResetChip(){
+  const rc=document.getElementById('resetChip');if(!rc)return;
+  const active=filters.district||filters.lang||filters.maxPrice||filters.gosorder||filters.license||filters.fav||data.some(s=>s._dist);
+  rc.style.display=active?'inline-flex':'none';
 }
 function plural(n,a,b,c){const m=n%100,d=n%10;if(m>10&&m<20)return c;if(d===1)return a;if(d>=2&&d<=4)return b;return c;}
 function activeFilterText(){
@@ -948,7 +991,7 @@ function openProfile(id){
           ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:`<button class="contactbtn" id="pContact">✉️ ${lang==='kz'?'Балабақшамен байланысу':'Связаться с садиком'}</button>`}
           ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
           <button class="favrow" id="pFav">${fav?APPLE_FILL:APPLE_OUTLINE} ${fav?t('inFav'):t('saveFav')}</button>
-          ${s.availability?`<div class="avail">✓ ${esc(s.availability)}</div>`:''}
+          ${s.availability&&s.availability!=='уточните'&&s.availability!=='Уточните у нас'?`<div class="avail">✓ ${esc(s.availability)}</div>`:''}
         </div>
         <!-- Facts strip -->
         ${facts?`<div class="bc facts"><h4>${lang==='kz'?'Қысқаша':'Коротко о садике'}</h4><div class="factflow">${facts}</div></div>`:''}
@@ -1072,9 +1115,18 @@ function closeDrawer(){
 window.addEventListener('popstate',e=>{
   if(document.getElementById('drawer').classList.contains('on')){
     closeDrawer();
+    return;
   }
   if(document.getElementById('mscrim').classList.contains('on')){
     closeModal();
+    return;
+  }
+  // Return from map to list
+  const layout=document.querySelector('.layout');
+  if(layout&&layout.classList.contains('show-map')){
+    setView('list');
+    document.querySelectorAll('.bni').forEach(b=>b.classList.remove('on'));
+    document.querySelector('.bni[data-tab="home"]').classList.add('on');
   }
 });
 
@@ -1384,27 +1436,63 @@ function buildFilters(){
     `<span class="fchip gos" data-g="gosorder" data-v="1">🍃 Госзаказ</span>`+
     `<span class="fchip lang-cycle" data-g="lang">🗣 Язык</span>`+
     `<span class="fchip" data-g="license" data-v="verified">🛡 Лицензия</span>`+
-    `<span class="fchip fav" data-g="fav" data-v="1">❤️ Избранное</span>`;
-  // District chip cycles through districts
+    `<span class="fchip fav" data-g="fav" data-v="1">❤️ Избранное</span>`+
+    `<span class="fchip reset-chip" id="resetChip" style="display:none">✕ Сбросить</span>`;
+  // District chip opens dropdown
   const distChip=wrap.querySelector('.district-cycle');
-  distChip.onclick=()=>{
-    const cur=filters.district;
-    const idx=dlist.indexOf(cur);
-    filters.district=idx<0?dlist[0]:(idx>=dlist.length-1?'':dlist[idx+1]);
-    distChip.textContent=filters.district?'📍 '+filters.district.replace('ский','.'):'📍 Район';
-    distChip.classList.toggle('on',!!filters.district);
-    refresh(true);
+  let distDD=document.getElementById('distDropdown');
+  if(!distDD){
+    distDD=document.createElement('div');
+    distDD.id='distDropdown';
+    distDD.className='filter-dropdown';
+    distDD.innerHTML='<button class="dd-item" data-d="">Все районы</button>'+dlist.map(d=>'<button class="dd-item" data-d="'+d+'">📍 '+d+'</button>').join('');
+    wrap.appendChild(distDD);
+  }
+  distChip.onclick=(e)=>{
+    e.stopPropagation();
+    const langDD=document.getElementById('langDropdown');
+    if(langDD)langDD.classList.remove('show');
+    distDD.classList.toggle('show');
+    // Update active state
+    distDD.querySelectorAll('.dd-item').forEach(item=>{
+      item.classList.toggle('on',item.dataset.d===filters.district);
+    });
   };
-  // Language chip cycles through languages
+  distDD.querySelectorAll('.dd-item').forEach(item=>item.onclick=(e)=>{
+    e.stopPropagation();
+    filters.district=item.dataset.d;
+    distChip.textContent=filters.district?'📍 '+filters.district:'📍 Район';
+    distChip.classList.toggle('on',!!filters.district);
+    distDD.classList.remove('show');
+    refresh(true);updateResetChip();
+  });
+  // Language chip opens dropdown
   const langChip=wrap.querySelector('.lang-cycle');
-  langChip.onclick=()=>{
-    const cur=filters.lang;
-    const idx=langOpts.indexOf(cur);
-    filters.lang=idx<0?langOpts[1]:(idx>=langOpts.length-1?'':langOpts[idx+1]);
+  let langDD=document.getElementById('langDropdown');
+  if(!langDD){
+    langDD=document.createElement('div');
+    langDD.id='langDropdown';
+    langDD.className='filter-dropdown';
+    langDD.innerHTML=[['','Все языки'],['казах','🗣 Казахский'],['рус','🗣 Русский'],['англ','🗣 Английский']].map(([v,l])=>'<button class="dd-item" data-l="'+v+'">'+l+'</button>').join('');
+    wrap.appendChild(langDD);
+  }
+  langChip.onclick=(e)=>{
+    e.stopPropagation();
+    const distDD2=document.getElementById('distDropdown');
+    if(distDD2)distDD2.classList.remove('show');
+    langDD.classList.toggle('show');
+    langDD.querySelectorAll('.dd-item').forEach(item=>{
+      item.classList.toggle('on',item.dataset.l===filters.lang);
+    });
+  };
+  langDD.querySelectorAll('.dd-item').forEach(item=>item.onclick=(e)=>{
+    e.stopPropagation();
+    filters.lang=item.dataset.l;
     langChip.textContent=langLabels[filters.lang]||'🗣 Язык';
     langChip.classList.toggle('on',!!filters.lang);
-    refresh(true);
-  };
+    langDD.classList.remove('show');
+    refresh(true);updateResetChip();
+  });
   // Simple toggle chips
   wrap.querySelectorAll('.fchip:not(.district-cycle):not(.lang-cycle)').forEach(ch=>ch.onclick=()=>{
     const g=ch.dataset.g;
@@ -1413,7 +1501,7 @@ function buildFilters(){
     else if(g==='maxPrice')filters.maxPrice=filters.maxPrice?null:+ch.dataset.v;
     else if(g==='license')filters.license=filters.license?'':'verified';
     ch.classList.toggle('on');
-    refresh(true);
+    refresh(true);updateResetChip();
   });
   // Hero district chips (keep simple)
   const hc=document.getElementById('heroChips');
@@ -1423,9 +1511,17 @@ function buildFilters(){
     syncChips();refresh(true);scrollResults();
   });
 
-  // Nearby button - sorts by distance from user
+  // Nearby button - toggleable
   const nearbyChip=wrap.querySelector('.nearby');
   if(nearbyChip)nearbyChip.onclick=()=>{
+    if(nearbyChip.classList.contains('on')){
+      // Turn off - reset distances
+      data.forEach(s=>{delete s._dist;});
+      nearbyChip.textContent='📍 Рядом';
+      nearbyChip.classList.remove('on');
+      refresh(true);
+      return;
+    }
     if(!navigator.geolocation){alert('Геолокация недоступна');return;}
     nearbyChip.textContent='📍 Ищу...';
     navigator.geolocation.getCurrentPosition(pos=>{
@@ -1436,7 +1532,6 @@ function buildFilters(){
           s._dist=Math.round(d*10)/10;
         }else{s._dist=999;}
       });
-      document.getElementById('sort').value='reco';
       data.sort((a,b)=>(a._dist||999)-(b._dist||999));
       nearbyChip.textContent='📍 Рядом ✓';
       nearbyChip.classList.add('on');
@@ -1446,7 +1541,21 @@ function buildFilters(){
       alert('Не удалось определить местоположение');
     });
   };
+  // Reset chip
+  const resetChip=document.getElementById('resetChip');
+  if(resetChip)resetChip.onclick=()=>{
+    filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',fav:false};
+    data.forEach(s=>{delete s._dist;});
+    document.getElementById('q').value='';
+    const nb=wrap.querySelector('.nearby');if(nb){nb.textContent='📍 Рядом';nb.classList.remove('on');}
+    syncChips();refresh(true);updateResetChip();
+  };
   updateFavCount();
+}
+function updateResetChip(){
+  const rc=document.getElementById('resetChip');if(!rc)return;
+  const active=filters.district||filters.lang||filters.maxPrice||filters.gosorder||filters.license||filters.fav||data.some(s=>s._dist);
+  rc.style.display=active?'inline-flex':'none';
 }
 function syncChips(){
   const wrap=document.getElementById('filters');
@@ -1612,6 +1721,7 @@ function showStory(i){
 }
 
 /* ---------- bottom nav ---------- */
+document.addEventListener('click',()=>{document.querySelectorAll('.filter-dropdown').forEach(d=>d.classList.remove('show'));});
 document.addEventListener('DOMContentLoaded',()=>{
 document.querySelectorAll('.bni').forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll('.bni').forEach(b=>b.classList.remove('on'));
@@ -1620,7 +1730,7 @@ document.querySelectorAll('.bni').forEach(btn=>btn.onclick=()=>{
   if(tab==='home'){filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',fav:false};syncChips();refresh(true);window.scrollTo({top:0,behavior:'smooth'});}
   else if(tab==='search'){document.getElementById('q').focus();document.getElementById('results').scrollIntoView({behavior:'smooth'});}
   else if(tab==='map'){document.getElementById('results').scrollIntoView({behavior:'smooth'});if(window.innerWidth<=980){setView('map');history.pushState({map:true},'');}}
-  else if(tab==='favs'){filters.fav=!filters.fav;syncChips();refresh(true);document.getElementById('results').scrollIntoView({behavior:'smooth'});}
+  else if(tab==='favs'){filters.fav=!filters.fav;syncChips();refresh(true);document.getElementById('results').scrollIntoView({behavior:'smooth'});btn.classList.toggle('on',filters.fav);}
   else if(tab==='profile'){if(currentUser)openUserMenu();else openAuthModal();}
 });
 });
@@ -1660,6 +1770,26 @@ document.querySelectorAll('.bni').forEach(btn=>btn.onclick=()=>{
   .recent-item .ri-photo{width:100px;height:70px;border-radius:12px;display:grid;place-items:center;margin-bottom:5px}
   .recent-item .ri-photo .mono{font-family:'Outfit';font-weight:600;font-size:24px;color:rgba(0,0,0,.1)}
   .recent-item .ri-name{font-size:11px;font-weight:600;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+
+  .backbtn{position:absolute;top:14px;left:14px;z-index:10;border:0;background:rgba(255,255,255,.9);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#1a1a1a;font-weight:700;font-size:14px;
+    padding:8px 16px;border-radius:20px;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+  .backbtn:hover{background:#fff}
+
+
+  .reset-chip{background:#fee2e2!important;color:#dc2626!important;border-color:#fecaca!important}
+  .reset-chip:hover{background:#fecaca!important}
+
+
+  .filter-dropdown{position:absolute;top:100%;left:0;margin-top:6px;background:#fff;border:1px solid #e8e8e8;border-radius:14px;
+    box-shadow:0 8px 30px rgba(0,0,0,.12);padding:8px;z-index:100;display:none;min-width:180px}
+  .filter-dropdown.show{display:block}
+  .filter-dropdown .dd-item{display:block;width:100%;text-align:left;border:0;background:none;padding:10px 14px;
+    font-size:13px;font-weight:600;color:#555;cursor:pointer;border-radius:10px;font-family:inherit}
+  .filter-dropdown .dd-item:hover{background:#f5f5f5}
+  .filter-dropdown .dd-item.on{background:#E8F5E9;color:#166534}
+  .chips{position:relative}
 
 </style>
 <div class="install-banner" id="installBanner">
