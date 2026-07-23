@@ -970,7 +970,7 @@ function openProfile(id){
       <div class="p-hero" style="background:${grad(s)}">
         <span class="pat"></span>
         ${s.logo?'<img class="plogo" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" onerror="this.outerHTML=\'<span class=mono>'+esc(monogram(s.name))+'</span>\'">':'<span class="mono">'+esc(monogram(s.name))+'</span>'}
-        <button class="x" id="closeX" aria-label="Закрыть">✕</button>
+        <button class="backbtn" id="closeX" aria-label="Назад">← Назад</button>
         <span class="ptrust">${t_.svg}${t_.label}</span>
       </div>
       <div class="bento">
