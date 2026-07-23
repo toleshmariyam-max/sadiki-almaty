@@ -120,9 +120,9 @@
   .viewtog{display:none;border:1px solid var(--line);border-radius:var(--pill);overflow:hidden;background:var(--paper)}
   .viewtog button{border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--ink2);padding:9px 15px;cursor:pointer}
   .viewtog button.on{background:var(--green);color:#fff}
-  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px;align-items:center}
+  .chips{display:flex;gap:7px;flex-wrap:nowrap;margin-top:11px;align-items:center;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:relative}
   .chipgroup{display:flex;gap:6px;flex-wrap:wrap}
-  .fchip{font-size:11.5px;font-weight:600;padding:6px 11px;border-radius:var(--pill);border:1px solid var(--line);
+  .fchip{font-size:11.5px;font-weight:600;padding:6px 11px;flex:none;border-radius:var(--pill);border:1px solid var(--line);
     background:var(--paper);color:var(--ink2);cursor:pointer;user-select:none;transition:.12s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;flex:none}
   .fchip:hover{border-color:var(--ink3)}
   .fchip.on{background:var(--green);color:#fff;border-color:var(--green)}
@@ -451,14 +451,14 @@
   .reset-chip:hover{background:#fecaca!important}
 
 
-  .filter-dropdown{position:absolute;top:100%;left:0;margin-top:6px;background:#fff;border:1px solid #e8e8e8;border-radius:14px;
+  .filter-dropdown{position:fixed;top:auto;left:16px;margin-top:6px;background:#fff;border:1px solid #e8e8e8;border-radius:14px;
     box-shadow:0 8px 30px rgba(0,0,0,.12);padding:8px;z-index:100;display:none;min-width:180px}
   .filter-dropdown.show{display:block}
   .filter-dropdown .dd-item{display:block;width:100%;text-align:left;border:0;background:none;padding:10px 14px;
     font-size:13px;font-weight:600;color:#555;cursor:pointer;border-radius:10px;font-family:inherit}
   .filter-dropdown .dd-item:hover{background:#f5f5f5}
   .filter-dropdown .dd-item.on{background:#E8F5E9;color:#166534}
-  .chips{position:relative}
+  
 
 </style>
 </head>
@@ -1446,12 +1446,15 @@ function buildFilters(){
     distDD.id='distDropdown';
     distDD.className='filter-dropdown';
     distDD.innerHTML='<button class="dd-item" data-d="">Все районы</button>'+dlist.map(d=>'<button class="dd-item" data-d="'+d+'">📍 '+d+'</button>').join('');
-    wrap.appendChild(distDD);
+    document.body.appendChild(distDD);
   }
   distChip.onclick=(e)=>{
     e.stopPropagation();
     const langDD=document.getElementById('langDropdown');
     if(langDD)langDD.classList.remove('show');
+    const rect=distChip.getBoundingClientRect();
+    distDD.style.top=(rect.bottom+6)+'px';
+    distDD.style.left=rect.left+'px';
     distDD.classList.toggle('show');
     // Update active state
     distDD.querySelectorAll('.dd-item').forEach(item=>{
@@ -1474,12 +1477,15 @@ function buildFilters(){
     langDD.id='langDropdown';
     langDD.className='filter-dropdown';
     langDD.innerHTML=[['','Все языки'],['казах','🗣 Казахский'],['рус','🗣 Русский'],['англ','🗣 Английский']].map(([v,l])=>'<button class="dd-item" data-l="'+v+'">'+l+'</button>').join('');
-    wrap.appendChild(langDD);
+    document.body.appendChild(langDD);
   }
   langChip.onclick=(e)=>{
     e.stopPropagation();
     const distDD2=document.getElementById('distDropdown');
     if(distDD2)distDD2.classList.remove('show');
+    const rect2=langChip.getBoundingClientRect();
+    langDD.style.top=(rect2.bottom+6)+'px';
+    langDD.style.left=rect2.left+'px';
     langDD.classList.toggle('show');
     langDD.querySelectorAll('.dd-item').forEach(item=>{
       item.classList.toggle('on',item.dataset.l===filters.lang);
@@ -1782,14 +1788,14 @@ document.querySelectorAll('.bni').forEach(btn=>btn.onclick=()=>{
   .reset-chip:hover{background:#fecaca!important}
 
 
-  .filter-dropdown{position:absolute;top:100%;left:0;margin-top:6px;background:#fff;border:1px solid #e8e8e8;border-radius:14px;
+  .filter-dropdown{position:fixed;top:auto;left:16px;margin-top:6px;background:#fff;border:1px solid #e8e8e8;border-radius:14px;
     box-shadow:0 8px 30px rgba(0,0,0,.12);padding:8px;z-index:100;display:none;min-width:180px}
   .filter-dropdown.show{display:block}
   .filter-dropdown .dd-item{display:block;width:100%;text-align:left;border:0;background:none;padding:10px 14px;
     font-size:13px;font-weight:600;color:#555;cursor:pointer;border-radius:10px;font-family:inherit}
   .filter-dropdown .dd-item:hover{background:#f5f5f5}
   .filter-dropdown .dd-item.on{background:#E8F5E9;color:#166534}
-  .chips{position:relative}
+  
 
 </style>
 <div class="install-banner" id="installBanner">
