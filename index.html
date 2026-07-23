@@ -959,7 +959,7 @@ function openProfile(id){
         <!-- Safety -->
         ${safetyHtml?`<div class="bc safety"><h4>${lang==='kz'?'Қауіпсіздік':'Безопасность'}</h4><div class="slist">${safetyHtml}</div></div>`:''}
         <!-- Discounts note -->
-        \${s.discounts?'<div class="bc" style="grid-column:1/-1;padding:12px 16px;background:#f0fdf4;border-color:#dcfce7"><span style="font-size:13px">💚 <b>Скидка</b> — '+esc(s.discounts)+(s.discounts.includes('предоплат')?'':'')+'. Уточняйте при записи.</span></div>':''}
+        ${s.discounts?'<div class="bc" style="grid-column:1/-1;padding:12px 16px;background:#f0fdf4;border-color:#dcfce7"><span style="font-size:13px">💚 <b>Скидка</b> — '+esc(s.discounts)+'. Уточняйте при записи.</span></div>':''}
         <!-- License bar -->
         <div class="bc lic">
           <div class="licicon ${t_.cls}">🛡</div>
@@ -1057,8 +1057,26 @@ async function autoSave(id){
   clearTimeout(saveTimer);
   saveTimer=setTimeout(async()=>{await save();const sv=document.getElementById('saved');if(sv){sv.classList.add('show');setTimeout(()=>sv.classList.remove('show'),1200);}},350);
 }
-function openDrawer(){document.getElementById('scrim').classList.add('on');document.getElementById('drawer').classList.add('on');document.getElementById('scrim').onclick=closeDrawer;document.getElementById('drawer').onclick=e=>{if(e.target===document.getElementById('drawer'))closeDrawer();};}
-function closeDrawer(){document.getElementById('drawer').classList.remove('on');document.getElementById('scrim').classList.remove('on');renderRecent();}
+function openDrawer(){
+  document.getElementById('scrim').classList.add('on');
+  document.getElementById('drawer').classList.add('on');
+  document.getElementById('scrim').onclick=closeDrawer;
+  document.getElementById('drawer').onclick=e=>{if(e.target===document.getElementById('drawer'))closeDrawer();};
+  history.pushState({drawer:true},'');
+}
+function closeDrawer(){
+  document.getElementById('drawer').classList.remove('on');
+  document.getElementById('scrim').classList.remove('on');
+  renderRecent();
+}
+window.addEventListener('popstate',e=>{
+  if(document.getElementById('drawer').classList.contains('on')){
+    closeDrawer();
+  }
+  if(document.getElementById('mscrim').classList.contains('on')){
+    closeModal();
+  }
+});
 
 
 /* ---------- i18n ---------- */
@@ -1594,15 +1612,17 @@ function showStory(i){
 }
 
 /* ---------- bottom nav ---------- */
+document.addEventListener('DOMContentLoaded',()=>{
 document.querySelectorAll('.bni').forEach(btn=>btn.onclick=()=>{
   document.querySelectorAll('.bni').forEach(b=>b.classList.remove('on'));
   btn.classList.add('on');
   const tab=btn.dataset.tab;
-  if(tab==='home'){window.scrollTo({top:0,behavior:'smooth'});}
+  if(tab==='home'){filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',fav:false};syncChips();refresh(true);window.scrollTo({top:0,behavior:'smooth'});}
   else if(tab==='search'){document.getElementById('q').focus();document.getElementById('results').scrollIntoView({behavior:'smooth'});}
-  else if(tab==='map'){document.getElementById('results').scrollIntoView({behavior:'smooth'});if(window.innerWidth<=980)setView('map');}
-  else if(tab==='favs'){filters.fav=true;syncChips();refresh(true);document.getElementById('results').scrollIntoView({behavior:'smooth'});}
+  else if(tab==='map'){document.getElementById('results').scrollIntoView({behavior:'smooth'});if(window.innerWidth<=980){setView('map');history.pushState({map:true},'');}}
+  else if(tab==='favs'){filters.fav=!filters.fav;syncChips();refresh(true);document.getElementById('results').scrollIntoView({behavior:'smooth'});}
   else if(tab==='profile'){if(currentUser)openUserMenu();else openAuthModal();}
+});
 });
 
 </script>
