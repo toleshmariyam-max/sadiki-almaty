@@ -1648,7 +1648,7 @@ function openBooking(id){
 function submitBooking(id){
   const s=data.find(x=>x.id===id);const parent=fv('bk_parent'),phone=fv('bk_phone');
   if(!parent||!phone){alert('Заполните имя и телефон');return;}
-  bookings.unshift({id:'bk'+Date.now(),sadikId:id,sadikName:s.name,parent,phone,date:fv('bk_date'),child:fv('bk_age'),note:fv('bk_note'),created:new Date().toISOString()});
+  bookings.unshift();
   saveBookings();updateReqCount();
   openModal(`<h2>Заявка сохранена ✓</h2><p class="sub">«${esc(s.name)}» — запрос на пробный день записан. Это демо: заявки лежат в разделе «Мои заявки» вверху.</p><div class="qbar"><span></span><button class="btn-primary" style="flex:none;padding:11px 20px" onclick="closeModal()">Готово</button></div>`);
 }
@@ -1700,7 +1700,7 @@ function setAdmin(on){
 }
 function addNew(){
   const id='new'+Date.now();
-  data.unshift({id,name:'Новый садик',type:'sadik',district:'',address:'',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',food:'',transport:'',ratio:'',program:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'',lat:null,lng:null});
+  data.push({id:id,name:'Новый садик',type:'sadik',district:'',address:'',hours:'',lang:'',age:'',price:'',fee:'',discounts:'',gosorder:false,license:'unverified',licenseNo:'',licenseDate:'',reviews:'',contacts:'',notes:'',source:'вручную'});
   save();render();openEditor(id);
 }
 function exportJSON(){
