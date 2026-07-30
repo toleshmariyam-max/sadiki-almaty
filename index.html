@@ -711,6 +711,7 @@
 
 <script>
 const TYPES={sadik:'садик полного дня',center:'центр развития',preschool:'предшкольная подготовка','school-sadik':'школа-садик'};
+const TYPES_KZ={sadik:'толық күндік балабақша',center:'даму орталығы',preschool:'мектепалды дайындық','school-sadik':'мектеп-балабақша'};
 const LIC={unverified:'лицензия уточняется',verified:'лицензия проверена',none:'лицензии нет'};
 const DISTRICTS=['Бостандыкский','Медеуский','Наурызбайский','Алмалинский','Ауэзовский'];
 const KEY='sadiki_almaty_v3';
@@ -843,7 +844,7 @@ function render(){
           <h3 class="cname">${esc(s.name)}</h3>
           <div class="cloc">${lang==='kz'?(s.age||'').replace(/лет/g,'жас').replace(/год/g,'жас'):esc(s.age||'')}</div>
           <div class="cprice-row">
-            ${s.price?'<span class="cprice">'+esc(s.price).replace(/\s*\/.*$/,'')+' <small>₸/мес</small></span>':''}
+            ${s.price?'<span class="cprice">'+esc(s.price).replace(/\s*\/.*$/,'')+' <small>'+(lang==='kz'?'₸/айына':'₸/мес')+'</small></span>':''}  
 
           </div>
         </div>
@@ -945,6 +946,115 @@ function renderMap(fit){
 }
 function refresh(fit){render();renderMap(fit);}
 
+/* ---------- kz field translations ---------- */
+const KZ_DICT=[
+  // food
+  [/5[\s-]?разовое,?\s*своя кухня/gi,'5 рет тамақтану, өз асханасы бар'],
+  [/4[\s-]?разовое,?\s*своя кухня/gi,'4 рет тамақтану, өз асханасы бар'],
+  [/3[\s-]?разовое,?\s*своя кухня/gi,'3 рет тамақтану, өз асханасы бар'],
+  [/5[\s-]?разовое/gi,'5 рет тамақтану'],
+  [/4[\s-]?разовое/gi,'4 рет тамақтану'],
+  [/3[\s-]?разовое/gi,'3 рет тамақтану'],
+  [/своя кухня/gi,'өз асханасы бар'],
+  [/халяль/gi,'халал'],
+  [/гипоаллергенное меню/gi,'гипоаллергендік мәзір'],
+  [/меню от нутрициолога/gi,'нутрициолог мәзірі'],
+  [/индивидуальное аллергенное меню/gi,'жеке аллергендік мәзір'],
+  // cameras
+  [/онлайн-доступ через приложение/gi,'қосымша арқылы онлайн қол жетімді'],
+  [/онлайн-доступ 24\/7/gi,'онлайн қол жетімді 24/7'],
+  [/онлайн-доступ/gi,'онлайн қол жетімді'],
+  [/камеры везде,?\s*по запросу/gi,'бейнебақылау барлық жерде, сұраныс бойынша'],
+  [/камеры везде/gi,'бейнебақылау барлық жерде'],
+  [/камеры/gi,'бейнебақылау'],
+  [/есть/gi,'бар'],
+  // medic
+  [/штатная медсестра/gi,'штаттық медбике'],
+  [/врач-педиатр/gi,'педиатр дәрігер'],
+  [/приходящий медработник/gi,'келетін медициналық қызметкер'],
+  [/приходящий/gi,'келетін'],
+  [/в штате/gi,'штатта'],
+  [/медработник/gi,'медициналық қызметкер'],
+  // playground
+  [/своя огороженная площадка/gi,'жеке қоршалған алаң'],
+  [/своя площадка/gi,'жеке алаң'],
+  [/своя,?\s*огорожена/gi,'жеке қоршалған алаң'],
+  [/выходят в парк/gi,'саябаққа шығады'],
+  // parking
+  [/своя парковка/gi,'жеке тұрақ бар'],
+  [/на улице рядом/gi,'жанында'],
+  [/нет/gi,'жоқ'],
+  [/есть,?\s*\d+ мест/gi,'бар'],
+  // adaptation
+  [/гибко[^,]*/gi,'икемді бейімделу'],
+  [/(\d+)[–-](\d+) недели? постепенного привыкания/gi,'$1-$2 апта бойы біртіндеп үйрену'],
+  [/(\d+)[–-](\d+) недели?/gi,'$1-$2 апта'],
+  [/2 недели,?\s*психолог/gi,'2 апта, психолог қолдауымен'],
+  [/мягкая,?\s*2 недели/gi,'жұмсақ, 2 апта'],
+  [/по Сингапурской методике/gi,'Сингапур әдісімен'],
+  [/бесплатный пробный день/gi,'тегін сынақ күні'],
+  [/всё индивидуально/gi,'барлығы жеке'],
+  // summer
+  [/работает всё лето/gi,'жаз бойы жұмыс істейді'],
+  [/летний лагерь/gi,'жазғы лагерь'],
+  [/работает, летняя программа/gi,'жұмыс істейді, жазғы бағдарлама'],
+  [/закрыт летом/gi,'жазда жабық'],
+  [/работает/gi,'жұмыс істейді'],
+  // transport
+  [/за дополнительную плату/gi,'қосымша ақыға'],
+  [/есть, цена по району/gi,'бар, аудан бойынша баға'],
+  [/да \(утро\/вечер\)/gi,'иә (таңертең/кешке)'],
+  // ratio
+  [/детей/gi,'бала'],
+  [/до (\d+) \(.*?\)/gi,'$1 балаға дейін'],
+  [/до (\d+)/gi,'$1 балаға дейін'],
+  [/(\d+)[–-](\d+) детей/gi,'$1-$2 бала'],
+  // program
+  [/Стандартная государственная программа/gi,'Мемлекеттік стандарт бағдарламасы'],
+  [/Авторская программа/gi,'Авторлық бағдарлама'],
+  [/подготовка к школе/gi,'мектепке дайындық'],
+  [/штатный логопед и психолог/gi,'штаттық логопед және психолог'],
+  [/штатный логопед/gi,'штаттық логопед'],
+  [/логопед/gi,'логопед'],
+  [/психолог/gi,'психолог'],
+  [/английский с носителем/gi,'ана тілі ағылшын мұғалімімен'],
+  [/английский/gi,'ағылшын тілі'],
+  [/казахский/gi,'қазақ тілі'],
+  [/русский/gi,'орыс тілі'],
+  [/музыка/gi,'музыка'],
+  [/изобразительное искусство/gi,'сурет өнері'],
+  [/танцы/gi,'би'],
+  [/хореография/gi,'хореография'],
+  [/математика/gi,'математика'],
+  [/развитие речи/gi,'сөйлеуді дамыту'],
+  [/физкультура/gi,'дене тәрбиесі'],
+  [/робототехника/gi,'роботтехника'],
+  [/плавание/gi,'жүзу'],
+  [/шахматы/gi,'шахмат'],
+  [/рисование/gi,'сурет салу'],
+  [/творческая мастерская/gi,'шығармашылық шеберхана'],
+  [/моторика/gi,'моторика дамыту'],
+  // lang field
+  [/три языка/gi,'үш тілде'],
+  [/с англ\. носителем/gi,'ағылшын тілі жергілікті мұғалімімен'],
+  // discounts
+  [/детям из одной семьи/gi,'бір отбасының балаларына'],
+  [/многодетным/gi,'көп балалы отбасыларға'],
+  [/за предоплату/gi,'алдын ала төлем үшін'],
+  [/-10% на второго ребёнка/gi,'екінші балаға -10%'],
+];
+
+function kzVal(str){
+  if(!str)return '';
+  let s=str;
+  for(const [re,rep] of KZ_DICT) s=s.replace(re,rep);
+  return s;
+}
+function kzAvail(str){
+  if(!str)return str;
+  return str.replace(/есть места/gi,'бос орындар бар').replace(/есть/gi,'бар');
+}
+
 /* ---------- profile (read view) ---------- */
 function kv(label,val){return val&&String(val).trim()?`<div class="kvitem"><div class="k">${label}</div><div class="vv">${esc(val)}</div></div>`:'';}
 function openProfile(id){
@@ -967,22 +1077,22 @@ function openProfile(id){
   const igUser=s.instagram||'';
   const igLink=igUser?'https://instagram.com/'+igUser.replace('@',''):'';
   // quick facts
-  const qf=(icon,label,val)=>val&&String(val).trim()?`<span class="fpill">${icon} ${esc(val)}</span>`:'';
+  const qf=(icon,label,val)=>val&&String(val).trim()?`<span class="fpill">${icon} ${lang==='kz'?kzVal(esc(val)):esc(val)}</span>`:'';
   const facts=[
-    qf('⏰',t('regime'),s.hours), qf('👶',t('age'),s.age), qf('🗣',t('language'),s.lang),
+    qf('⏰',t('regime'),s.hours), qf('👶',t('age'),lang==='kz'?(s.age||'').replace(/лет/g,'жас').replace(/год/g,'жас'):s.age), qf('🗣',t('language'),lang==='kz'?kzVal(s.lang):s.lang),
     qf('👥',t('group'),s.ratio), qf('🍽',t('food'),s.food), qf('📹','',s.cameras),
     qf('🏥','',s.medic?'медработник: '+s.medic:''), qf('🌳','',s.playground),
     qf('🚗','',s.parking?'парковка: '+s.parking:''), qf('🚐','',s.transport?'развозка: '+s.transport:''),
     qf('☀️','',s.summer)
   ].filter(Boolean).join('');
   // extra classes as tags
-  const classTags=(s.extraClasses||'').split(',').map(c=>c.trim()).filter(Boolean).map(c=>`<span>${esc(c)}</span>`).join('');
+  const classTags=(s.extraClasses||'').split(',').map(c=>c.trim()).filter(Boolean).map(c=>`<span>${lang==='kz'?kzVal(esc(c)):esc(c)}</span>`).join('');
   // safety checklist
   const checks=[];
-  if(s.playground)checks.push('✅ '+esc(s.playground));
-  if(s.cameras)checks.push('✅ '+(lang==='kz'?t('cameras'):' Камеры')+': '+esc(s.cameras));
-  if(s.medic)checks.push('✅ '+(lang==='kz'?t('medic'):' Медработник')+': '+esc(s.medic));
-  if(s.adaptation)checks.push('✅ '+(lang==='kz'?t('adaptation'):' Адаптация')+': '+esc(s.adaptation));
+  if(s.playground)checks.push('✅ '+(lang==='kz'?kzVal(esc(s.playground)):esc(s.playground)));
+  if(s.cameras)checks.push('✅ '+(lang==='kz'?kzVal(esc(s.cameras)):'Камеры: '+esc(s.cameras)));
+  if(s.medic)checks.push('✅ '+(lang==='kz'?kzVal(esc(s.medic)):'Медработник: '+esc(s.medic)));
+  if(s.adaptation)checks.push('✅ '+(lang==='kz'?kzVal(esc(s.adaptation)):'Адаптация: '+esc(s.adaptation)));
   const safetyHtml=checks.map(c=>`<span>${c}</span>`).join('');
 
   const d=document.getElementById('drawer');
@@ -1000,7 +1110,7 @@ function openProfile(id){
         <div class="bc hero">
           <div class="hinfo">
             <h2>${esc(s.name)}</h2>
-            <div class="sub">${TYPES[s.type]||s.type}${s.gosorder?' · '+t('gosFull'):''}</div>
+            <div class="sub">${(lang==='kz'?(TYPES_KZ[s.type]||s.type):(TYPES[s.type]||s.type))}${s.gosorder?' · '+t('gosFull'):''}</div>
             ${s.address?`<div class="addr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>${esc(s.district?s.district+', ':'')}${esc(s.address)}</span></div>`:''}
             <span class="htrust ${t_.cls}">${t_.svg}${t_.label}</span>
           </div>
@@ -1013,19 +1123,19 @@ function openProfile(id){
           ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:`<button class="contactbtn" id="pContact">✉️ ${lang==='kz'?'Балабақшамен байланысу':'Связаться с садиком'}</button>`}
           ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
           <button class="favrow" id="pFav">${fav?APPLE_FILL:APPLE_OUTLINE} ${fav?t('inFav'):t('saveFav')}</button>
-          ${s.availability&&s.availability!=='уточните'&&s.availability!=='Уточните у нас'?`<div class="avail">✓ ${esc(s.availability)}</div>`:''}
+          ${s.availability&&s.availability!=='уточните'&&s.availability!=='Уточните у нас'?`<div class="avail">✓ ${lang==='kz'?kzAvail(s.availability):esc(s.availability)}</div>`:''}
         </div>
         <!-- Facts strip -->
         ${facts?`<div class="bc facts"><h4>${lang==='kz'?t('briefAbout'):'Коротко о садике'}</h4><div class="factflow">${facts}</div></div>`:''}
         <!-- Program -->
-        ${s.program||classTags?`<div class="bc prog"><h4>${t('program')}</h4>${s.program?`<div class="progbox">${esc(s.program)}</div>`:''}${classTags?`<div class="tags">${classTags}</div>`:''}</div>`:''}
+        ${s.program||classTags?`<div class="bc prog"><h4>${t('program')}</h4>${s.program?`<div class="progbox">${lang==='kz'?kzVal(esc(s.program)):esc(s.program)}</div>`:''}${classTags?`<div class="tags">${classTags}</div>`:''}</div>`:''}
         <!-- Reviews -->
         ${s.reviews?`<div class="bc reviews"><h4>${t('reviews')}</h4><div class="stars">⭐⭐⭐⭐⭐</div><div class="rtext"><b>${esc(s.reviews)}</b></div></div>`:''}
         <!-- Safety -->
         ${safetyHtml?`<div class="bc safety"><h4>${lang==='kz'?'Қауіпсіздік':'Безопасность'}</h4><div class="slist">${safetyHtml}</div></div>`:''}
         ${s.photos&&s.photos.length?`<div class="bc photosec" style="grid-column:1/-1;padding:0 16px 16px"><h3>${lang==='kz'?'Фотосуреттер':'Фотографии'} (${s.photos.length})</h3><div class="photogrid">${s.photos.slice(0,5).map((ph,i)=>`<img src="${ph}" onclick="openPhotoViewer(${JSON.stringify(s.photos).replace(/"/g,'&quot;')},${i})">`).join("")}${s.photos.length>5?`<div class="more-photos" onclick="openPhotoViewer(${JSON.stringify(s.photos).replace(/"/g,'&quot;')},5)">+${s.photos.length-5} ${lang==='kz'?'тағы':'ещё'}</div>`:""}</div></div>`:""}
         <!-- Discounts note -->
-        ${s.discounts?`<div class="bc" style="grid-column:1/-1;padding:12px 16px;background:#f0fdf4;border-color:#dcfce7"><span style="font-size:13px">💚 <b>${lang==='kz'?'Жеңілдік':'Скидка'}</b> — ${esc(s.discounts)}. ${lang==='kz'?'Жазылу кезінде нақтылаңыз.':'Уточняйте при записи.'}</span></div>`:''}
+        ${s.discounts?`<div class="bc" style="grid-column:1/-1;padding:12px 16px;background:#f0fdf4;border-color:#dcfce7"><span style="font-size:13px">💚 <b>${lang==='kz'?'Жеңілдік':'Скидка'}</b> — ${lang==='kz'?kzVal(esc(s.discounts)):esc(s.discounts)}. ${lang==='kz'?'Жазылу кезінде нақтылаңыз.':'Уточняйте при записи.'}</span></div>`:''}
         <!-- License bar -->
         <div class="bc lic">
           <div class="licicon ${t_.cls}">🛡</div>
@@ -1220,7 +1330,7 @@ const T={
     addSadik:'+ Балабақша қосу',exportJson:'⤓ JSON экспорт',
     found:'Табылды',sadik1:'балабақша',sadik2:'балабақша',sadik5:'балабақша',
     more:'Толығырақ →',priceReq:'Бағасы сұрау бойынша',
-    book:'Сынақ күніне жазылу',saveFav:'Таңдаулыға сақтау',inFav:'Таңдаулыда',
+    book:'Сынақ күніне жазылу',saveFav:'Таңдаулыға қосу',inFav:'Таңдаулыда',
     conditions:'Жағдайлар',cost:'Құны',program:'Бағдарлама және сабақтар',
     trust:'Сенімділік',reviews:'Пікірлер',important:'Маңызды ақпарат',contacts:'Байланыс',
     licVer:'Лицензия бар (балабақша мәліметі бойынша)',licUnv:'Лицензия нақтыланбаған',licNon:'Лицензия жоқ',
@@ -1271,7 +1381,7 @@ const T={
     navHome:'Басты',navSearch:'Іздеу',navMap:'Карта',navFavs:'Таңдаулы',navProfile:'Профиль',
     storyName0:'Қалай табуға',storyName1:'Сүзгілер',storyName2:'Таңдаулылар',storyName3:'Жазылу',storyName4:'WhatsApp',
     waMsg:'Сәлем! Сізді Алматы балабақшалар каталогынан таптым. Балабақша туралы толығырақ білгім келеді. Экскурсияға жазыла аламын ба?',
-    briefAbout:'Балабақша туралы қысқаша',
+    briefAbout:'Балабақша туралы қысқаша ақпарат',
     langLabels:'{"":"🗣 Тіл","казах":"🗣 Қазақша","рус":"🗣 Орысша","английский":"🗣 Ағылшынша"}',
     feeShort:'жарна',priceNote:'жазылу кезінде нақтылаңыз',
   }
