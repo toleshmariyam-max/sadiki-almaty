@@ -503,7 +503,7 @@
         <path d="M16 9c0-2.4 1.4-4.6 4-5.4" stroke="#15704A" stroke-width="2" stroke-linecap="round"/>
         <path d="M16.5 5.5c1.8-.4 3.4.4 4 2-1.8.4-3.4-.4-4-2Z" fill="#86A96B"/>
       </svg>
-      Садики<span class="light">&nbsp;Алматы</span>
+      <span id="siteTitle">Садики</span><span class="light">&nbsp;Алматы</span>
     </a>
     <nav class="topnav">
       <a href="#results">Каталог</a>
@@ -671,8 +671,8 @@
 <!-- RECENTLY VIEWED -->
 <div id="recentSection" style="display:none;padding:0 20px 8px">
   <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-    <h3 style="font-family:'Outfit';font-size:16px;font-weight:700;margin:0">Недавно смотрели</h3>
-    <button onclick="localStorage.removeItem('sadiki_recent_v1');document.getElementById('recentSection').style.display='none'" style="border:0;background:none;color:#999;font-size:12px;font-weight:600;cursor:pointer">Очистить</button>
+    <h3 id="recentTitle" style="font-family:'Outfit';font-size:16px;font-weight:700;margin:0">Недавно смотрели</h3>
+    <button onclick="localStorage.removeItem('sadiki_recent_v1');document.getElementById('recentSection').style.display='none'" id="recentClear" style="border:0;background:none;color:#999;font-size:12px;font-weight:600;cursor:pointer">Очистить</button>
   </div>
   <div id="recentList" style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px"></div>
 </div>
@@ -830,7 +830,7 @@ function render(){
     grid.innerHTML=list.map(s=>{
       const t=trust(s.license);
       const fav=isFav(s.id);
-      const badgeTxt=s.gosorder?(lang==='kz'?'🍃 Мемтапсырыс':'🍃 Госзаказ'):'';
+      const badgeTxt=s.gosorder?(lang==='kz'?'🍃 Гос. дотация':'🍃 Госзаказ'):'';
       const g=GRADS[hash(s)%GRADS.length];
       return `<article class="card${admin?' editable':''}" data-id="${s.id}" tabindex="0">
         <div class="card-top" style="background:linear-gradient(135deg,${g[0]},${g[1]})">
@@ -841,7 +841,7 @@ function render(){
         </div>
         <div class="card-body-new">
           <h3 class="cname">${esc(s.name)}</h3>
-          <div class="cloc">${esc(s.age||'')}</div>
+          <div class="cloc">${lang==='kz'?(s.age||'').replace(/лет/g,'жас').replace(/год/g,'жас'):esc(s.age||'')}</div>
           <div class="cprice-row">
             ${s.price?'<span class="cprice">'+esc(s.price).replace(/\s*\/.*$/,'')+' <small>₸/мес</small></span>':''}
 
@@ -854,7 +854,7 @@ function render(){
   document.getElementById('stTotal').textContent=data.length;
   document.getElementById('stDistricts').textContent=new Set(data.map(s=>s.district).filter(Boolean)).size||DISTRICTS.length;
   const cl=document.getElementById('countline');
-  cl.innerHTML=`Найдено <b>${list.length}</b> ${plural(list.length,'садик','садика','садиков')}${activeFilterText()}`;
+  cl.innerHTML=lang==='kz'?`<b>${list.length}</b> балабақша табылды${activeFilterText()}`:`Найдено <b>${list.length}</b> ${plural(list.length,'садик','садика','садиков')}${activeFilterText()}`;
   // bind
   grid.querySelectorAll('.card').forEach(c=>{
     const open=()=>admin?openEditor(c.dataset.id):openProfile(c.dataset.id);
@@ -871,7 +871,7 @@ function render(){
     if(nearbyChip.classList.contains('on')){
       // Turn off - reset distances
       data.forEach(s=>{delete s._dist;});
-      nearbyChip.textContent=lang==='kz'?'📍 Жақында':'📍 Рядом';
+      nearbyChip.textContent=lang==='kz'?'📍 Жақын жерде':'📍 Рядом';
       nearbyChip.classList.remove('on');
       refresh(true);
       return;
@@ -887,11 +887,11 @@ function render(){
         }else{s._dist=999;}
       });
       data.sort((a,b)=>(a._dist||999)-(b._dist||999));
-      nearbyChip.textContent=lang==='kz'?'📍 Жақында ✓':'📍 Рядом ✓';
+      nearbyChip.textContent=lang==='kz'?'📍 Жақын жерде ✓':'📍 Рядом ✓';
       nearbyChip.classList.add('on');
       render();renderMap(true);
     },()=>{
-      nearbyChip.textContent=lang==='kz'?'📍 Жақында':'📍 Рядом';
+      nearbyChip.textContent=lang==='kz'?'📍 Жақын жерде':'📍 Рядом';
       alert('Не удалось определить местоположение');
     });
   };
@@ -1227,7 +1227,7 @@ const T={
     licDescVer:'Балабақша лицензиясы бар екенін хабарлады. Біз әлі тізілімде тексерген жоқпыз.',
     licDescUnv:'Лицензия әлі тексерілмеді — жазылу алдында нақтылаңыз.',
     licDescNon:'Мектепке дейінгі білім берудің лицензиясы табылмады.',
-    gos:'Мемтапсырыс',gosFull:'Мемтапсырыс «Балапан»',
+    gos:'Гос. дотация',gosFull:'Гос. дотация «Балапан»',
     empty:'Ештеңе табылмады',emptyDesc:'Сүзгілерді жұмсартып көріңіз.',
     free:'Тегін',freeDesc:'іріктеу және өтінім',
     sadikiInCatalog:'каталогтағы балабақша',districts:'қала аудандары',
@@ -1313,16 +1313,21 @@ function applyLang(){
   document.querySelectorAll('.bni-label').forEach((el,i)=>{if(navKeys[i])el.textContent=lang==='kz'?navKeys[i][3]:navKeys[i][2];});
   // story names
   const snames=lang==='kz'
-    ?['Қалай табуға','Сүзгілер','Таңдаулылар','Жазылу','WhatsApp']
+    ?['Іздеу','Сүзгіні қолдану','Таңдаулы','Жазылу','WhatsApp']
     :['Как найти садик','Фильтры','Избранное','Записаться','WhatsApp'];
   snames.forEach((n,i)=>{const el=document.getElementById('sn'+i);if(el)el.textContent=n;});
+  // site title
+  const st=document.getElementById('siteTitle');if(st)st.textContent=lang==='kz'?'Балабақшалар':'Садики';
+  // recently viewed title
+  const rt=document.getElementById('recentTitle');if(rt)rt.textContent=lang==='kz'?'Соңғы қаралғандар':'Недавно смотрели';
+  const rc=document.getElementById('recentClear');if(rc)rc.textContent=lang==='kz'?'Тазалау':'Очистить';
   // map back button
   const mbb=document.getElementById('mapBackBtn'); if(mbb)mbb.textContent=(lang==='kz'?'← Тізімге қайту':'← Назад к списку');
   // filter chips static labels
-  const nearby=document.querySelector('.fchip.nearby'); if(nearby&&!nearby.classList.contains('on'))nearby.textContent=lang==='kz'?'📍 Жақында':'📍 Рядом';
+  const nearby=document.querySelector('.fchip.nearby'); if(nearby&&!nearby.classList.contains('on'))nearby.textContent=lang==='kz'?'📍 Жақын жерде':'📍 Рядом';
   const distChipEl=document.querySelector('.fchip.district-cycle'); if(distChipEl&&!filters.district)distChipEl.textContent=lang==='kz'?'📍 Аудан':'📍 Район';
   const price150=document.querySelector('.fchip[data-g="maxPrice"]'); if(price150&&!filters.maxPrice)price150.textContent=lang==='kz'?'💰 150 000-ға дейін':'💰 до 150 000';
-  const gosChip=document.querySelector('.fchip[data-g="gosorder"]'); if(gosChip)gosChip.textContent=lang==='kz'?'🍃 Мемтапсырыс':'🍃 Госзаказ';
+  const gosChip=document.querySelector('.fchip[data-g="gosorder"]'); if(gosChip)gosChip.textContent=lang==='kz'?'🍃 Гос. дотация':'🍃 Госзаказ';
   const montChip=document.querySelector('.fchip[data-g="montessori"]'); if(montChip)montChip.textContent=lang==='kz'?'🌱 Монтессори':'🌱 Монтессори';
   const licChip=document.querySelector('.fchip[data-g="license"]'); if(licChip)licChip.textContent=lang==='kz'?'🛡 Лицензия':'🛡 Лицензия';
   const resetChip=document.getElementById('resetChip'); if(resetChip)resetChip.textContent=lang==='kz'?'✕ Қалпына келтіру':'✕ Сбросить';
@@ -1518,10 +1523,10 @@ function buildFilters(){
   const langOpts=['','казах','рус','английский'];
   const langLabels=lang==='kz'?{'':'🗣 Тіл','казах':'🗣 Қазақша','рус':'🗣 Орысша','английский':'🗣 Ағылшынша'}:{'':'🗣 Язык','казах':'🗣 Казахский','рус':'🗣 Русский','английский':'🗣 Английский'};
   wrap.innerHTML=
-    `<span class="fchip nearby" data-g="nearby">${lang==='kz'?'📍 Жақында':'📍 Рядом'}</span>`+
+    `<span class="fchip nearby" data-g="nearby">${lang==='kz'?'📍 Жақын жерде':'📍 Рядом'}</span>`+
     `<span class="fchip district-cycle" data-g="district">${lang==='kz'?'📍 Аудан':'📍 Район'}</span>`+
     `<span class="fchip" data-g="maxPrice" data-v="150000">${lang==='kz'?'💰 150 000-ға дейін':'💰 до 150 000'}</span>`+
-    `<span class="fchip gos" data-g="gosorder" data-v="1">${lang==='kz'?'🍃 Мемтапсырыс':'🍃 Госзаказ'}</span>`+
+    `<span class="fchip gos" data-g="gosorder" data-v="1">${lang==='kz'?'🍃 Гос. дотация':'🍃 Госзаказ'}</span>`+
     `<span class="fchip lang-cycle" data-g="lang">${lang==='kz'?'🗣 Тіл':'🗣 Язык'}</span>`+
     `<span class="fchip" data-g="license" data-v="verified">${lang==='kz'?'🛡 Лицензия':'🛡 Лицензия'}</span>`+
     `<span class="fchip" data-g="montessori" data-v="1">${lang==='kz'?'🌱 Монтессори':'🌱 Монтессори'}</span>`+
@@ -1613,7 +1618,7 @@ function buildFilters(){
     if(nearbyChip.classList.contains('on')){
       // Turn off - reset distances
       data.forEach(s=>{delete s._dist;});
-      nearbyChip.textContent=lang==='kz'?'📍 Жақында':'📍 Рядом';
+      nearbyChip.textContent=lang==='kz'?'📍 Жақын жерде':'📍 Рядом';
       nearbyChip.classList.remove('on');
       refresh(true);
       return;
@@ -1629,11 +1634,11 @@ function buildFilters(){
         }else{s._dist=999;}
       });
       data.sort((a,b)=>(a._dist||999)-(b._dist||999));
-      nearbyChip.textContent=lang==='kz'?'📍 Жақында ✓':'📍 Рядом ✓';
+      nearbyChip.textContent=lang==='kz'?'📍 Жақын жерде ✓':'📍 Рядом ✓';
       nearbyChip.classList.add('on');
       render();renderMap(true);
     },()=>{
-      nearbyChip.textContent=lang==='kz'?'📍 Жақында':'📍 Рядом';
+      nearbyChip.textContent=lang==='kz'?'📍 Жақын жерде':'📍 Рядом';
       alert('Не удалось определить местоположение');
     });
   };
