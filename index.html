@@ -426,7 +426,7 @@
   @media(max-width:600px){
     .topbar-actions .reqbtn{display:none}
     .topbar-actions .ownerbtn{display:none}
-    .topbar-actions .langtog{display:none}
+    
     .topbar-actions .userbtn{display:none}
     .topbar-in{padding:8px 16px}
   }
@@ -631,11 +631,11 @@
 
 <!-- STORIES ONBOARDING -->
 <div class="stories" id="storiesBar">
-  <button class="story" onclick="showStory(0)"><div class="circle"><div class="inner" style="background:#f0fdf4">🔍</div></div><div class="sname" data-key="storyName0">Как найти садик</div></button>
-  <button class="story" onclick="showStory(1)"><div class="circle"><div class="inner" style="background:#fef3c7">⚡</div></div><div class="sname" data-key="storyName1">Фильтры</div></button>
-  <button class="story" onclick="showStory(2)"><div class="circle"><div class="inner" style="background:#fce7f3">❤️</div></div><div class="sname" data-key="storyName2">Избранное</div></button>
-  <button class="story" onclick="showStory(3)"><div class="circle"><div class="inner" style="background:#e0e7ff">📝</div></div><div class="sname" data-key="storyName3">Записаться</div></button>
-  <button class="story" onclick="showStory(4)"><div class="circle"><div class="inner" style="background:#dcfce7">💬</div></div><div class="sname" data-key="storyName4">WhatsApp</div></button>
+  <button class="story" onclick="showStory(0)"><div class="circle"><div class="inner" style="background:#f0fdf4">🔍</div></div><div class="sname" id="sn0">Как найти садик</div></button>
+  <button class="story" onclick="showStory(1)"><div class="circle"><div class="inner" style="background:#fef3c7">⚡</div></div><div class="sname" id="sn1">Фильтры</div></button>
+  <button class="story" onclick="showStory(2)"><div class="circle"><div class="inner" style="background:#fce7f3">❤️</div></div><div class="sname" id="sn2">Избранное</div></button>
+  <button class="story" onclick="showStory(3)"><div class="circle"><div class="inner" style="background:#e0e7ff">📝</div></div><div class="sname" id="sn3">Записаться</div></button>
+  <button class="story" onclick="showStory(4)"><div class="circle"><div class="inner" style="background:#dcfce7">💬</div></div><div class="sname" id="sn4">WhatsApp</div></button>
 </div>
 
 <button class="map-back" onclick="var ly=document.querySelector('.layout');ly.classList.remove('show-map');ly.classList.add('show-list');document.querySelectorAll('.bni').forEach(b=>b.classList.remove('on'));document.querySelector('.bni[data-tab=home]').classList.add('on');window.scrollTo({top:0});" id="mapBackBtn">← Назад к списку</button>
@@ -1308,10 +1308,14 @@ function applyLang(){
   if(stats[2])stats[2].textContent=t('freeDesc');
   // owner btn
   if(!admin)document.getElementById('ownerBtn').textContent=t('ownerMode');
-  // bottom nav
-  document.querySelectorAll('.bni-label[data-key]').forEach(el=>{ const v=t(el.dataset.key); if(v)el.textContent=v; });
+  // bottom nav labels
+  const navKeys=[['home','navHome','Главная','Басты'],['search','navSearch','Поиск','Іздеу'],['map','navMap2','Карта','Карта'],['favs','navFavs','Избранное','Таңдаулы'],['profile','navProfile','Профиль','Профиль']];
+  document.querySelectorAll('.bni-label').forEach((el,i)=>{if(navKeys[i])el.textContent=lang==='kz'?navKeys[i][3]:navKeys[i][2];});
   // story names
-  document.querySelectorAll('.sname[data-key]').forEach(el=>{ const v=t(el.dataset.key); if(v)el.textContent=v; });
+  const snames=lang==='kz'
+    ?['Қалай табуға','Сүзгілер','Таңдаулылар','Жазылу','WhatsApp']
+    :['Как найти садик','Фильтры','Избранное','Записаться','WhatsApp'];
+  snames.forEach((n,i)=>{const el=document.getElementById('sn'+i);if(el)el.textContent=n;});
   // map back button
   const mbb=document.getElementById('mapBackBtn'); if(mbb)mbb.textContent=(lang==='kz'?'← Тізімге қайту':'← Назад к списку');
   // filter chips static labels
@@ -1864,7 +1868,7 @@ document.querySelectorAll('.bni').forEach(btn=>btn.onclick=()=>{
   @media(max-width:600px){
     .topbar-actions .reqbtn{display:none}
     .topbar-actions .ownerbtn{display:none}
-    .topbar-actions .langtog{display:none}
+    
     .topbar-actions .userbtn{display:none}
     .topbar-in{padding:8px 16px}
   }
