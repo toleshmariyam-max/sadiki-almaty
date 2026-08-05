@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" href="icons/icon-152x152.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192x192.png">
 <title>Садики Алматы — найдите садик рядом с домом</title>
-<meta name="description" content="Каталог детских садов Алматы: фильтр по району, цене, языку. Честная проверка лицензии и условий. Запись на пробный день.">
+<meta name="description" content="Каталог детских садов Алматы: фильтр по району, цене, языку. Честная проверка лицензии и условий. Прямая связь с садиком в WhatsApp.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -519,7 +519,7 @@
     </nav>
     <div class="topbar-actions">
       <div class="langtog" id="langTog"><button id="langRu" class="on">Рус</button><button id="langKz">Қаз</button></div>
-      <button class="reqbtn" id="reqBtn">Мои заявки <span class="cnt" id="reqCount">0</span></button>
+      <button class="reqbtn" id="reqBtn" style="display:none">Мои заявки <span class="cnt" id="reqCount">0</span></button>
       <button class="userbtn" id="authBtn">👤 Войти</button>
       <button class="ownerbtn" id="ownerBtn" title="Режим для владельцев каталога: добавление и редактирование">Режим владельца</button>
     </div>
@@ -532,7 +532,7 @@
     <div class="hero-copy">
       <span class="eyebrow">🍎 Детские сады Алматы</span>
       <h1>Найдите садик, где ребёнку будет <em>хорошо</em></h1>
-      <p class="lede">Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и запишитесь на пробный день.</p>
+      <p class="lede">Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и напишите ему напрямую в WhatsApp.</p>
       <div class="herosearch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="heroq" placeholder="Название или адрес — например, «Капитошка» или «Мирас»" aria-label="Поиск садика">
@@ -641,7 +641,7 @@
   <button class="story" onclick="showStory(0)"><div class="circle"><div class="inner" style="background:#f0fdf4">🔍</div></div><div class="sname" id="sn0">Как найти садик</div></button>
   <button class="story" onclick="showStory(1)"><div class="circle"><div class="inner" style="background:#fef3c7">⚡</div></div><div class="sname" id="sn1">Фильтры</div></button>
   <button class="story" onclick="showStory(2)"><div class="circle"><div class="inner" style="background:#fce7f3">❤️</div></div><div class="sname" id="sn2">Избранное</div></button>
-  <button class="story" onclick="showStory(3)"><div class="circle"><div class="inner" style="background:#e0e7ff">📝</div></div><div class="sname" id="sn3">Записаться</div></button>
+  <button class="story" onclick="showStory(3)"><div class="circle"><div class="inner" style="background:#e0e7ff">📝</div></div><div class="sname" id="sn3">WhatsApp</div></button>
   <button class="story" onclick="showStory(4)"><div class="circle"><div class="inner" style="background:#dcfce7">💬</div></div><div class="sname" id="sn4">WhatsApp</div></button>
 </div>
 
@@ -880,7 +880,7 @@ function render(){
           <div class="cloc">${lang==='kz'?(s.age||'').replace(/лет/g,'жас').replace(/год/g,'жас'):esc(s.age||'')}</div>
           <div class="cprice-row">
             <span class="cprice">${s.price?esc(s.price).replace(/\s*\/.*$/,'').replace(/\s*\(.*?\)/,'').trim()+' <small>'+(lang==='kz'?'тг/айына':'₸/мес')+'</small>':`<small style="color:#bbb">${lang==='kz'?'Баға: сұраныс бойынша':'Цена: уточнить'}</small>`}</span>
-            <button class="cbtn" onclick="event.stopPropagation();openProfile('${s.id}')">${lang==='kz'?'Жазылу →':'Записаться →'}</button>
+            <button class="cbtn" onclick="event.stopPropagation();openProfile('${s.id}')">${lang==='kz'?'Толығырақ →':'Подробнее →'}</button>
           </div>
         </div>
       </article>`;
@@ -1111,7 +1111,7 @@ function openProfile(id){
   const waPhone=(s.contacts||'').replace(/[^0-9]/g,'');
   const waMsg=lang==='kz'
     ?encodeURIComponent(t('waMsg')+' '+s.name+'.')
-    :encodeURIComponent('Здравствуйте! Нашла вас в каталоге Садики Алматы. Хочу узнать подробнее о садике '+s.name+'. Подскажите, можно записаться на экскурсию?');
+    :encodeURIComponent('Здравствуйте! Нашла вас на сервисе Balabaq.kz. Хочу узнать подробнее о садике '+s.name+'. Подскажите, можно записаться на экскурсию?');
   const waLink=waPhone?'https://wa.me/'+waPhone+'?text='+waMsg:'';
   const igUser=s.instagram||'';
   const igLink=igUser?'https://instagram.com/'+igUser.replace('@',''):'';
@@ -1158,8 +1158,7 @@ function openProfile(id){
         <div class="bc price">
           <h4>${t('cost')}</h4>
           <div class="bigp"${veryLongPrice?' style="font-size:16px;line-height:1.35"':longPrice?' style="font-size:20px"':''}>${priceDisplay}<small>${priceSub}</small></div>
-          <button class="bookbtn" id="pBook">${t('book')}</button>
-          ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:`<button class="contactbtn" id="pContact">✉️ ${lang==='kz'?'Балабақшамен байланысу':'Связаться с садиком'}</button>`}
+          ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:''}
           ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
           ${s.gis?`<a class="iglink" href="${s.gis}" target="_blank" rel="noopener" style="background:#f0fff4;border-color:#bbf7d0"><span class="igdot" style="background:none;border:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0"><img src="icons/2gis.png" width="28" height="28" style="border-radius:6px" alt="2GIS">></span>${lang==='kz'?'2ГИС-те ашу':'Открыть в 2ГИС'}</a>`:''}
           <button class="favrow" id="pFav">${fav?APPLE_FILL:APPLE_OUTLINE} ${fav?t('inFav'):t('saveFav')}</button>
@@ -1180,16 +1179,12 @@ function openProfile(id){
         <div class="bc lic">
           <div class="licicon ${t_.cls}">🛡</div>
           <div class="lictxt"><b>${t_.label}</b><span>${licDesc}${s.licenseNo?' № '+esc(s.licenseNo):''}</span></div>
-          <button class="bookbtn" id="pBook2">${lang==='kz'?'Жазылу →':'Записаться →'}</button>
         </div>
       </div>
     </div>
   </div>`;
   openDrawer();
   d.querySelector('#closeX').onclick=closeDrawer;
-  d.querySelector('#pBook').onclick=()=>openBooking(id);
-  d.querySelector('#pBook2').onclick=()=>openBooking(id);
-  const pContact=d.querySelector('#pContact');if(pContact)pContact.onclick=()=>openBooking(id);
   d.querySelector('#pFav').onclick=async()=>{await toggleFav(id);d.querySelector('#pFav').innerHTML=(isFav(id)?APPLE_FILL:APPLE_OUTLINE)+' '+(isFav(id)?t('inFav'):t('saveFav'));render();};
 }
 
@@ -1311,7 +1306,7 @@ let lang='ru';
 const T={
   ru:{
     heroTitle:'Найдите садик, где ребёнку будет <em>хорошо</em>',
-    lede:'Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и запишитесь на пробный день.',
+    lede:'Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и напишите ему напрямую в WhatsApp.',
     searchPh:'Название или адрес — например, «Капитошка» или «Мирас»',
     show:'Показать',
     catalog:'Каталог', onMap:'На карте', pickSadik:'Подобрать садик',
@@ -1420,7 +1415,7 @@ const T={
     storyOk:'Түсінікті!',storyNext:'Келесі →',storyBack:'← Артқа',
     navHome:'Басты',navSearch:'Іздеу',navMap:'Карта',navFavs:'Таңдаулы',navProfile:'Профиль',
     storyName0:'Қалай табуға',storyName1:'Сүзгілер',storyName2:'Таңдаулылар',storyName3:'Жазылу',storyName4:'WhatsApp',
-    waMsg:'Сәлем! Сізді Алматы балабақшалар каталогынан таптым. Балабақша туралы толығырақ білгім келеді. Экскурсияға жазыла аламын ба?',
+    waMsg:'Сәлем! Сізді Balabaq.kz сервисінен таптым. Балабақша туралы толығырақ білгім келеді. Экскурсияға жазыла аламын ба?',
     briefAbout:'Балабақша туралы қысқаша ақпарат',
     langLabels:'{"":"🗣 Тіл","казах":"🗣 Қазақша","рус":"🗣 Орысша","английский":"🗣 Ағылшынша"}',
     feeShort:'жарна',priceNote:'жазылу кезінде нақтылаңыз',
@@ -1464,7 +1459,7 @@ function applyLang(){
   // story names
   const snames=lang==='kz'
     ?['Іздеу','Сүзгіні қолдану','Таңдаулы','Жазылу','WhatsApp']
-    :['Как найти садик','Фильтры','Избранное','Записаться','WhatsApp'];
+    :['Как найти садик','Фильтры','Избранное','WhatsApp','WhatsApp'];
   snames.forEach((n,i)=>{const el=document.getElementById('sn'+i);if(el)el.textContent=n;});
   // site title
   const st=document.getElementById('siteTitle');if(st)st.textContent=lang==='kz'?'Балабақшалар':'Садики';
@@ -1864,7 +1859,7 @@ function submitBooking(id){
   openModal(`<h2>Заявка сохранена ✓</h2><p class="sub">«${esc(s.name)}» — запрос на пробный день записан. Это демо: заявки лежат в разделе «Мои заявки» вверху.</p><div class="qbar"><span></span><button class="btn-primary" style="flex:none;padding:11px 20px" onclick="closeModal()">Готово</button></div>`);
 }
 function openRequests(){
-  const rows=bookings.length?bookings.map(b=>`<div class="reqcard"><b>${esc(b.sadikName)}</b><br>${esc(b.parent)} · ${esc(b.phone)}<br><span class="sub">дата: ${esc(b.date||'—')} · ребёнок: ${esc(b.child||'—')}</span>${b.note?`<div class="sub">${esc(b.note)}</div>`:''}</div>`).join(''):'<p class="sub">Заявок пока нет. Откройте садик → «Записаться на пробный день».</p>';
+  const rows=bookings.length?bookings.map(b=>`<div class="reqcard"><b>${esc(b.sadikName)}</b><br>${esc(b.parent)} · ${esc(b.phone)}<br><span class="sub">дата: ${esc(b.date||'—')} · ребёнок: ${esc(b.child||'—')}</span>${b.note?`<div class="sub">${esc(b.note)}</div>`:''}</div>`).join(''):'<p class="sub">Заявок пока нет.</p>';
   openModal(`<h2>Мои заявки</h2><div style="margin-top:14px;max-height:50vh;overflow:auto">${rows}</div><div class="qbar"><button class="btn-ghost" onclick="clearBookings()">Очистить</button><button class="btn-primary" style="flex:none;padding:11px 20px" onclick="closeModal()">Закрыть</button></div>`);
 }
 function clearBookings(){if(confirm('Очистить все заявки?')){bookings=[];saveBookings();updateReqCount();closeModal();}}
@@ -1968,7 +1963,7 @@ const STORIES_RU=[
   {icon:'🔍',title:'Найди садик',desc:'Используй поиск по названию или выбери район в фильтрах. Мы покажем все садики рядом с домом.'},
   {icon:'⚡',title:'Фильтры',desc:'Фильтруй по цене, языку, госзаказу и наличию лицензии. Найди именно то, что нужно.'},
   {icon:'❤️',title:'Избранное',desc:'Нажми на сердечко, чтобы сохранить садик. Потом сравнишь все сохранённые в разделе «Избранное».'},
-  {icon:'📝',title:'Запишись на экскурсию',desc:'Нажми «Записаться» в карточке садика — оставь заявку на пробный день.'},
+  {icon:'💬',title:'Напиши садику',desc:'Открой карточку садика и нажми «Написать в WhatsApp» — сообщение уже готово.'},
   {icon:'💬',title:'WhatsApp',desc:'Напиши садику напрямую в WhatsApp — кнопка в карточке. Сообщение уже готово!'},
 ];
 const STORIES_KZ=[
