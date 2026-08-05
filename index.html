@@ -159,7 +159,9 @@
   .card .card-top{height:160px;display:grid;place-items:center;position:relative;overflow:hidden;flex-shrink:0}
   .card .card-top .mono{font-family:'Outfit';font-weight:800;font-size:52px;color:rgba(255,255,255,.3);user-select:none}
   .card .card-top.plain{background:#faf9f7}
-  .card .card-top .lfg{position:relative;z-index:3;width:112px;height:112px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.13)}
+  .card .card-top.plain .mono{display:none}
+  .card .card-top>*{grid-area:1/1}
+  .card .card-top .lfg{position:relative;z-index:3;width:112px;height:112px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.13);align-self:start;justify-self:center;margin-top:16px}
   .card .card-top .badges{position:absolute;top:10px;left:10px;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 56px);z-index:3}
   .card .card-top .badge{position:static;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.93);color:#166534;backdrop-filter:blur(4px);white-space:nowrap}
   .card .card-top .badge.br{color:#1d4ed8}
@@ -231,8 +233,10 @@
   .p-hero .ptrust{position:absolute;left:18px;bottom:16px;font-size:13px;font-weight:700;padding:6px 14px;border-radius:var(--pill);background:rgba(255,255,255,.94);display:inline-flex;gap:6px;align-items:center}
   .p-hero .ptrust svg{width:14px;height:14px}
   .p-hero.plain{background:#faf9f7}
+  .p-hero.plain .mono{display:none}
+  .p-hero>*{grid-area:1/1}
   .p-hero.plain .pat{opacity:0}
-  .p-hero img.plogo{position:relative;z-index:3;width:140px;height:140px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 6px 22px rgba(0,0,0,.15)}
+  .p-hero img.plogo{position:relative;z-index:3;width:140px;height:140px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 6px 22px rgba(0,0,0,.15);align-self:start;justify-self:center;margin-top:22px}
   .bento{display:grid;grid-template-columns:1fr 1fr 320px;gap:12px;padding:18px}
   .bc{background:var(--paper);border:1px solid var(--line2);border-radius:18px;padding:16px 18px}
   .bc h4{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--green-700);margin:0 0 10px}
@@ -352,8 +356,10 @@
   /* ---------- LOGO ON CARD ---------- */
   .card-photo img.clogo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
   .p-hero.plain{background:#faf9f7}
+  .p-hero.plain .mono{display:none}
+  .p-hero>*{grid-area:1/1}
   .p-hero.plain .pat{opacity:0}
-  .p-hero img.plogo{position:relative;z-index:3;width:140px;height:140px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 6px 22px rgba(0,0,0,.15)}
+  .p-hero img.plogo{position:relative;z-index:3;width:140px;height:140px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 6px 22px rgba(0,0,0,.15);align-self:start;justify-self:center;margin-top:22px}
 
   /* ---------- AUTH ---------- */
   .auth-form{display:flex;flex-direction:column;gap:12px;margin-top:16px}
