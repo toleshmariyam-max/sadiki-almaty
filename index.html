@@ -158,7 +158,8 @@
   
   .card .card-top{height:160px;display:grid;place-items:center;position:relative;overflow:hidden;flex-shrink:0}
   .card .card-top .mono{font-family:'Outfit';font-weight:800;font-size:52px;color:rgba(255,255,255,.3);user-select:none}
-  .card .card-top img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .card .card-top.plain{background:#faf9f7}
+  .card .card-top .lfg{position:relative;z-index:3;width:112px;height:112px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.13)}
   .card .card-top .badges{position:absolute;top:10px;left:10px;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 56px);z-index:3}
   .card .card-top .badge{position:static;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.93);color:#166534;backdrop-filter:blur(4px);white-space:nowrap}
   .card .card-top .badge.br{color:#1d4ed8}
@@ -229,7 +230,9 @@
   .p-hero .x{position:absolute;top:16px;right:16px}
   .p-hero .ptrust{position:absolute;left:18px;bottom:16px;font-size:13px;font-weight:700;padding:6px 14px;border-radius:var(--pill);background:rgba(255,255,255,.94);display:inline-flex;gap:6px;align-items:center}
   .p-hero .ptrust svg{width:14px;height:14px}
-  .p-hero img.plogo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .p-hero.plain{background:#faf9f7}
+  .p-hero.plain .pat{opacity:0}
+  .p-hero img.plogo{position:relative;z-index:3;width:140px;height:140px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 6px 22px rgba(0,0,0,.15)}
   .bento{display:grid;grid-template-columns:1fr 1fr 320px;gap:12px;padding:18px}
   .bc{background:var(--paper);border:1px solid var(--line2);border-radius:18px;padding:16px 18px}
   .bc h4{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--green-700);margin:0 0 10px}
@@ -286,6 +289,7 @@
     .drawer{padding:0}
     .p-hero{height:120px}
     .p-hero .mono{font-size:44px}
+    .p-hero img.plogo{width:88px;height:88px}
     .bc.price .bigp{font-size:24px}
   }
   .btn-primary{border:0;background:var(--green);color:#fff;font-weight:800;font-size:15px;
@@ -347,7 +351,9 @@
 
   /* ---------- LOGO ON CARD ---------- */
   .card-photo img.clogo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
-  .p-hero img.plogo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+  .p-hero.plain{background:#faf9f7}
+  .p-hero.plain .pat{opacity:0}
+  .p-hero img.plogo{position:relative;z-index:3;width:140px;height:140px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 6px 22px rgba(0,0,0,.15)}
 
   /* ---------- AUTH ---------- */
   .auth-form{display:flex;flex-direction:column;gap:12px;margin-top:16px}
@@ -411,6 +417,7 @@
     .p-side{border-left:0;border-top:1px solid var(--line)}
     .p-hero{height:150px}
     .p-hero .mono{font-size:50px}
+    .p-hero img.plogo{width:106px;height:106px}
     .drawer-inner{max-height:95vh;border-radius:20px}
   }
   @media(max-width:420px){
@@ -875,9 +882,9 @@ function render(){
       const brTxt=brN>1?(lang==='kz'?'🏢 '+brN+' филиал':'🏢 '+brN+' '+(brN%10===1&&brN%100!==11?'филиал':(brN%10>=2&&brN%10<=4&&(brN%100<10||brN%100>=20)?'филиала':'филиалов'))):'';
       const g=GRADS[hash(s)%GRADS.length];
       return `<article class="card${admin?' editable':''}" data-id="${s.id}" tabindex="0">
-        <div class="card-top" style="background:linear-gradient(135deg,${g[0]},${g[1]})">
+        <div class="card-top${s.logo?' plain':''}"${s.logo?'':` style="background:linear-gradient(135deg,${g[0]},${g[1]})"`}>
           <span class="mono">${esc(monogram(s.name))}</span>
-          ${s.logo?'<img src="'+esc(s.logo)+'" alt="" onerror="this.remove()">':''}
+          ${s.logo?'<img class="lfg" src="'+esc(s.logo)+'" alt="" onerror="this.remove()">':''}
           ${(badgeTxt||brTxt)?'<div class="badges">'+(badgeTxt?'<span class="badge">'+badgeTxt+'</span>':'')+(brTxt?'<span class="badge br">'+brTxt+'</span>':'')+'</div>':''}
           <button class="fav" data-fav="${s.id}">${fav?APPLE_FILL:APPLE_OUTLINE}</button>
         </div>
@@ -1144,7 +1151,7 @@ function openProfile(id){
   d.innerHTML=`<div class="drawer-inner">
     <div class="dbody">
       ${s.photos&&s.photos.length?`<div class="p-carousel" id="pCarousel">${s.photos.map((ph,i)=>`<img class="p-slide" src="${ph}" onclick="openPhotoViewer(${JSON.stringify(s.photos).replace(/"/g,"&quot;")},${i})">`).join("")}</div><div class="p-dots">${s.photos.map((_,i)=>`<span class="${i===0?"on":""}"></span>`).join("")}</div>`:""}
-        <div class="p-hero" style="${s.photos&&s.photos.length?"display:none":""}" style="background:${grad(s)}">
+        <div class="p-hero${s.logo?' plain':''}" style="${s.photos&&s.photos.length?"display:none;":""}${s.logo?"":"background:"+grad(s)}">
         <span class="pat"></span>
         ${s.logo?'<img class="plogo" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" onerror="this.outerHTML=\'<span class=mono>'+esc(monogram(s.name))+'</span>\'">':'<span class="mono">'+esc(monogram(s.name))+'</span>'}
         <button class="backbtn" id="closeX" aria-label="Назад">${lang==='kz'?'← Артқа':'← Назад'}</button>
