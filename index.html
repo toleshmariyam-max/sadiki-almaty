@@ -135,7 +135,7 @@
 
   /* ---------- LAYOUT ---------- */
   .layout{display:grid;grid-template-columns:minmax(0,1fr) 416px;gap:24px;align-items:start;margin-top:14px}
-  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .mapcol{position:sticky;top:132px}
 
   /* ---------- CARD (full-width photo) ---------- */
@@ -156,21 +156,28 @@
   
   
   
-  .card .card-top{height:160px;display:grid;place-items:center;position:relative;overflow:hidden;flex-shrink:0}
-  .card .card-top .mono{font-family:'Outfit';font-weight:800;font-size:52px;color:rgba(255,255,255,.3);user-select:none}
+  .card .card-top{height:100px;display:grid;place-items:center;position:relative;overflow:hidden;flex-shrink:0}
+  .card .card-top .mono{font-family:'Outfit';font-weight:800;font-size:38px;color:rgba(255,255,255,.3);user-select:none}
   .card .card-top.plain{background:#faf9f7}
   .card .card-top.plain .mono{display:none}
   .card .card-top>*{grid-area:1/1}
-  .card .card-top .lfg{position:relative;z-index:3;width:112px;height:112px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 4px 16px rgba(0,0,0,.13);align-self:start;justify-self:center;margin-top:16px}
-  .card .card-top .badges{position:absolute;top:10px;left:10px;display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 56px);z-index:3}
-  .card .card-top .badge{position:static;font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.93);color:#166534;backdrop-filter:blur(4px);white-space:nowrap}
+  .card .card-top .lfg{position:relative;z-index:3;width:76px;height:76px;border-radius:50%;object-fit:cover;background:#fff;box-shadow:0 3px 12px rgba(0,0,0,.12);align-self:start;justify-self:center;margin-top:11px}
+  .card .card-top .badges{position:absolute;top:7px;left:7px;display:flex;flex-direction:column;align-items:flex-start;gap:3px;max-width:calc(100% - 44px);z-index:3}
+  .card .card-top .badge{position:static;font-size:8.7px;font-weight:700;padding:3px 7px;border-radius:20px;background:rgba(255,255,255,.95);color:#166534;white-space:nowrap;line-height:1.15}
   .card .card-top .badge.br{color:#1d4ed8}
-  .card .card-body-new{padding:14px 15px 15px;flex:1;display:flex;flex-direction:column;gap:3px}
-  .card .card-body-new .cname{font-weight:800;font-size:15.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:#111;margin:0}
-  .card .card-body-new .cloc{font-size:12px;color:#777;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .card .card-body-new .cprice-row{margin-top:auto;padding-top:10px;border-top:1px solid #f5f5f5;display:flex;flex-direction:column;align-items:stretch;gap:6px}
-  .card .card-body-new .cprice{font-family:'Outfit';font-weight:800;font-size:15px;color:#111;white-space:nowrap}
-  .card .card-body-new .cprice small{font-size:10px;color:#999;font-weight:500;font-family:'Onest'}
+  .card .card-body-new{padding:10px 12px 12px;flex:1;display:flex;flex-direction:column;gap:2px}
+  .card .card-body-new .cname{font-weight:800;font-size:12.5px;line-height:1.25;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;color:#111;margin:0}
+  .card .card-body-new .caddr{display:flex;align-items:center;gap:3px;font-size:9.5px;color:#828282;font-weight:500;min-width:0;margin-top:2px}
+  .card .card-body-new .caddr svg{width:10px;height:10px;flex:none;color:#bcbcbc}
+  .card .card-body-new .caddr span,.card .card-body-new .cstreet{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .card .card-body-new .cstreet{font-size:9.5px;color:#aaa;font-weight:500;padding-left:13px}
+  .card .card-body-new .cloc{font-size:9.5px;color:#8c8c8c;margin-top:2px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .card-body-new .cprice-row{margin-top:auto;padding-top:8px;border-top:1px solid #f5f5f5;display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:8px}
+  .card .card-body-new .cgo{flex:none;width:26px;height:26px;border-radius:50%;border:0;background:var(--green);color:#fff;cursor:pointer;display:grid;place-items:center;transition:.12s;padding:0}
+  .card .card-body-new .cgo:hover{background:#1a7a40;transform:scale(1.08)}
+  .card .card-body-new .cgo svg{width:13px;height:13px}
+  .card .card-body-new .cprice{font-family:'Outfit';font-weight:800;font-size:13.5px;color:#111;white-space:nowrap}
+  .card .card-body-new .cprice small{font-size:8.5px;color:#999;font-weight:500;font-family:'Onest'}
   .card .card-body-new .crating{display:flex;align-items:center;gap:2px;font-size:11px;font-weight:600;color:#888}
   .card .card-body-new .crating svg{width:12px;height:12px;color:#facc15}
   .card .card-body-new .cbtn{background:var(--green);color:#fff;border:0;border-radius:12px;font:700 12px/1 'Onest',sans-serif;padding:9px 14px;cursor:pointer;white-space:nowrap;transition:.12s;flex-shrink:0}
@@ -178,11 +185,11 @@
   .card .card-body-new .cdetails{display:flex;flex-direction:column;gap:2px;margin:2px 0;min-height:32px}
   .card .card-body-new .cdetail{font-size:11.5px;color:#555;display:flex;align-items:center;gap:5px}
 
-  .fav{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;
+  .fav{position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;border:0;
     background:rgba(255,255,255,.85);cursor:pointer;display:grid;place-items:center;
     transition:.15s;z-index:3}
   .fav:hover{transform:scale(1.1);background:rgba(255,255,255,.3)}
-  .fav svg{width:14px;height:20px}
+  .fav svg{width:12px;height:17px}
   .badge{position:absolute;top:14px;left:14px;font-size:11px;font-weight:700;padding:6px 14px;border-radius:var(--pill);
     background:rgba(255,255,255,.15);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;z-index:3;
     display:inline-flex;align-items:center;gap:4px}
@@ -807,22 +814,11 @@ let admin=false, map=null, markersLayer=null;
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function priceNum(p){const m=(p||'').match(/\d[\d\s]*/);return m?parseInt(m[0].replace(/\s/g,'')):null;}
 function fv(id){const e=document.getElementById(id);return e?e.value.trim():'';}
-function monogram(name){return (name.replace(/[«»"'().]/g,'').trim().charAt(0)||'С').toUpperCase();}
-const GRADS=[['#E8F5E9','#C8E6C9'],['#E8F5E9','#C8E6C9'],['#E8F5E9','#C8E6C9'],['#E8F5E9','#C8E6C9'],['#E8F5E9','#C8E6C9'],['#E8F5E9','#C8E6C9'],['#E8F5E9','#C8E6C9']];
-function hash(s){let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return h;}
-function grad(s){const g=GRADS[hash(s.id)%GRADS.length];return `linear-gradient(135deg,${g[0]},${g[1]})`;}
-
-const COMPLETE_FIELDS=['type','district','address','hours','lang','age','price','food','transport','ratio','program','license','reviews','contacts'];
-function completeness(s){let f=0;COMPLETE_FIELDS.forEach(k=>{const v=s[k];if(k==='license'){if(v==='verified')f++;}else if(v&&String(v).trim())f++;});return Math.round(f/COMPLETE_FIELDS.length*100);}
-
-const SHIELD_VER='<svg viewBox="0 0 24 24" fill="none" stroke="#15704A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 9.5C8 19 5 15.5 5 11V6z"/><path d="m9 12 2 2 4-4"/></svg>';
-const SHIELD_UNV='<svg viewBox="0 0 24 24" fill="none" stroke="#56685D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 9.5C8 19 5 15.5 5 11V6z"/><path d="M12 9v4"/><circle cx="12" cy="16" r=".6" fill="#56685D"/></svg>';
-const SHIELD_NON='<svg viewBox="0 0 24 24" fill="none" stroke="#E2553D" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 8-7 9.5C8 19 5 15.5 5 11V6z"/><path d="m9.5 9.5 5 5M14.5 9.5l-5 5"/></svg>';
-function trust(lic){
-  if(lic==='verified')return {cls:'ver',label:t('licVer'),svg:SHIELD_VER};
-  if(lic==='none')return {cls:'non',label:t('licNon'),svg:SHIELD_NON};
-  return {cls:'unv',label:t('licUnv'),svg:SHIELD_UNV};
-}
+function shortAddr(a){var t=' '+String(a||'');
+  t=t.replace(/\s*шағын аудан/gi,'').replace(/([\s,·])(микрорайон|мкр\.?)\s*/gi,'$1');
+  t=t.replace(/\s*көшесі/gi,'').replace(/([\s,·])(улица|ул\.?)\s*/gi,'$1');
+  t=t.replace(/\s*даңғылы/gi,'').replace(/([\s,·])(проспект|просп\.?|пр\.?)\s*/gi,'$1');
+  return t.replace(/\s{2,}/g,' ').replace(/^[\s,·-]+/,'').trim();}
 const APPLE_OUTLINE='<svg viewBox="0 0 24 24" fill="none" stroke="#E2553D" stroke-width="2"><path d="M12 8.5C10.6 6.8 7.8 7 6.5 9c-1.4 2.1-.6 5.4 1.4 7.4C9 17.6 10.4 18.5 12 18.5s3-.9 4.1-2.1c2-2 2.8-5.3 1.4-7.4C16.2 7 13.4 6.8 12 8.5Z"/><path d="M12 8.5c0-1.5.9-2.9 2.5-3.4" stroke-linecap="round"/></svg>';
 const APPLE_FILL='<svg viewBox="0 0 24 24" fill="#E2553D" stroke="#E2553D" stroke-width="1.4"><path d="M12 8.5C10.6 6.8 7.8 7 6.5 9c-1.4 2.1-.6 5.4 1.4 7.4C9 17.6 10.4 18.5 12 18.5s3-.9 4.1-2.1c2-2 2.8-5.3 1.4-7.4C16.2 7 13.4 6.8 12 8.5Z"/><path d="M12 8.5c0-1.5.9-2.9 2.5-3.4" fill="none" stroke-linecap="round"/></svg>';
 const PIN='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg>';
@@ -896,10 +892,12 @@ function render(){
         </div>
         <div class="card-body-new">
           <h3 class="cname">${esc(s.name)}</h3>
+          ${s.district?`<div class="caddr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>${esc(s.district)}</span></div>`:''}
+          ${s.address?`<div class="cstreet">${esc(shortAddr(s.address))}</div>`:''}
           <div class="cloc">${lang==='kz'?(s.age||'').replace(/лет/g,'жас').replace(/год/g,'жас'):esc(s.age||'')}</div>
           <div class="cprice-row">
             <span class="cprice">${s.price?esc(s.price).replace(/\s*\/.*$/,'').replace(/\s*\(.*?\)/,'').trim()+' <small>'+(lang==='kz'?'тг/айына':'₸/мес')+'</small>':`<small style="color:#bbb">${lang==='kz'?'Баға: сұраныс бойынша':'Цена: уточнить'}</small>`}</span>
-            <button class="cbtn" onclick="event.stopPropagation();openProfile('${s.id}')">${lang==='kz'?'Толығырақ →':'Подробнее →'}</button>
+            <button class="cgo" aria-label="${lang==='kz'?'Толығырақ':'Подробнее'}" onclick="event.stopPropagation();openProfile('${s.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
           </div>
         </div>
       </article>`;
