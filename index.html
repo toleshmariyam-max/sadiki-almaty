@@ -15,6 +15,14 @@ window.PH_HOST = 'https://us.i.posthog.com';  // EU → https://eu.i.posthog.com
 </script>
 <script>
 (function(){
+  /* Отключение слежки для своих: открой balabaq.kz/?notrack=1 — и этот браузер
+     перестанет попадать в статистику навсегда. Вернуть: balabaq.kz/?notrack=0 */
+  try{
+    var qs=location.search;
+    if(qs.indexOf('notrack=1')>-1) localStorage.setItem('ph_optout','1');
+    if(qs.indexOf('notrack=0')>-1) localStorage.removeItem('ph_optout');
+    if(localStorage.getItem('ph_optout')==='1'){ window.track=function(){}; return; }
+  }catch(e){}
   if(!window.PH_KEY){ window.track=function(){}; return; }
   !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
   posthog.init(window.PH_KEY,{
@@ -573,7 +581,8 @@ window.sadikProps=function(s){
     <div class="topbar-actions">
       <div class="langtog" id="langTog"><button id="langRu" class="on">Рус</button><button id="langKz">Қаз</button></div>
       <button class="reqbtn" id="reqBtn" style="display:none">Мои заявки <span class="cnt" id="reqCount">0</span></button>
-      <button class="userbtn" id="authBtn">👤 Войти</button>
+      <!-- личный кабинет отключён до появления бэкенда: чтобы вернуть, убери style="display:none" -->
+      <button class="userbtn" id="authBtn" style="display:none">👤 Войти</button>
       <button class="ownerbtn" id="ownerBtn" title="Режим для владельцев каталога: добавление и редактирование">Режим владельца</button>
     </div>
   </div>
@@ -1640,6 +1649,7 @@ async function loadAuth(){try{const r=localStorage.getItem(AUTH_KEY);if(r&&r.val
 async function saveAuth(){try{localStorage.setItem(AUTH_KEY, JSON.stringify(currentUser));}catch(e){}}
 function updateAuthBtn(){
   const btn=document.getElementById('authBtn');
+  btn.style.display='none';  // личный кабинет отключён — убери эту строку, когда появится бэкенд
   if(currentUser){
     btn.textContent='👤 '+currentUser.name;
     btn.onclick=openUserMenu;
@@ -2312,7 +2322,7 @@ if(/iPhone|iPad/.test(navigator.userAgent)&&!window.navigator.standalone){
   <button class="bni" data-tab="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><span class="bni-label" data-key="navSearch">Поиск</span></button>
   <button class="bni" data-tab="map" id="navMapBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span class="bni-label" data-key="navMap">Карта</span></button>
   <button class="bni" data-tab="favs"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8.5C10.6 6.8 7.8 7 6.5 9c-1.4 2.1-.6 5.4 1.4 7.4C9 17.6 10.4 18.5 12 18.5s3-.9 4.1-2.1c2-2 2.8-5.3 1.4-7.4C16.2 7 13.4 6.8 12 8.5Z"/></svg><span class="bni-label" data-key="navFavs">Избранное</span></button>
-  <button class="bni" data-tab="profile" id="navProfileBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg><span class="bni-label" data-key="navProfile">Профиль</span></button>
+  <button class="bni" data-tab="profile" id="navProfileBtn" style="display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 10-16 0"/></svg><span class="bni-label" data-key="navProfile">Профиль</span></button>
 </nav>
 
 </body>
