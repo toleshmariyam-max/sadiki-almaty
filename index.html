@@ -929,7 +929,7 @@ function getFiltered(){
     if(filters.maxPrice){const p=priceNum(s.price);if(p!=null&&p>filters.maxPrice)return false;}
     if(filters.montessori&&!(s.program||'').toLowerCase().includes('монтессори'))return false;
     if(filters.nearKm!=null&&(s._dist==null||s._dist>filters.nearKm))return false;
-    if(q&&!(s.name.toLowerCase().includes(q)||(s.address||'').toLowerCase().includes(q)))return false;
+    if(q){const hay=[s.name,s.address,s.district,s.program,s.extraClasses,s.lang,s.age,s.food,s.medic,s.playground].filter(Boolean).join(' ').toLowerCase();if(!hay.includes(q))return false;}
     return true;
   });
   const nearOn=document.querySelector('.fchip.nearby')&&document.querySelector('.fchip.nearby').classList.contains('on');
@@ -995,7 +995,7 @@ function render(){
   });
 
   // Nearby button - toggleable
-  const nearbyChip=wrap.querySelector('.nearby');
+  const nearbyChip=document.querySelector('#filters .nearby');
   if(nearbyChip)nearbyChip.onclick=()=>{
     if(nearbyChip.classList.contains('on')){
       // Turn off - reset distances
@@ -1039,7 +1039,7 @@ function render(){
     filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,fav:false,nearKm:null};
     data.forEach(s=>{delete s._dist;});
     document.getElementById('q').value='';
-    const nb=wrap.querySelector('.nearby');if(nb){nb.textContent='📍 Рядом';nb.classList.remove('on');}
+    const nb=document.querySelector('#filters .nearby');if(nb){nb.textContent='📍 Рядом';nb.classList.remove('on');}
     syncChips();refresh(true);updateResetChip();
   };
   updateFavCount();
@@ -2053,11 +2053,11 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();close
 window.addEventListener('resize',()=>{if(map)map.invalidateSize();});
 // mobile view toggle
 function setView(v){
-  const L=document.getElementById('layout');
-  L.classList.toggle('show-map',v==='map');L.classList.toggle('show-list',v==='list');
+  const ly=document.getElementById('layout');
+  ly.classList.toggle('show-map',v==='map');ly.classList.toggle('show-list',v==='list');
   document.getElementById('viewList').classList.toggle('on',v==='list');
   document.getElementById('viewMap').classList.toggle('on',v==='map');
-  if(v==='map')setTimeout(()=>{if(map){map.invalidateSize();renderMap(true);}},80);
+  if(v==='map')setTimeout(()=>{renderMap(true);setTimeout(()=>{if(map)map.invalidateSize();},120);},80);
 }
 document.getElementById('viewList').onclick=()=>setView('list');
 document.getElementById('viewMap').onclick=()=>setView('map');
