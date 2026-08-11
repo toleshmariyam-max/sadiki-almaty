@@ -3,6 +3,38 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- ═══ АНАЛИТИКА PostHog ═══
+     1. Зарегистрируйся на posthog.com (бесплатно)
+     2. Project Settings → Project API Key — скопируй ключ вида phc_xxxxx
+     3. Вставь его в PH_KEY ниже. Пока строка пустая — аналитика выключена,
+        сайт работает как обычно.
+     Регион: если при регистрации выбрала EU, замени PH_HOST на https://eu.i.posthog.com -->
+<script>
+window.PH_KEY  = 'phc_y9EdMM4LTLhTqzDmoWVqQyQAG84fibEpxWmvoWnTpSEW';                          // ← сюда ключ phc_...
+window.PH_HOST = 'https://us.i.posthog.com';  // EU → https://eu.i.posthog.com
+</script>
+<script>
+(function(){
+  if(!window.PH_KEY){ window.track=function(){}; return; }
+  !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.async=!0,p.src=s.api_host+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+  posthog.init(window.PH_KEY,{
+    api_host: window.PH_HOST,
+    autocapture: false,              // ключевое: не пишем каждый клик — экономит лимит в разы
+    capture_pageview: true,
+    disable_session_recording: true, // записи сессий выключены (лимит 5000/мес)
+    persistence: 'localStorage+cookie'
+  });
+})();
+/* Безопасная обёртка: если PostHog не загрузился или заблокирован — просто ничего не делает */
+window.track=window.track||function(name,props){
+  try{ if(window.posthog&&posthog.capture) posthog.capture(name,props||{}); }catch(e){}
+};
+/* Свойства садика, которые цепляются к каждому событию о конкретном садике */
+window.sadikProps=function(s){
+  if(!s) return {};
+  return {sadik_id:s.id, sadik_name:s.name, district:s.district||'', has_price:!!(s.price&&s.price.trim()), gosorder:!!s.gosorder, license:s.license||''};
+};
+</script>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1F8A5B">
 <meta name="mobile-web-app-capable" content="yes">
@@ -918,7 +950,7 @@ async function save(){try{localStorage.setItem(KEY, JSON.stringify(data));}catch
 async function loadFavs(){try{const r=localStorage.getItem(FAVKEY);if(r)favs=JSON.parse(r);}catch(e){favs=[];}}
 async function saveFavs(){try{localStorage.setItem(FAVKEY,JSON.stringify(favs));}catch(e){}}
 function isFav(id){return favs.includes(id);}
-async function toggleFav(id){favs=isFav(id)?favs.filter(x=>x!==id):[...favs,id];await saveFavs();updateFavCount();}
+async function toggleFav(id){const was=isFav(id);favs=was?favs.filter(x=>x!==id):[...favs,id];track(was?'fav_remove':'fav_add',sadikProps(data.find(x=>x.id===id)));await saveFavs();updateFavCount();}
 function updateFavCount(){const c=document.querySelector('.fchip.fav .favn');if(c)c.textContent=favs.length?` (${favs.length})`:'';}
 
 /* ---------- filtering ---------- */
@@ -1205,6 +1237,7 @@ function kzAvail(str){
 function kv(label,val){return val&&String(val).trim()?`<div class="kvitem"><div class="k">${label}</div><div class="vv">${esc(val)}</div></div>`:'';}
 function openProfile(id){
   const s=data.find(x=>x.id===id);if(!s)return;
+  track('card_open',sadikProps(s));
   addRecentlyViewed(id);
   closeModal();
   if(map&&s.lat&&s.lng)map.panTo([s.lat,s.lng]);
@@ -1266,9 +1299,9 @@ function openProfile(id){
         <div class="bc price">
           <h4>${t('cost')}</h4>
           <div class="bigp"${veryLongPrice?' style="font-size:16px;line-height:1.35"':longPrice?' style="font-size:20px"':''}>${priceDisplay}<small>${priceSub}</small></div>
-          ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:''}
-          ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
-          ${s.gis?`<a class="iglink" href="${s.gis}" target="_blank" rel="noopener" style="background:#f0fff4;border-color:#bbf7d0"><span class="igdot" style="background:none;border:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0"><img src="icons/2gis.png" width="28" height="28" style="border-radius:6px" alt="2GIS">></span>${lang==='kz'?'2ГИС-те ашу':'Открыть в 2ГИС'}</a>`:''}
+          ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener" onclick="track('whatsapp_click',sadikProps(data.find(x=>x.id==='${s.id}')))"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:''}
+          ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener" onclick="track('instagram_click',sadikProps(data.find(x=>x.id==='${s.id}')))"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
+          ${s.gis?`<a class="iglink" href="${s.gis}" target="_blank" rel="noopener" onclick="track('gis_click',sadikProps(data.find(x=>x.id==='${s.id}')))" style="background:#f0fff4;border-color:#bbf7d0"><span class="igdot" style="background:none;border:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0"><img src="icons/2gis.png" width="28" height="28" style="border-radius:6px" alt="2GIS">></span>${lang==='kz'?'2ГИС-те ашу':'Открыть в 2ГИС'}</a>`:''}
           <button class="favrow" id="pFav">${fav?APPLE_FILL:APPLE_OUTLINE} ${fav?t('inFav'):t('saveFav')}</button>
           ${s.availability&&s.availability!=='уточните'&&s.availability!=='Уточните у нас'?`<div class="avail">✓ ${lang==='kz'?kzAvail(s.availability):esc(s.availability)}</div>`:''}
         </div>
@@ -1861,6 +1894,7 @@ function buildFilters(){
     else if(g==='license')filters.license=filters.license?'':'verified';
     ch.classList.toggle('on');
     refresh(true);updateResetChip();
+    track('filter_apply',{filter:g,value:String(ch.dataset.v||''),active:ch.classList.contains('on'),results:getFiltered().length});
   });
   // Hero district chips (keep simple)
   const hc=document.getElementById('heroChips');
@@ -2011,6 +2045,7 @@ function applyQuiz(){
   filters.lang=quizAns.lang||'';filters.type=quizAns.type||'';
   if(quizAns.sort)document.getElementById('sort').value=quizAns.sort;
   syncChips();closeModal();refresh(true);scrollResults();
+  track('quiz_complete',{district:filters.district||'любой',maxPrice:filters.maxPrice||0,lang:filters.lang||'любой',results:getFiltered().length});
 }
 
 /* ---------- owner mode, add, export, geo ---------- */
@@ -2044,9 +2079,12 @@ function syncHero(){const h=document.getElementById('heroq'),q=document.getEleme
 document.getElementById('heroq').addEventListener('input',()=>{document.getElementById('q').value=document.getElementById('heroq').value;refresh(false);});
 document.getElementById('heroFind').onclick=()=>{syncHero();scrollResults();};
 document.getElementById('heroq').addEventListener('keydown',e=>{if(e.key==='Enter'){syncHero();scrollResults();}});
-document.getElementById('q').addEventListener('input',()=>{document.getElementById('heroq').value=document.getElementById('q').value;refresh(false);});
+let _searchT=null;
+document.getElementById('q').addEventListener('input',()=>{document.getElementById('heroq').value=document.getElementById('q').value;refresh(false);
+  clearTimeout(_searchT);_searchT=setTimeout(()=>{const q=document.getElementById('q').value.trim();
+    if(q.length>=3)track('search',{query:q.toLowerCase(),results:getFiltered().length,found:getFiltered().length>0});},1200);});
 document.getElementById('sort').addEventListener('change',()=>refresh(false));
-document.getElementById('quizBtn').onclick=openQuiz;
+document.getElementById('quizBtn').onclick=()=>{track('quiz_start',{});openQuiz();};
 document.getElementById('reqBtn').onclick=openRequests;
 document.getElementById('geoBtn').onclick=geolocate;
 document.getElementById('addBtn').onclick=addNew;
@@ -2059,6 +2097,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeDrawer();close
 window.addEventListener('resize',()=>{if(map)map.invalidateSize();});
 // mobile view toggle
 function setView(v){
+  if(v==='map')track('map_open',{results:getFiltered().length});
   const ly=document.getElementById('layout');
   ly.classList.toggle('show-map',v==='map');ly.classList.toggle('show-list',v==='list');
   document.getElementById('viewList').classList.toggle('on',v==='list');
