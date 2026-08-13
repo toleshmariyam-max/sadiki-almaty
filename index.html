@@ -2012,7 +2012,7 @@ function updateReqCount(){const el=document.getElementById('reqCount');if(el)el.
 const VAUCHER_SLIDES=[
  {img:'vaucher/step2.jpg',t:'Главная страница портала',d:'Очередь на ваучер, каталог садиков, статистика. Справа вверху меняется город и язык. Там же кнопки «Регистрация» и «Вход».'},
  {img:'vaucher/step3.jpg',t:'Вход в личный кабинет',d:'Если аккаунт есть — «Вход», логин и пароль. Забыли пароль — восстановление по номеру телефона через СМС-код.'},
- {img:'vaucher/step4.jpg',t:'Уведомление о ваучере',d:'Когда подойдёт очередь, придёт уведомление. Подтвердить нужно за 2 рабочих дня — иначе ваучер аннулируется, а заявление уйдёт в стоп-лист.'},
+ {img:'vaucher/step4.jpg',t:'Уведомление о ваучере',d:'Когда подойдёт очередь, придёт уведомление. Подтвердить нужно за 2 рабочих дня, иначе ваучер придётся ждать заново.'},
  {img:'vaucher/step5.jpg',t:'Подтверждение',d:'«Выбрать» → «Да». После этого 5 рабочих дней на выбор садика и договор. На 5-й день можно продлить ещё на 2 дня.'},
  {img:'vaucher/step6.jpg',t:'Выбор садика',d:'«Выбрать ДО» → нужный садик → «Зачислиться» → укажите ребёнка и группу → «Подтвердить».'},
  {img:'vaucher/step7.jpg',t:'Договор и документы',d:'Статус сменится на «Ожидайте договор от ДО». Садик пришлёт договор — заполните, приложите документы, подпишите ЭЦП.'},
@@ -2034,9 +2034,10 @@ function renderVaucher(){
       </div>
       <button class="btn-primary" style="flex:none;padding:10px 16px;font-size:13px" onclick="closeModal();filters.gosorder=true;syncChips();refresh(true);scrollResults();">Показать их</button>
     </div>
-    <div style="background:#FAEEDA;border-radius:12px;padding:12px 14px;margin:0 0 16px">
-      <div style="font-weight:800;color:#412402;font-size:14px;margin-bottom:3px">⏳ Сроки горят</div>
-      <div style="font-size:12.5px;color:#854F0B;line-height:1.6">2 рабочих дня на подтверждение ваучера и 5 рабочих дней на выбор садика. Пропустите — ваучер сгорит, и в очередь придётся вставать заново.</div>
+    <div style="background:#FAEEDA;border-radius:12px;padding:13px 15px;margin:0 0 16px">
+      <div style="font-weight:800;color:#412402;font-size:14.5px;margin-bottom:5px">📌 Как не потерять ваучер</div>
+      <div style="font-size:13px;color:#854F0B;line-height:1.65;margin-bottom:9px">После уведомления есть 2 рабочих дня, чтобы подтвердить ваучер, и ещё 5 рабочих дней на выбор садика. Если не успеть, очередь начинается заново.</div>
+      <div style="font-size:12.5px;color:#854F0B;line-height:1.55"><b>Совет:</b> включите уведомления на портале — оно может прийти в выходной.</div>
     </div>
     <div style="font-weight:800;font-size:15px;margin:0 0 8px">Пошагово, со скриншотами портала</div>
     <div style="border:1px solid var(--line-warm);border-radius:12px;overflow:hidden;background:#fff">
