@@ -2024,6 +2024,7 @@ function renderVaucher(){
   const sl=VAUCHER_SLIDES[vSlide];
   const gos=data.filter(x=>x.gosorder).length;
   openModal(`
+    <button class="btn-ghost" onclick="closeModal()" style="padding:7px 13px;font-size:13px;margin-bottom:12px;display:inline-flex;align-items:center;gap:6px">← Назад</button>
     <h2>Что такое ваучер</h2>
     <p class="sub" style="line-height:1.65">Ваучер — это оплата места в частном садике от государства. Очередь больше не назначает конкретный садик: вам приходит ваучер, а куда идти — решаете вы сами. Основные занятия по ваучеру бесплатны, доплата — только за дополнительные кружки по желанию.</p>
     <div style="background:#E1F5EE;border-radius:12px;padding:13px 15px;margin:14px 0;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
@@ -2049,17 +2050,17 @@ function renderVaucher(){
       </div>
     </div>
     <div style="display:flex;gap:8px;margin-top:10px;align-items:center">
-      <button class="btn-ghost" style="flex:none;padding:9px 14px" onclick="vNav(-1)" ${vSlide===0?'disabled style="opacity:.4;flex:none;padding:9px 14px"':''}>← Назад</button>
+      <button class="btn-ghost" style="flex:none;padding:9px 14px" onclick="vNav(-1)" ${vSlide===0?'disabled style="opacity:.4;flex:none;padding:9px 14px"':''} aria-label="Предыдущий шаг">←</button>
       <div style="flex:1;display:flex;gap:5px;justify-content:center">${VAUCHER_SLIDES.map((_,i)=>`<span onclick="vSlide=${i};renderVaucher()" style="width:7px;height:7px;border-radius:50%;cursor:pointer;background:${i===vSlide?'var(--green)':'#DCD5C8'}"></span>`).join('')}</div>
       <button class="btn-primary" style="flex:none;padding:9px 14px" onclick="vNav(1)">${vSlide===VAUCHER_SLIDES.length-1?'В начало':'Далее →'}</button>
     </div>
-    <div style="border-top:1px solid var(--line-warm);margin-top:16px;padding-top:14px">
-      <div style="font-weight:800;font-size:15px;margin-bottom:8px">Документы для договора</div>
-      <div style="font-size:13px;color:var(--ink2);line-height:1.85">🔑 ЭЦП-ключ · 📄 справка 027/у · 📄 свидетельство о рождении · 🪪 удостоверение личности родителя · 🏥 паспорт здоровья 052-2/у · 💉 карта прививок 065/у · 📋 заключение ПМПК (при наличии)</div>
+    <div style="border:1px solid var(--line-warm);border-radius:12px;padding:14px 16px;background:#fff;margin-top:18px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:17px">📁</span><span style="font-size:15px;font-weight:800">Документы для договора</span><span style="font-size:12px;color:var(--ink3);margin-left:auto">7 штук</span></div>
+      <div style="display:flex;flex-direction:column;gap:9px"><div style="display:flex;gap:10px;align-items:center"><span style="width:30px;height:30px;border-radius:8px;background:#E1F5EE;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px">🔑</span><span style="font-size:13.5px;line-height:1.45;">ЭЦП-ключ</span></div><div style="display:flex;gap:10px;align-items:center"><span style="width:30px;height:30px;border-radius:8px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px">📜</span><span style="font-size:13.5px;line-height:1.45;">Свидетельство о рождении</span></div><div style="display:flex;gap:10px;align-items:center"><span style="width:30px;height:30px;border-radius:8px;background:#E6F1FB;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px">🪪</span><span style="font-size:13.5px;line-height:1.45;">Удостоверение личности одного из родителей</span></div><div style="display:flex;gap:10px;align-items:center"><span style="width:30px;height:30px;border-radius:8px;background:#FBEAF0;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px">🩺</span><span style="font-size:13.5px;line-height:1.45;">Справка формы 027/у</span></div><div style="display:flex;gap:10px;align-items:center"><span style="width:30px;height:30px;border-radius:8px;background:#FBEAF0;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px">❤️</span><span style="font-size:13.5px;line-height:1.45;">Паспорт здоровья ребёнка, форма 052-2/у</span></div><div style="display:flex;gap:10px;align-items:center"><span style="width:30px;height:30px;border-radius:8px;background:#FBEAF0;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px">💉</span><span style="font-size:13.5px;line-height:1.45;">Карта профилактических прививок, форма 065/у</span></div><div style="display:flex;gap:10px;align-items:center"><span style="width:30px;height:30px;border-radius:8px;background:#F1EFE8;display:flex;align-items:center;justify-content:center;flex:none;font-size:15px">📋</span><span style="font-size:13.5px;line-height:1.45;color:var(--ink2)">Заключение ПМПК — только при наличии</span></div></div>
     </div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;align-items:center">
       <a class="btn-primary" href="vaucher/instrukciya-vaucher.pdf" download style="flex:none;padding:11px 16px;text-decoration:none;display:inline-block" onclick="track('vaucher_download',{})">⤓ Скачать инструкцию (PDF)</a>
-      <a href="https://wa.me/77473397222" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--ink2);text-decoration:none">Не получается? Контакт-центр в WhatsApp →</a>
+      <a href="https://wa.me/77473397222" target="_blank" rel="noopener" style="font-size:12.5px;color:var(--ink2);text-decoration:none">Вопросы по порталу — техподдержка Balabaqsha: 8 (747) 339-72-22 →</a>
     </div>
     <p class="sub" style="font-size:11.5px;color:var(--ink3);margin-top:12px">Скриншоты и порядок действий — из официальной инструкции портала Smart Nation Balabaqsha.</p>
   `);
