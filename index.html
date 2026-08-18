@@ -160,6 +160,24 @@ window.sadikProps=function(s){
   .viewtog{display:none;border:1px solid var(--line);border-radius:var(--pill);overflow:hidden;background:var(--paper)}
   .viewtog button{border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--ink2);padding:9px 15px;cursor:pointer}
   .viewtog button.on{background:var(--green);color:#fff}
+  .fchip.allf{background:var(--green);color:#fff;border-color:var(--green);font-weight:800}
+  .fchip.allf .afn{background:rgba(255,255,255,.28);border-radius:10px;padding:1px 6px;margin-left:6px;font-size:11px;display:none}
+  .fchip.allf .afn.on{display:inline-block}
+  .fpanel{position:fixed;inset:0;z-index:10000;background:rgba(20,14,6,.45);display:none;align-items:flex-end;justify-content:center}
+  .fpanel.on{display:flex}
+  .fpanel-in{background:#fff;width:100%;max-width:560px;max-height:88vh;overflow-y:auto;border-radius:18px 18px 0 0;padding:18px}
+  @media(min-width:700px){.fpanel{align-items:center}.fpanel-in{border-radius:18px}}
+  .fpanel h3{margin:0;font-size:18px;font-weight:800}
+  .fp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+  .fp-x{border:0;background:none;font-size:22px;line-height:1;cursor:pointer;color:var(--ink3);padding:0 4px}
+  .fp-lab{font-size:12px;color:var(--ink3);margin:0 0 7px;font-weight:600}
+  .fp-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+  .fp-chip{font-size:12.5px;padding:7px 12px;border-radius:20px;border:1px solid var(--line-warm);background:#fff;cursor:pointer;user-select:none;transition:.12s}
+  .fp-chip .cnt{color:var(--ink3);font-size:11px;margin-left:4px}
+  .fp-chip.on{background:var(--green-soft);border-color:var(--green);color:#04342C;font-weight:700}
+  .fp-chip.on .cnt{color:#0F6E56}
+  .fp-chip.zero{opacity:.45}
+  .fp-foot{display:flex;gap:8px;border-top:1px solid var(--line-warm);padding-top:14px;position:sticky;bottom:0;background:#fff}
   .chips{display:flex;gap:7px;flex-wrap:nowrap;margin-top:11px;align-items:center;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:relative}
   .chipgroup{display:flex;gap:6px;flex-wrap:wrap}
   .fchip{font-size:11.5px;font-weight:600;padding:6px 11px;flex:none;border-radius:var(--pill);border:1px solid var(--line);
@@ -777,6 +795,7 @@ window.sadikProps=function(s){
 
 <div class="scrim" id="scrim"></div>
 <aside class="drawer" id="drawer" aria-label="Карточка садика"></aside>
+<div class="fpanel" id="fpanel"><div class="fpanel-in" id="fpanelIn"></div></div>
 <div class="mscrim" id="mscrim"><div class="modal" id="modal"></div></div>
 
 <script>
@@ -946,7 +965,7 @@ const COORDS={zayka:[43.20810,76.91131],kapitoshka:[43.18446,76.90380],sparks:[4
 SEED.forEach(s=>{const c=COORDS[s.id]; if(c){s.lat=c[0];s.lng=c[1];}});
 
 let data=[], favs=[], bookings=[];
-let filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,fav:false,nearKm:null};
+let filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,pool:false,cams:false,salt:false,bus:false,fav:false,nearKm:null};
 let admin=false, map=null, markersLayer=null;
 
 /* ---------- helpers ---------- */
@@ -1012,6 +1031,10 @@ function getFiltered(){
     if(filters.maxPrice){const p=priceNum(s.price);if(p!=null&&p>filters.maxPrice)return false;}
     if(filters.montessori&&!(s.program||'').toLowerCase().includes('монтессори'))return false;
     if(filters.correction&&!s.correction)return false;
+    if(filters.pool&&!/бассейн|плавани/i.test((s.extraClasses||'')+' '+(s.program||'')+' '+(s.medic||'')+' '+(s.notes||'')))return false;
+    if(filters.cams&&!/камер|видеонаблюд|онлайн-?видео|видеобақылау|трансляц/i.test((s.cameras||'')+' '+(s.notes||'')))return false;
+    if(filters.salt&&!/соляная|солевая|тұзды|галотерап/i.test((s.extraClasses||'')+' '+(s.medic||'')+' '+(s.notes||'')))return false;
+    if(filters.bus&&!/развозк|тасымалдау/i.test((s.transport||'')+' '+(s.notes||'')) || (filters.bus&&/развозки нет|нет развозк/i.test((s.transport||''))))return false;
     if(filters.nearKm!=null&&(s._dist==null||s._dist>filters.nearKm))return false;
     if(q){const hay=[s.name,s.address,s.district,s.program,s.extraClasses,s.lang,s.age,s.food,s.medic,s.playground].filter(Boolean).join(' ').toLowerCase();if(!hay.includes(q))return false;}
     return true;
@@ -1120,7 +1143,7 @@ function render(){
   // Reset chip
   const resetChip=document.getElementById('resetChip');
   if(resetChip)resetChip.onclick=()=>{
-    filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,fav:false,nearKm:null};
+    filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,pool:false,cams:false,salt:false,bus:false,fav:false,nearKm:null};
     data.forEach(s=>{delete s._dist;});
     document.getElementById('q').value='';
     const nb=document.querySelector('#filters .nearby');if(nb){nb.textContent='📍 Рядом';nb.classList.remove('on');}
@@ -1855,6 +1878,66 @@ function navPhoto(dir){
   document.getElementById('pvCounter').textContent=(pvIdx+1)+' / '+pvPhotos.length;
 }
 
+/* ---------- панель «Все фильтры» ---------- */
+function countWith(patch){
+  const save=JSON.stringify(filters);
+  Object.assign(filters,patch);
+  const n=getFiltered().length;
+  filters=JSON.parse(save);
+  return n;
+}
+function afActiveCount(){
+  return (filters.lang?1:0)+(filters.license?1:0)+(filters.montessori?1:0)+(filters.correction?1:0)
+        +(filters.pool?1:0)+(filters.cams?1:0)+(filters.salt?1:0)+(filters.bus?1:0);
+}
+function syncAfBadge(){
+  const b=document.getElementById('afCount');if(!b)return;
+  const n=afActiveCount();
+  b.textContent=n||'';b.classList.toggle('on',n>0);
+}
+const FP_LANGS=[['казах','Казахский','Қазақша'],['рус','Русский','Орысша'],['английский','Английский','Ағылшынша']];
+const FP_COND=[['pool','🏊 Бассейн','🏊 Бассейн'],['cams','📹 Камеры онлайн','📹 Онлайн камера'],['salt','🧂 Соляная шахта','🧂 Тұзды шахта'],['bus','🚐 Развозка','🚐 Тасымалдау']];
+const FP_SPEC=[['montessori','🌱 Монтессори','🌱 Монтессори'],['correction','🧩 Коррекционный','🧩 Түзету'],['license','🛡 С лицензией','🛡 Лицензиясы бар']];
+function renderFPanel(){
+  const kz=lang==='kz';
+  const chip=(on,label,cnt,attr)=>`<span class="fp-chip${on?' on':''}${cnt===0?' zero':''}" ${attr}>${label}<span class="cnt">${cnt}</span></span>`;
+  let h=`<div class="fp-head"><h3>${kz?'Барлық сүзгілер':'Все фильтры'}</h3><button class="fp-x" id="fpX" aria-label="${kz?'Жабу':'Закрыть'}">×</button></div>`;
+  h+=`<p class="fp-lab">${kz?'ОҚЫТУ ТІЛІ':'ЯЗЫК ОБУЧЕНИЯ'}</p><div class="fp-row">`;
+  FP_LANGS.forEach(([v,ru,kzl])=>{h+=chip(filters.lang===v,kz?kzl:ru,countWith({lang:v}),`data-fp="lang" data-v="${v}"`)});
+  h+='</div>';
+  h+=`<p class="fp-lab">${kz?'ЖАҒДАЙЛАР':'УСЛОВИЯ'}</p><div class="fp-row">`;
+  FP_COND.forEach(([k,ru,kzl])=>{h+=chip(!!filters[k],kz?kzl:ru,countWith({[k]:true}),`data-fp="${k}"`)});
+  h+='</div>';
+  h+=`<p class="fp-lab">${kz?'МАМАНДАНУ':'СПЕЦИАЛИЗАЦИЯ'}</p><div class="fp-row">`;
+  FP_SPEC.forEach(([k,ru,kzl])=>{
+    const on=k==='license'?filters.license==='verified':!!filters[k];
+    const patch=k==='license'?{license:'verified'}:{[k]:true};
+    h+=chip(on,kz?kzl:ru,countWith(patch),`data-fp="${k}"`);
+  });
+  h+='</div>';
+  h+=`<div class="fp-foot"><button class="btn-ghost" id="fpReset" style="flex:1">${kz?'Тазарту':'Сбросить'}</button><button class="btn-primary" id="fpApply" style="flex:1">${kz?'Көрсету':'Показать'} ${getFiltered().length}</button></div>`;
+  document.getElementById('fpanelIn').innerHTML=h;
+  document.getElementById('fpX').onclick=closeFPanel;
+  document.getElementById('fpApply').onclick=closeFPanel;
+  document.getElementById('fpReset').onclick=()=>{
+    filters.lang='';filters.license='';filters.montessori=false;filters.correction=false;
+    filters.pool=false;filters.cams=false;filters.salt=false;filters.bus=false;
+    syncChips();syncAfBadge();refresh(true);updateResetChip();renderFPanel();
+  };
+  document.querySelectorAll('#fpanelIn .fp-chip').forEach(c=>c.onclick=()=>{
+    const k=c.dataset.fp;
+    if(k==='lang'){const v=c.dataset.v;filters.lang=filters.lang===v?'':v;}
+    else if(k==='license'){filters.license=filters.license?'':'verified';}
+    else filters[k]=!filters[k];
+    syncChips();syncAfBadge();refresh(true);updateResetChip();renderFPanel();
+    track('filter_apply',{filter:k,value:String(c.dataset.v||''),from:'panel',results:getFiltered().length});
+  });
+}
+function openFPanel(){renderFPanel();document.getElementById('fpanel').classList.add('on');track('filters_panel_open',{});}
+function closeFPanel(){document.getElementById('fpanel').classList.remove('on');}
+(function(){const fp=document.getElementById('fpanel');if(fp)fp.onclick=e=>{if(e.target.id==='fpanel')closeFPanel();};})();
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFPanel();});
+
 /* ---------- filters UI ---------- */
 function buildFilters(){
   const wrap=document.getElementById('filters');
@@ -1867,11 +1950,8 @@ function buildFilters(){
     `<span class="fchip district-cycle" data-g="district">${lang==='kz'?'📍 Аудан':'📍 Район'}</span>`+
     `<span class="fchip" data-g="maxPrice" data-v="150000">${lang==='kz'?'💰 150 000-ға дейін':'💰 до 150 000'}</span>`+
     `<span class="fchip gos" data-g="gosorder" data-v="1">${'🍃 Гос. дотация'}</span>`+
-    `<span class="fchip lang-cycle" data-g="lang">${lang==='kz'?'🗣 Тіл':'🗣 Язык'}</span>`+
-    `<span class="fchip" data-g="license" data-v="verified">${lang==='kz'?'🛡 Лицензия':'🛡 Лицензия'}</span>`+
-    `<span class="fchip" data-g="montessori" data-v="1">${lang==='kz'?'🌱 Монтессори':'🌱 Монтессори'}</span>`+
-    `<span class="fchip" data-g="correction" data-v="1">${lang==='kz'?'🧩 Түзету балабақшалар':'🧩 Коррекционный'}</span>`+
     
+    `<span class="fchip allf" id="allFiltersChip">${lang==='kz'?'⚙ Барлық сүзгілер':'⚙ Все фильтры'}<span class="afn" id="afCount"></span></span>`+
     `<span class="fchip reset-chip" id="resetChip" style="display:none">${lang==='kz'?'✕ Қалпына келтіру':'✕ Сбросить'}</span>`;
   // District chip opens dropdown
   const distChip=wrap.querySelector('.district-cycle');
@@ -1914,7 +1994,7 @@ function buildFilters(){
     langDD.innerHTML=[['','Все языки'],['казах','🗣 Казахский'],['рус','🗣 Русский'],['английский','🗣 Английский']].map(([v,l])=>'<button class="dd-item" data-l="'+v+'">'+l+'</button>').join('');
     document.body.appendChild(langDD);
   }
-  langChip.onclick=(e)=>{
+  if(langChip)langChip.onclick=(e)=>{
     e.stopPropagation();
     const distDD2=document.getElementById('distDropdown');
     if(distDD2)distDD2.classList.remove('show');
@@ -1929,13 +2009,13 @@ function buildFilters(){
   langDD.querySelectorAll('.dd-item').forEach(item=>item.onclick=(e)=>{
     e.stopPropagation();
     filters.lang=item.dataset.l;
-    langChip.textContent=langLabels[filters.lang]||'🗣 Язык';
-    langChip.classList.toggle('on',!!filters.lang);
+    if(langChip){langChip.textContent=langLabels[filters.lang]||'🗣 Язык';langChip.classList.toggle('on',!!filters.lang);}
+    syncAfBadge();
     langDD.classList.remove('show');
     refresh(true);updateResetChip();
   });
   // Simple toggle chips
-  wrap.querySelectorAll('.fchip:not(.district-cycle):not(.lang-cycle)').forEach(ch=>ch.onclick=()=>{
+  wrap.querySelectorAll('.fchip:not(.district-cycle):not(.lang-cycle):not(.allf):not(.reset-chip)').forEach(ch=>ch.onclick=()=>{
     const g=ch.dataset.g;
     if(g==='fav')filters.fav=!filters.fav;
     else if(g==='gosorder')filters.gosorder=!filters.gosorder;
@@ -1947,6 +2027,9 @@ function buildFilters(){
     refresh(true);updateResetChip();
     track('filter_apply',{filter:g,value:String(ch.dataset.v||''),active:ch.classList.contains('on'),results:getFiltered().length});
   });
+  const afChip=document.getElementById('allFiltersChip');
+  if(afChip)afChip.onclick=openFPanel;
+  syncAfBadge();
   // Hero district chips (keep simple)
   const hc=document.getElementById('heroChips');
   hc.innerHTML=dlist.map(d=>`<span class="hchip" data-d="${d}">📍 ${d}</span>`).join('');
@@ -1997,7 +2080,7 @@ function buildFilters(){
   // Reset chip
   const resetChip=document.getElementById('resetChip');
   if(resetChip)resetChip.onclick=()=>{
-    filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,fav:false,nearKm:null};
+    filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,pool:false,cams:false,salt:false,bus:false,fav:false,nearKm:null};
     data.forEach(s=>{delete s._dist;});
     document.getElementById('q').value='';
     const nb=wrap.querySelector('.nearby');if(nb){nb.textContent='📍 Рядом';nb.classList.remove('on');}
@@ -2026,7 +2109,7 @@ function syncChips(){
   wrap.querySelectorAll('.fchip[data-g="fav"]').forEach(c=>c.classList.toggle('on',!!filters.fav));
 }
 function resetAll(){
-  filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,fav:false,nearKm:null};
+  filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,pool:false,cams:false,salt:false,bus:false,fav:false,nearKm:null};
   document.getElementById('q').value='';document.getElementById('heroq').value='';
   document.getElementById('sort').value='reco';
   syncChips();refresh(true);
@@ -2260,7 +2343,7 @@ document.querySelectorAll('.bni').forEach(btn=>btn.onclick=()=>{
   // Always exit map first
   const ly=document.querySelector('.layout');
   if(tab!=='map'&&ly){ly.classList.remove('show-map');ly.classList.add('show-list');}
-  if(tab==='home'){filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,fav:false,nearKm:null};syncChips();refresh(true);window.scrollTo({top:0,behavior:'smooth'});}
+  if(tab==='home'){filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,pool:false,cams:false,salt:false,bus:false,fav:false,nearKm:null};syncChips();refresh(true);window.scrollTo({top:0,behavior:'smooth'});}
   else if(tab==='search'){document.getElementById('q').focus();document.getElementById('results').scrollIntoView({behavior:'smooth'});}
   else if(tab==='map'){document.getElementById('results').scrollIntoView({behavior:'smooth'});if(window.innerWidth<=980&&ly){ly.classList.remove('show-list');ly.classList.add('show-map');history.pushState({map:true},'');}setTimeout(()=>{if(map){map.invalidateSize();renderMap(true);}else{renderMap(true);}},120);}
   else if(tab==='favs'){filters.fav=!filters.fav;syncChips();refresh(true);document.getElementById('results').scrollIntoView({behavior:'smooth'});btn.classList.toggle('on',filters.fav);}
