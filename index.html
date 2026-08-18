@@ -160,6 +160,17 @@ window.sadikProps=function(s){
   .viewtog{display:none;border:1px solid var(--line);border-radius:var(--pill);overflow:hidden;background:var(--paper)}
   .viewtog button{border:0;background:none;font:inherit;font-size:13px;font-weight:700;color:var(--ink2);padding:9px 15px;cursor:pointer}
   .viewtog button.on{background:var(--green);color:#fff}
+  .nearbysec h4{font-size:15px;font-weight:800;color:var(--ink)}
+  .nb-list{display:flex;flex-direction:column;gap:7px}
+  .nb-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:#fff;border:1px solid var(--line-warm);border-radius:12px;padding:9px 11px;cursor:pointer;font-family:inherit;transition:.12s}
+  .nb-item:hover{border-color:var(--green);background:#FBFDFB}
+  .nb-logo{width:38px;height:38px;border-radius:50%;background:var(--plate);flex:none;display:grid;place-items:center;overflow:hidden}
+  .nb-logo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+  .nb-mono{font-weight:800;color:var(--ink2);font-size:15px}
+  .nb-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .nb-txt b{font-size:13.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
+  .nb-txt span{font-size:12px;color:var(--ink2)}
+  .nb-arr{color:var(--green);font-weight:800;flex:none}
   .fchip.allf{background:var(--green);color:#fff;border-color:var(--green);font-weight:800}
   .fchip.allf .afn{background:rgba(255,255,255,.28);border-radius:10px;padding:1px 6px;margin-left:6px;font-size:11px;display:none}
   .fchip.allf .afn.on{display:inline-block}
@@ -1391,12 +1402,46 @@ function openProfile(id){
           <div class="licicon ${t_.cls}">🛡</div>
           <div class="lictxt"><b>${t_.label}</b><span>${licDesc}${s.licenseNo?' № '+esc(s.licenseNo):''}</span></div>
         </div>
+        ${nearbyHtml(s)}
       </div>
     </div>
   </div>`;
   openDrawer();
   d.querySelector('#closeX').onclick=closeDrawer;
   d.querySelector('#pFav').onclick=async()=>{await toggleFav(id);d.querySelector('#pFav').innerHTML=(isFav(id)?APPLE_FILL:APPLE_OUTLINE)+' '+(isFav(id)?t('inFav'):t('saveFav'));render();};
+}
+
+/* ---------- «Ещё садики рядом» ---------- */
+function distKm(a,b){
+  const R=6371,rad=Math.PI/180;
+  const dLat=(b.lat-a.lat)*rad,dLng=(b.lng-a.lng)*rad;
+  const A=Math.sin(dLat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLng/2)**2;
+  return 2*R*Math.asin(Math.min(1,Math.sqrt(A)));
+}
+function nearbySadiks(s,limit){
+  if(!s.lat||!s.lng)return [];
+  return data.filter(x=>x.id!==s.id&&x.lat&&x.lng)
+    .map(x=>({s:x,d:distKm(s,x)}))
+    .sort((a,b)=>a.d-b.d).slice(0,limit||4);
+}
+function fmtDist(km){return km<1?Math.round(km*1000)+' м':(Math.round(km*10)/10).toString().replace('.',',')+' км';}
+function nearbyHtml(s){
+  const list=nearbySadiks(s,4);
+  if(!list.length)return '';
+  const kz=lang==='kz';
+  const rows=list.map(({s:n,d})=>{
+    const price=n.price?esc(n.price).replace(/\s*\/.*$/,'').replace(/\s*\(.*?\)/,'').replace(/\s*—.*$/,'').trim():(kz?'сұраныс бойынша':'цена не указана');
+    const logo=n.logo?`<img src="${n.logo}" alt="" onerror="this.style.visibility='hidden'">`:`<span class="nb-mono">${esc((n.name||'?').trim().charAt(0))}</span>`;
+    return `<button class="nb-item" onclick="openProfile('${n.id}')">
+      <span class="nb-logo">${logo}</span>
+      <span class="nb-txt"><b>${esc(n.name)}</b><span>${fmtDist(d)} · ${price}</span></span>
+      <span class="nb-arr">→</span>
+    </button>`;
+  }).join('');
+  return `<div class="bc nearbysec" style="grid-column:1/-1;padding:14px 16px">
+    <h4 style="margin:0 0 10px">${kz?'Жақын жердегі басқа балабақшалар':'Ещё садики рядом'}</h4>
+    <div class="nb-list">${rows}</div>
+  </div>`;
 }
 
 /* ---------- editor (owner mode) ---------- */
