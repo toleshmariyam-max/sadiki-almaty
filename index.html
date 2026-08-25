@@ -533,6 +533,30 @@ window.sadikProps=function(s){
     .herosearch{flex-wrap:wrap;border-radius:20px;padding:10px 14px}
     .btn-find{width:100%}
   }
+
+  /* ---------- ДЕСКТОП: компактный первый экран ----------
+     Всё внутри этого блока видит только экран шире 981 px.
+     Телефоны и планшеты (до 980 px) эти правила не читают. */
+  @media(min-width:981px){
+    .hero-art{display:none}
+    .hero-in{grid-template-columns:1fr;padding:22px 20px 16px;gap:0}
+    .hero .eyebrow{display:none}
+    .hero h1{font-size:32px;max-width:none;margin:0;line-height:1.12}
+    .hero .lede{display:none}
+    .hero .herochips{display:none}
+    .herosearch{margin-top:14px;max-width:640px}
+    .herostats{margin-top:14px;gap:26px}
+    .hstat b{font-size:18px}
+    .hstat span{font-size:12px}
+    .stories{display:none}
+    .bottomnav{display:none}
+    body{padding-bottom:0}
+    .mapcol{top:120px}
+    #map{height:calc(100vh - 190px);min-height:420px}
+  }
+  @media(min-width:1240px){
+    .grid{grid-template-columns:repeat(3,1fr)}
+  }
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important;scroll-behavior:auto!important;transition:none!important}
   }
@@ -648,7 +672,7 @@ window.sadikProps=function(s){
   <div class="hero-in">
     <div class="hero-copy">
       <span class="eyebrow">🍎 Детские сады Алматы</span>
-      <h1>Найдите садик, где ребёнку будет <em>хорошо</em></h1>
+      <h1>Частные садики Алматы — <em>сразу с ценами</em></h1>
       <p class="lede">Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и напишите ему напрямую в WhatsApp.</p>
       <div class="herosearch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -659,8 +683,8 @@ window.sadikProps=function(s){
       <div class="herochips" id="heroChips"></div>
       <div class="herostats">
         <div class="hstat"><b id="stTotal">0</b><span>садиков в каталоге</span></div>
-        <div class="hstat"><b id="stDistricts">5</b><span>районов города</span></div>
-        <div class="hstat"><b>Бесплатно</b><span>подбор и заявка</span></div>
+        <div class="hstat"><b id="stPrice">0</b><span>с указанной ценой</span></div>
+        <div class="hstat"><b id="stVoucher">0</b><span>принимают ваучер</span></div>
       </div>
     </div>
     <div class="hero-art" aria-hidden="true">
@@ -760,8 +784,7 @@ window.sadikProps=function(s){
   <button class="story" onclick="showStory(0)"><div class="circle"><div class="inner" style="background:#f0fdf4">🔍</div></div><div class="sname" id="sn0">Как найти садик</div></button>
   <button class="story" onclick="showStory(1)"><div class="circle"><div class="inner" style="background:#fef3c7">⚡</div></div><div class="sname" id="sn1">Фильтры</div></button>
   <button class="story" onclick="showStory(2)"><div class="circle"><div class="inner" style="background:#fce7f3">❤️</div></div><div class="sname" id="sn2">Избранное</div></button>
-  <button class="story" onclick="showStory(3)"><div class="circle"><div class="inner" style="background:#e0e7ff">📝</div></div><div class="sname" id="sn3">WhatsApp</div></button>
-  <button class="story" onclick="showStory(4)"><div class="circle"><div class="inner" style="background:#dcfce7">💬</div></div><div class="sname" id="sn4">WhatsApp</div></button>
+  <button class="story" onclick="showStory(3)"><div class="circle"><div class="inner" style="background:#dcfce7">💬</div></div><div class="sname" id="sn3">WhatsApp</div></button>
 </div>
 
 <button class="map-back" onclick="var ly=document.querySelector('.layout');ly.classList.remove('show-map');ly.classList.add('show-list');document.querySelectorAll('.bni').forEach(b=>b.classList.remove('on'));document.querySelector('.bni[data-tab=home]').classList.add('on');window.scrollTo({top:0});" id="mapBackBtn">← Назад к списку</button>
@@ -1145,7 +1168,12 @@ function render(){
   }
   // stats
   document.getElementById('stTotal').textContent=data.length;
-  document.getElementById('stDistricts').textContent=new Set(data.map(s=>s.district).filter(Boolean)).size||DISTRICTS.length;
+  const elP=document.getElementById('stPrice');
+  if(elP)elP.textContent=data.filter(x=>x.price&&String(x.price).trim()).length;
+  const elV=document.getElementById('stVoucher');
+  if(elV)elV.textContent=data.filter(x=>x.gosorder).length;
+  const elD=document.getElementById('stDistricts');
+  if(elD)elD.textContent=new Set(data.map(s=>s.district).filter(Boolean)).size||DISTRICTS.length;
   const cl=document.getElementById('countline');
   cl.innerHTML=lang==='kz'?`<b>${list.length}</b> балабақша табылды${activeFilterText()}`:`Найдено <b>${list.length}</b> ${plural(list.length,'садик','садика','садиков')}${activeFilterText()}`;
   // bind
@@ -1939,7 +1967,7 @@ function renderRecent(){
   const rv=getRecentlyViewed();
   const sec=document.getElementById('recentSection');
   const list=document.getElementById('recentList');
-  if(!rv.length||!sec||!list){if(sec)sec.style.display='none';return;}
+  if(rv.length<2||!sec||!list){if(sec)sec.style.display='none';return;}
   sec.style.display='block';
   list.innerHTML=rv.map(id=>{
     const s=data.find(x=>x.id===id);
@@ -2640,14 +2668,12 @@ const STORIES_RU=[
   {icon:'🔍',title:'Найди садик',desc:'Используй поиск по названию или выбери район в фильтрах. Мы покажем все садики рядом с домом.'},
   {icon:'⚡',title:'Фильтры',desc:'Фильтруй по цене, языку, госзаказу и наличию лицензии. Найди именно то, что нужно.'},
   {icon:'❤️',title:'Избранное',desc:'Нажми на сердечко, чтобы сохранить садик. Потом сравнишь все сохранённые в разделе «Избранное».'},
-  {icon:'💬',title:'Напиши садику',desc:'Открой карточку садика и нажми «Написать в WhatsApp» — сообщение уже готово.'},
-  {icon:'💬',title:'WhatsApp',desc:'Напиши садику напрямую в WhatsApp — кнопка в карточке. Сообщение уже готово!'},
+  {icon:'💬',title:'WhatsApp',desc:'Открой карточку садика и нажми «Написать в WhatsApp» — сообщение уже готово.'},
 ];
 const STORIES_KZ=[
   {icon:'🔍',title:'Балабақшаны тап',desc:'Атауы бойынша іздеңіз немесе фильтрден аудан таңдаңыз. Үйге жақын барлық балабақшаны көрсетеміз.'},
   {icon:'⚡',title:'Сүзгілер',desc:'Баға, тіл, мемтапсырыс және лицензия бойынша сүзіңіз. Дәл қажетті нәтижені табыңыз.'},
   {icon:'❤️',title:'Таңдаулылар',desc:'Балабақшаны сақтау үшін жүрекшеге басыңыз. Барлық сақталғандарды «Таңдаулылар» бөлімінен табасыз.'},
-  {icon:'📝',title:'Экскурсияға жазыл',desc:'Балабақша карточкасындағы «Жазылу» батырмасын басыңыз — сынақ күніне өтінім қалдырыңыз.'},
   {icon:'💬',title:'WhatsApp',desc:'Балабақшаға тікелей WhatsApp арқылы жазыңыз — карточкадағы батырма арқылы. Хабарлама дайын!'},
 ];
 function getStories(){return lang==='kz'?STORIES_KZ:STORIES_RU;}
