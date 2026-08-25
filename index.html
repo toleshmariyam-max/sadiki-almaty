@@ -155,8 +155,8 @@ window.sadikProps=function(s){
   .tb-search input{border:0;outline:0;background:none;flex:1;font:inherit;font-size:14px;min-width:0}
   /* ---------- SEARCH SUGGESTIONS ---------- */
   .sugg{position:fixed;background:var(--paper);border:1px solid var(--line-warm);
-    border-radius:16px;box-shadow:var(--sh-lg);z-index:1200;display:none;
-    max-height:min(58vh,360px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+    border-radius:16px;box-shadow:var(--sh-lg);z-index:3000;display:none;
+    max-height:360px;overflow-y:auto;-webkit-overflow-scrolling:touch}
   .sugg.on{display:block}
   .sgi{display:flex;gap:10px;align-items:center;padding:10px 12px;cursor:pointer;
     border-bottom:1px solid var(--line2)}
@@ -2452,14 +2452,32 @@ function renderSugg(box,q){
 function placeSugg(box,anchor){
   if(!anchor)return;
   var r=anchor.getBoundingClientRect();
-  box.style.left=r.left+'px';
-  box.style.width=r.width+'px';
-  box.style.top=(r.bottom+6)+'px';
+  var vw=window.innerWidth||document.documentElement.clientWidth;
+  var vh=window.innerHeight||document.documentElement.clientHeight;
+  var w=Math.min(r.width,vw-16);
+  var left=Math.max(8,Math.min(r.left,vw-w-8));
+  box.style.left=left+'px';
+  box.style.width=w+'px';
+  var pad=84; /* запас под нижнюю панель навигации */
+  var below=vh-r.bottom-pad-8;
+  var above=r.top-14;
+  if(below<170&&above>below){
+    box.style.top='auto';
+    box.style.bottom=(vh-r.top+6)+'px';
+    box.style.maxHeight=Math.max(150,Math.min(360,above))+'px';
+  }else{
+    box.style.bottom='auto';
+    box.style.top=(r.bottom+6)+'px';
+    box.style.maxHeight=Math.max(150,Math.min(360,below))+'px';
+  }
 }
 function wireSugg(inputId,boxId,anchorSel){
   var inp=document.getElementById(inputId),box=document.getElementById(boxId);
   if(!inp||!box)return;
   var anchor=inp.closest(anchorSel)||inp;
+  /* .toolbar и .topbar используют backdrop-filter — он превращается в контейнер для position:fixed
+     и запирает выпадашку под собой. Поэтому переносим её в конец <body>. */
+  if(box.parentNode!==document.body)document.body.appendChild(box);
   function show(){renderSugg(box,inp.value);if(box.classList.contains('on'))placeSugg(box,anchor);}
   function hide(){box.classList.remove('on');}
   inp.addEventListener('input',show);
