@@ -153,6 +153,26 @@ window.sadikProps=function(s){
     border:1px solid var(--line);border-radius:var(--pill);padding:9px 16px}
   .tb-search svg{width:17px;height:17px;color:var(--ink3);flex:none}
   .tb-search input{border:0;outline:0;background:none;flex:1;font:inherit;font-size:14px;min-width:0}
+  /* ---------- SEARCH SUGGESTIONS ---------- */
+  .sugg{position:fixed;background:var(--paper);border:1px solid var(--line-warm);
+    border-radius:16px;box-shadow:var(--sh-lg);z-index:1200;display:none;
+    max-height:min(58vh,360px);overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .sugg.on{display:block}
+  .sgi{display:flex;gap:10px;align-items:center;padding:10px 12px;cursor:pointer;
+    border-bottom:1px solid var(--line2)}
+  .sgi:last-child{border-bottom:0}
+  .sgi:hover,.sgi.sel{background:var(--plate)}
+  .sgi .av{width:36px;height:36px;border-radius:50%;background:var(--plate);flex:none;
+    display:grid;place-items:center;overflow:hidden;font-weight:700;color:var(--green);font-size:13px}
+  .sgi .av img{width:100%;height:100%;object-fit:cover}
+  .sgi .tx{flex:1;min-width:0}
+  .sgi .nm{font-size:14px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sgi .ad{font-size:11.5px;color:var(--ink3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+  .sgi .pr{font-size:13px;font-weight:700;color:var(--ink);flex:none;white-space:nowrap}
+  .sugg mark{background:var(--apricot-soft);color:inherit;border-radius:3px;padding:0 1px}
+  .sugg .allr{padding:11px 12px;text-align:center;font-size:13px;font-weight:700;
+    color:var(--green);cursor:pointer;background:var(--plate);border-top:1px solid var(--line2)}
+  .sugg .nores{padding:16px 14px;font-size:13px;color:var(--ink3);text-align:center;line-height:1.5}
   .selwrap{position:relative}
   select.sortsel{font:inherit;font-size:13.5px;font-weight:600;border:1px solid var(--line);
     background:var(--paper);color:var(--ink);border-radius:var(--pill);padding:10px 34px 10px 15px;cursor:pointer;appearance:none}
@@ -634,6 +654,7 @@ window.sadikProps=function(s){
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <input id="heroq" placeholder="Название или адрес — например, «Капитошка» или «Мирас»" aria-label="Поиск садика">
         <button class="btn-find" id="heroFind">Показать</button>
+        <div class="sugg" id="suggHero" role="listbox"></div>
       </div>
       <div class="herochips" id="heroChips"></div>
       <div class="herostats">
@@ -751,6 +772,7 @@ window.sadikProps=function(s){
         <div class="tb-search">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           <input id="q" placeholder="Поиск по названию или адресу…" aria-label="Поиск">
+          <div class="sugg" id="suggTb" role="listbox"></div>
         </div>
         <div class="selwrap">
           <select id="sort" class="sortsel" aria-label="Сортировка">
@@ -1053,7 +1075,7 @@ function getFiltered(){
     if(filters.salt&&!/соляная|солевая|тұзды|галотерап/i.test((s.extraClasses||'')+' '+(s.medic||'')+' '+(s.notes||'')))return false;
     if(filters.bus&&!/развозк|тасымалдау/i.test((s.transport||'')+' '+(s.notes||'')) || (filters.bus&&/развозки нет|нет развозк/i.test((s.transport||''))))return false;
     if(filters.nearKm!=null&&(s._dist==null||s._dist>filters.nearKm))return false;
-    if(q){const hay=[s.name,s.address,s.district,s.program,s.extraClasses,s.lang,s.age,s.food,s.medic,s.playground].filter(Boolean).join(' ').toLowerCase();if(!hay.includes(q))return false;}
+    if(q){const toks=searchTokens(q);if(toks.length){const hay=sadikHay(s);for(let i=0;i<toks.length;i++){if(!tokenHit(hay,toks[i]))return false;}}}
     return true;
   });
   const nearOn=document.querySelector('.fchip.nearby')&&document.querySelector('.fchip.nearby').classList.contains('on');
@@ -2321,6 +2343,159 @@ function geolocate(){
   },()=>alert('Геолокацию не удалось получить — листайте карту вручную.'));
 }
 
+/* ---------- поиск: нормализация и подсказки ---------- */
+/* «ё» → «е», апострофы и пунктуация выкидываются, всё в нижний регистр */
+function normText(v){
+  return (v==null?'':String(v)).toLowerCase()
+    .replace(/[ёЁ]/g,'е')
+    .replace(/[’'`´]/g,'')
+    .replace(/[^a-zа-я0-9]+/g,' ')
+    .trim();
+}
+/* запрос дробится на слова: ищем садики, где встречается КАЖДОЕ */
+function searchTokens(q){
+  return normText(q).split(' ').filter(function(w){return w.length>=1;});
+}
+/* всё текстовое поле карточки в одну строку (кэшируется) */
+function sadikHay(s){
+  if(s._hay!=null)return s._hay;
+  s._hay=normText([s.name,s.address,s.district,s.program,s.extraClasses,s.lang,
+    s.langGroups,s.age,s.food,s.medic,s.playground,s.transport,s.cameras,s.notes]
+    .filter(Boolean).join(' '));
+  return s._hay;
+}
+/* слово найдено, если встречается целиком или как основа (садики → садик, toddlers → toddler) */
+function tokenHit(hay,w){
+  if(hay.indexOf(w)>=0)return true;
+  if(w.length>=5){
+    for(var k=1;k<=2;k++){
+      var st=w.slice(0,w.length-k);
+      if(st.length>=4&&hay.indexOf(st)>=0)return true;
+    }
+  }
+  return false;
+}
+function suggMatches(toks){
+  if(!toks.length)return [];
+  return data.filter(function(s){
+    var hay=sadikHay(s);
+    for(var i=0;i<toks.length;i++){if(!tokenHit(hay,toks[i]))return false;}
+    return true;
+  });
+}
+/* сортировка подсказок: сначала те, чьё НАЗВАНИЕ начинается с запроса */
+function stemsOf(w){
+  var a=[w];
+  if(w.length>=5){a.push(w.slice(0,w.length-1));if(w.length>=6)a.push(w.slice(0,w.length-2));}
+  return a;
+}
+function startsAny(str,w){
+  return stemsOf(w).some(function(x){return str.indexOf(x)===0;});
+}
+function suggRank(s,toks){
+  var nm=normText(s.name);
+  var first=toks[0];
+  var words=nm.split(' ');
+  var inName=toks.every(function(w){return stemsOf(w).some(function(x){return nm.indexOf(x)>=0;});});
+  if(startsAny(nm,first))return 0;
+  if(words.some(function(p){return startsAny(p,first);}))return 1;
+  if(inName)return 2;
+  return 3;
+}
+function hlName(name,toks){
+  var out=esc(name);
+  for(var i=0;i<toks.length&&i<3;i++){
+    var w=toks[i];if(w.length<1)continue;
+    var pat=w.split('').map(function(ch){
+      if(ch==='е')return '[еЕёЁ]';
+      return ch.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    }).join('');
+    try{out=out.replace(new RegExp('('+pat+')(?![^<]*>)','ig'),'<mark>$1</mark>');}catch(e){}
+  }
+  return out;
+}
+function shortPrice(p){
+  if(!p)return '';
+  var m=String(p).match(/[\d\s ]{4,}/);
+  return m?m[0].trim()+' ₸':'';
+}
+function renderSugg(box,q){
+  var toks=searchTokens(q);
+  if(!toks.length){box.classList.remove('on');box.innerHTML='';return;}
+  var all=suggMatches(toks);
+  if(!all.length){
+    box.innerHTML='<div class="nores">Такого садика у нас пока нет.<br>Напишите нам — добавим.</div>';
+    box.classList.add('on');return;
+  }
+  var ranked=all.slice().sort(function(a,b){
+    var d=suggRank(a,toks)-suggRank(b,toks);
+    if(d)return d;
+    return String(a.name||'').localeCompare(String(b.name||''),'ru');
+  });
+  /* сначала совпадения в названии и адресе; совпадения по описанию добираем, только если первых мало */
+  var strong=[],weak=[];
+  ranked.forEach(function(x){(suggRank(x,toks)<=2?strong:weak).push(x);});
+  var list=strong.slice(0,7);
+  if(list.length<3)list=list.concat(weak.slice(0,3-list.length));
+  var h=list.map(function(s){
+    var av=s.logo?'<img src="'+s.logo+'" alt="" onerror="this.remove()">':esc(String(s.name||'?').trim().charAt(0));
+    var pr=shortPrice(s.price);
+    return '<div class="sgi" role="option" data-id="'+s.id+'">'+
+      '<div class="av">'+av+'</div>'+
+      '<div class="tx"><div class="nm">'+hlName(s.name||'',toks)+'</div>'+
+      '<div class="ad">'+esc([s.district,s.address].filter(Boolean).join(' · '))+'</div></div>'+
+      (pr?'<div class="pr">'+pr+'</div>':'')+'</div>';
+  }).join('');
+  if(all.length>list.length)h+='<div class="allr" data-all="1">Показать все '+all.length+'</div>';
+  box.innerHTML=h;box.classList.add('on');
+}
+function placeSugg(box,anchor){
+  if(!anchor)return;
+  var r=anchor.getBoundingClientRect();
+  box.style.left=r.left+'px';
+  box.style.width=r.width+'px';
+  box.style.top=(r.bottom+6)+'px';
+}
+function wireSugg(inputId,boxId,anchorSel){
+  var inp=document.getElementById(inputId),box=document.getElementById(boxId);
+  if(!inp||!box)return;
+  var anchor=inp.closest(anchorSel)||inp;
+  function show(){renderSugg(box,inp.value);if(box.classList.contains('on'))placeSugg(box,anchor);}
+  function hide(){box.classList.remove('on');}
+  inp.addEventListener('input',show);
+  inp.addEventListener('focus',function(){if(inp.value.trim())show();});
+  inp.addEventListener('keydown',function(e){
+    var list=[].slice.call(box.querySelectorAll('.sgi'));
+    if(e.key==='Escape'){hide();return;}
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){
+      if(!list.length)return;e.preventDefault();
+      var i=list.findIndex(function(x){return x.classList.contains('sel');});
+      list.forEach(function(x){x.classList.remove('sel');});
+      i=e.key==='ArrowDown'?(i+1)%list.length:(i<=0?list.length-1:i-1);
+      list[i].classList.add('sel');list[i].scrollIntoView({block:'nearest'});
+      return;
+    }
+    if(e.key==='Enter'){
+      var sel=box.querySelector('.sgi.sel');
+      if(sel){e.preventDefault();hide();track('sugg_click',{query:inp.value.trim().toLowerCase(),sadik_id:sel.dataset.id});openProfile(sel.dataset.id);}
+      else hide();
+    }
+  });
+  box.addEventListener('mousedown',function(e){
+    var all=e.target.closest('[data-all]');
+    if(all){e.preventDefault();hide();if(typeof scrollResults==='function')scrollResults();return;}
+    var it=e.target.closest('.sgi');if(!it)return;
+    e.preventDefault();hide();
+    track('sugg_click',{query:inp.value.trim().toLowerCase(),sadik_id:it.dataset.id});
+    openProfile(it.dataset.id);
+  });
+  document.addEventListener('click',function(e){
+    if(e.target!==inp&&!box.contains(e.target))hide();
+  });
+  window.addEventListener('scroll',function(){if(box.classList.contains('on'))placeSugg(box,anchor);},true);
+  window.addEventListener('resize',function(){if(box.classList.contains('on'))placeSugg(box,anchor);});
+}
+
 /* ---------- wiring ---------- */
 function syncHero(){const h=document.getElementById('heroq'),q=document.getElementById('q');q.value=h.value;refresh(false);}
 document.getElementById('heroq').addEventListener('input',()=>{document.getElementById('q').value=document.getElementById('heroq').value;refresh(false);});
@@ -2330,6 +2505,8 @@ let _searchT=null;
 document.getElementById('q').addEventListener('input',()=>{document.getElementById('heroq').value=document.getElementById('q').value;refresh(false);
   clearTimeout(_searchT);_searchT=setTimeout(()=>{const q=document.getElementById('q').value.trim();
     if(q.length>=3)track('search',{query:q.toLowerCase(),results:getFiltered().length,found:getFiltered().length>0});},1200);});
+wireSugg('heroq','suggHero','.herosearch');
+wireSugg('q','suggTb','.tb-search');
 document.getElementById('sort').addEventListener('change',()=>refresh(false));
 document.getElementById('quizBtn').onclick=()=>{track('quiz_start',{});openQuiz();};
 document.getElementById('reqBtn').onclick=openRequests;
