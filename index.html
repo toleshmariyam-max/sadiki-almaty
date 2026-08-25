@@ -185,6 +185,36 @@ window.sadikProps=function(s){
   .mk:hover{transform:scale(1.12)}
   .mk img{width:100%;height:100%;object-fit:cover;border-radius:50%;display:block}
   .mk-ini{font:800 15px/1 'Outfit','Onest',sans-serif;color:#1F8A5B}
+  /* ценовые маркеры на карте */
+  .mkp{display:inline-flex;align-items:center;justify-content:center;gap:3px;background:#fff;
+    border:2px solid #D8CFC0;border-radius:999px;padding:0 9px;height:24px;box-sizing:border-box;
+    font:800 12px/1 'Outfit','Onest',sans-serif;color:#16261D;white-space:nowrap;cursor:pointer;
+    box-shadow:0 2px 6px rgba(70,48,24,.30);transition:transform .12s}
+  .mkp:hover{transform:scale(1.12)}
+  .mkp.gos{background:#FAEEDA;border-color:#B37109;color:#412402}
+  .mkp.noprice{color:#9A9186;font-weight:700;border-color:#E4DACA;background:#FFFDF9;
+    box-shadow:0 1px 4px rgba(70,48,24,.18)}
+  .mk-pop{display:flex;gap:10px;align-items:center;min-width:210px}
+  .mk-pop .pl{width:44px;height:44px;border-radius:50%;background:#F6F1E8;flex:none;overflow:hidden;
+    display:grid;place-items:center;font:800 16px/1 'Outfit',sans-serif;color:#1F8A5B}
+  .mk-pop .pl img{width:100%;height:100%;object-fit:cover;display:block}
+  .mk-pop .pn{font-size:14px;font-weight:700;color:#16261D;line-height:1.2}
+  .mk-pop .pd{font-size:11.5px;color:#8B8377;margin-top:2px}
+  .mk-pop .pp{font-size:15px;font-weight:800;color:#16261D;margin-top:4px}
+  .mkp.far{opacity:.42;filter:grayscale(.5)}
+  .mkp.far:hover{opacity:1;filter:none}
+  .radiusbox{margin:10px 3px 0;background:var(--paper);border:1px solid var(--line-warm);
+    border-radius:14px;padding:11px 13px;box-shadow:var(--sh)}
+  .rb-top{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:var(--ink2);margin-bottom:8px}
+  .rb-top b{font-size:14px;color:var(--ink);font-family:'Outfit',sans-serif}
+  .rb-range{width:100%;-webkit-appearance:none;appearance:none;height:5px;border-radius:5px;
+    background:var(--line-warm);outline:0;cursor:pointer}
+  .rb-range::-webkit-slider-thumb{-webkit-appearance:none;width:17px;height:17px;border-radius:50%;
+    background:#fff;border:4px solid var(--green);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+  .rb-range::-moz-range-thumb{width:17px;height:17px;border-radius:50%;background:#fff;
+    border:4px solid var(--green);cursor:pointer}
+  .rb-scale{display:flex;justify-content:space-between;font-size:9.5px;color:var(--ink3);margin-top:5px}
+  .rb-note{font-size:11px;color:var(--ink2);margin-top:7px}
   .mk-me{width:44px;height:44px;border-radius:50%;background:#1F8A5B;display:grid;place-items:center;font-size:21px;box-shadow:0 0 0 7px rgba(31,138,91,.22),0 2px 8px rgba(0,0,0,.25)}
   .nearbysec h4{font-size:15px;font-weight:800;color:var(--ink)}
   .nb-list{display:flex;flex-direction:column;gap:7px}
@@ -837,10 +867,16 @@ window.sadikProps=function(s){
           <div class="maptitle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3 3 6v15l6-3 6 3 6-3V3l-6 3-6-3Z"/><path d="M9 3v15M15 6v15"/></svg> Садики на карте</div>
           <div id="map"></div>
           <div class="maptools">
-            <span class="leg"><i class="dot" style="background:#1F8A5B"></i> лицензия проверена</span>
-            <span class="leg"><i class="dot" style="background:#8A998F"></i> уточняется</span>
-            <span class="leg"><i class="dot" style="background:#E2553D"></i> нет</span>
+            <span class="leg" id="legPrice">цена в месяц</span>
+            <span class="leg" id="legGos">🎟 принимают ваучер</span>
+            <span class="leg" id="legNo">бледные — цена по запросу</span>
             <button class="nearbtn" id="geoBtn">📍 Рядом со мной</button>
+          </div>
+          <div class="radiusbox" id="radiusBox" style="display:none">
+            <div class="rb-top"><span id="rbLabel">Радиус поиска</span><b id="rbVal">3 км</b></div>
+            <input type="range" class="rb-range" id="rbRange" min="0" max="5" step="1" value="3" aria-label="Радиус поиска">
+            <div class="rb-scale"><span>500 м</span><span>1</span><span>2</span><span>3</span><span>5</span><span>10 км</span></div>
+            <div class="rb-note" id="rbNote"></div>
           </div>
         </div>
       </aside>
@@ -1202,6 +1238,7 @@ function render(){
     nearbyChip.textContent='📍 Ищу...';
     navigator.geolocation.getCurrentPosition(pos=>{
       const lat=pos.coords.latitude,lng=pos.coords.longitude;
+      MYPOS={lat:lat,lng:lng};
       data.forEach(s=>{
         if(s.lat&&s.lng){
           const R=6371,rad=Math.PI/180;
@@ -1230,6 +1267,7 @@ function render(){
   if(resetChip)resetChip.onclick=()=>{
     filters={type:'',district:'',license:'',gosorder:false,maxPrice:null,lang:'',montessori:false,correction:false,pool:false,cams:false,salt:false,bus:false,fav:false,nearKm:null};
     data.forEach(s=>{delete s._dist;});
+    MYPOS=null;
     document.getElementById('q').value='';
     const nb=document.querySelector('#filters .nearby');if(nb){nb.textContent='📍 Рядом';nb.classList.remove('on');}
     syncChips();refresh(true);updateResetChip();
@@ -1253,27 +1291,106 @@ function activeFilterText(){
 }
 
 /* ---------- map ---------- */
+let MYPOS=null, geoLayer=null;
+const RB_STEPS=[0.5,1,2,3,5,10];
 function initMap(){
   map=L.map('map',{scrollWheelZoom:true}).setView([43.215,76.895],12);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'© OpenStreetMap, © CARTO'}).addTo(map);
   markersLayer=L.layerGroup().addTo(map);
+  geoLayer=L.layerGroup().addTo(map);
+}
+/* дом пользователя и круг радиуса */
+function drawGeo(){
+  if(!geoLayer)return;
+  geoLayer.clearLayers();
+  if(!MYPOS)return;
+  const km=filters.nearKm;
+  if(km){
+    L.circle([MYPOS.lat,MYPOS.lng],{radius:km*1000,color:'#1F8A5B',weight:1.5,dashArray:'6 5',
+      fillColor:'#1F8A5B',fillOpacity:.06,interactive:false}).addTo(geoLayer);
+    if(km>0.8)L.circle([MYPOS.lat,MYPOS.lng],{radius:km*500,color:'#5DCAA5',weight:1.5,dashArray:'5 5',
+      fillColor:'#1F8A5B',fillOpacity:.05,interactive:false}).addTo(geoLayer);
+  }
+  L.marker([MYPOS.lat,MYPOS.lng],{icon:L.divIcon({className:'mk-wrap',
+    html:'<span class="mk-me">🏠</span>',iconSize:[44,44],iconAnchor:[22,22],popupAnchor:[0,-24]}),
+    zIndexOffset:2000,interactive:false}).addTo(geoLayer);
+}
+/* ползунок радиуса под картой */
+function syncRadiusBox(){
+  const box=document.getElementById('radiusBox');
+  if(!box)return;
+  if(!MYPOS||filters.nearKm==null){box.style.display='none';return;}
+  box.style.display='block';
+  let i=RB_STEPS.indexOf(filters.nearKm);
+  if(i<0){i=RB_STEPS.findIndex(x=>x>=filters.nearKm); if(i<0)i=RB_STEPS.length-1;}
+  const r=document.getElementById('rbRange');if(r)r.value=String(i);
+  const v=document.getElementById('rbVal');
+  const km=RB_STEPS[i];
+  if(v)v.textContent=km<1?(km*1000)+' м':km+' км';
+  const n=data.filter(x=>x._dist!=null&&x._dist<=km).length;
+  const note=document.getElementById('rbNote');
+  if(note)note.textContent=(lang==='kz'?'осы жерде: ':'в этом радиусе: ')+n+(lang==='kz'?' балабақша':' '+plural(n,'садик','садика','садиков'));
+}
+/* «150 000 ₸/мес» → «150к» для маркера на карте */
+function priceShort(p){
+  if(!p)return null;
+  const t=String(p).replace(/[\s\u00a0]/g,'');
+  const m=t.match(/(\d{4,7})/);
+  if(!m)return null;
+  const n=parseInt(m[1],10);
+  if(!n||n<1000)return null;
+  return Math.round(n/1000)+'к';
 }
 function renderMap(fit){
   if(typeof L==='undefined')return setTimeout(()=>renderMap(fit),60);
   if(!map)initMap();
   markersLayer.clearLayers();
-  const list=getFiltered().filter(s=>s.lat&&s.lng);
+  const inRadius=getFiltered().filter(s=>s.lat&&s.lng);
+  /* когда включён радиус — рисуем и тех, кто за ним, но бледными */
+  let outside=[];
+  if(filters.nearKm!=null){
+    const keepKm=filters.nearKm;
+    filters.nearKm=null;
+    const all=getFiltered().filter(s=>s.lat&&s.lng);
+    filters.nearKm=keepKm;
+    const ids=new Set(inRadius.map(x=>x.id));
+    outside=all.filter(x=>!ids.has(x.id));
+  }
+  const list=inRadius.concat(outside);
+  const farIds=new Set(outside.map(x=>x.id));
   const bounds=[];
   list.forEach(s=>{
-    const color=s.license==='verified'?'#1F8A5B':s.license==='none'?'#E2553D':'#8A998F';
-    const ring=s.gosorder?'#1F8A5B':'#D8CFC0';
-    const inner=s.logo?`<img src="${s.logo}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('span'),{className:'mk-ini',textContent:'${esc((s.name||'?').trim().charAt(0))}'}))">`:`<span class="mk-ini">${esc((s.name||'?').trim().charAt(0))}</span>`;
-    const m=L.marker([s.lat,s.lng],{icon:L.divIcon({className:'mk-wrap',html:`<span class="mk" style="border-color:${ring}">${inner}</span>`,iconSize:[38,38],iconAnchor:[19,19],popupAnchor:[0,-20]})});
-    const price=s.price?esc(s.price):'цена по запросу';
-    m.bindPopup(`<b>${esc(s.name)}</b><br>${TYPES[s.type]} · ${esc(s.district||'')}<br>${price}<br><span style="color:${color};font-weight:700">${(lang==='kz'?{unverified:'лицензия нақтыланбаған',verified:'лицензия тексерілді',none:'лицензия жоқ'}:LIC)[s.license]}</span><br><button class="popbtn" onclick="openProfile('${s.id}')">${lang==='kz'?'Карточканы ашу':'Открыть карточку'}</button>`);
-    m.addTo(markersLayer);bounds.push([s.lat,s.lng]);
+    const ps=priceShort(s.price);
+    const label=ps?(ps+(s.gosorder?' 🎟':'')):(lang==='kz'?'сұраныс б.':'по запросу');
+    const cls='mkp'+(s.gosorder&&ps?' gos':'')+(ps?'':' noprice')+(farIds.has(s.id)?' far':'');
+    const w=Math.max(46,label.length*7.4+20), h=24;
+    const m=L.marker([s.lat,s.lng],{
+      icon:L.divIcon({className:'mk-wrap',html:`<span class="${cls}">${esc(label)}</span>`,
+        iconSize:[w,h],iconAnchor:[w/2,h/2],popupAnchor:[0,-14]}),
+      riseOnHover:true
+    });
+    const logoHtml=s.logo?`<img src="${s.logo}" alt="">`:esc((s.name||'?').trim().charAt(0));
+    const priceFull=s.price?esc(s.price):(lang==='kz'?'бағасы сұраныс бойынша':'цена по запросу');
+    m.bindPopup(`<div class="mk-pop">
+      <div class="pl">${logoHtml}</div>
+      <div>
+        <div class="pn">${esc(s.name)}</div>
+        <div class="pd">${s._dist!=null&&s._dist<900?'<b>'+fmtDist(s._dist)+'</b> · ':''}${esc(s.district||'')}${s.address?' · '+esc(s.address):''}</div>
+        <div class="pp">${priceFull}</div>
+      </div>
+    </div><button class="popbtn" style="margin-top:9px" onclick="openProfile('${s.id}')">${lang==='kz'?'Карточканы ашу':'Открыть карточку'}</button>`);
+    m.addTo(markersLayer);
+    if(s.district!=='За городом'&&!farIds.has(s.id))bounds.push([s.lat,s.lng]);
   });
-  if(fit&&bounds.length)map.fitBounds(bounds,{padding:[36,36],maxZoom:14});
+  /* загородные садики не участвуют в расчёте масштаба, иначе карта уезжает на всю область */
+  drawGeo();
+  syncRadiusBox();
+  if(MYPOS&&filters.nearKm!=null){
+    const c=L.circle([MYPOS.lat,MYPOS.lng],{radius:filters.nearKm*1000});
+    if(fit)map.fitBounds(c.getBounds(),{padding:[24,24]});
+  }
+  else if(fit&&bounds.length)map.fitBounds(bounds,{padding:[36,36],maxZoom:14});
+  else if(fit)map.setView([43.238,76.913],12);
   setTimeout(()=>map.invalidateSize(),60);
 }
 function refresh(fit){render();renderMap(fit);}
@@ -2175,6 +2292,7 @@ function buildFilters(){
     nearbyChip.textContent='📍 Ищу...';
     navigator.geolocation.getCurrentPosition(pos=>{
       const lat=pos.coords.latitude,lng=pos.coords.longitude;
+      MYPOS={lat:lat,lng:lng};
       data.forEach(s=>{
         if(s.lat&&s.lng){
           const R=6371,rad=Math.PI/180;
@@ -2384,7 +2502,8 @@ function geolocate(){
   if(!navigator.geolocation){alert('Геолокация недоступна.');return;}
   navigator.geolocation.getCurrentPosition(pos=>{
     const{latitude,longitude}=pos.coords;if(!map)initMap();
-    L.marker([latitude,longitude],{icon:L.divIcon({className:'mk-wrap',html:'<span class="mk-me">🏠</span>',iconSize:[44,44],iconAnchor:[22,22],popupAnchor:[0,-24]}),zIndexOffset:1000}).addTo(markersLayer).bindPopup(lang==='kz'?'Сіз осындасыз':'Вы здесь').openPopup();
+    MYPOS={lat:latitude,lng:longitude};
+    drawGeo();
     map.setView([latitude,longitude],13);
   },()=>alert('Геолокацию не удалось получить — листайте карту вручную.'));
 }
@@ -2630,6 +2749,17 @@ let _searchT=null;
 document.getElementById('q').addEventListener('input',()=>{document.getElementById('heroq').value=document.getElementById('q').value;refresh(false);
   clearTimeout(_searchT);_searchT=setTimeout(()=>{const q=document.getElementById('q').value.trim();
     if(q.length>=3)track('search',{query:q.toLowerCase(),results:getFiltered().length,found:getFiltered().length>0});},1200);});
+const rbEl=document.getElementById('rbRange');
+if(rbEl)rbEl.addEventListener('input',()=>{
+  const km=RB_STEPS[parseInt(rbEl.value,10)]||3;
+  filters.nearKm=km;
+  const nb=document.querySelector('#filters .nearby');
+  if(nb&&nb.classList.contains('on')){
+    const cnt=data.filter(x=>x._dist!=null&&x._dist<=km).length;
+    nb.textContent=(lang==='kz'?'📍 '+km+' км ішінде: ':'📍 В радиусе '+km+' км: ')+cnt;
+  }
+  render();renderMap(false);
+});
 wireSugg('heroq','suggHero','.herosearch');
 wireSugg('q','suggTb','.tb-search');
 document.getElementById('sort').addEventListener('change',()=>refresh(false));
