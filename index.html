@@ -1075,7 +1075,7 @@ function getFiltered(){
     if(filters.salt&&!/соляная|солевая|тұзды|галотерап/i.test((s.extraClasses||'')+' '+(s.medic||'')+' '+(s.notes||'')))return false;
     if(filters.bus&&!/развозк|тасымалдау/i.test((s.transport||'')+' '+(s.notes||'')) || (filters.bus&&/развозки нет|нет развозк/i.test((s.transport||''))))return false;
     if(filters.nearKm!=null&&(s._dist==null||s._dist>filters.nearKm))return false;
-    if(q){const toks=searchTokens(q);if(toks.length){const hay=sadikHay(s);for(let i=0;i<toks.length;i++){if(!tokenHit(hay,toks[i]))return false;}}}
+    if(q){const toks=searchTokens(q);if(toks.length){const keys=tokenKeys(toks);for(let i=0;i<toks.length;i++){if(!matchToken(s,toks[i],keys[i]))return false;}}}
     return true;
   });
   const nearOn=document.querySelector('.fchip.nearby')&&document.querySelector('.fchip.nearby').classList.contains('on');
@@ -2349,8 +2349,36 @@ function normText(v){
   return (v==null?'':String(v)).toLowerCase()
     .replace(/[ёЁ]/g,'е')
     .replace(/[’'`´]/g,'')
-    .replace(/[^a-zа-я0-9]+/g,' ')
+    .replace(/[^a-zа-яәғқңөұүіһ0-9]+/g,' ')
     .trim();
+}
+/* ---- транслитерация: «болашак» и «bolashaq» приводятся к одному виду ---- */
+var TR_MAP={'а':'a','ә':'a','б':'b','в':'v','г':'g','ғ':'g','д':'d','е':'e','ж':'zh','з':'z',
+ 'и':'i','і':'i','й':'i','к':'k','қ':'k','л':'l','м':'m','н':'n','ң':'n','о':'o','ө':'o',
+ 'п':'p','р':'r','с':'s','т':'t','у':'u','ұ':'u','ү':'u','ф':'f','х':'h','һ':'h','ц':'ts',
+ 'ч':'ch','ш':'sh','щ':'sh','ъ':'','ы':'y','ь':'','э':'e','ю':'yu','я':'ya'};
+function translitKey(v){
+  var t=normText(v),out='';
+  for(var i=0;i<t.length;i++){
+    var ch=t[i];
+    out+=(TR_MAP[ch]!==undefined?TR_MAP[ch]:ch);
+  }
+  /* прячем устойчивые сочетания, чтобы их не поломали правила ниже */
+  out=out.replace(/sch/g,'~1~').replace(/dzh/g,'~4~').replace(/ch/g,'~2~').replace(/sh/g,'~3~')
+         .replace(/zh/g,'~4~').replace(/ts/g,'~5~')
+         .replace(/kh/g,'h').replace(/ph/g,'f').replace(/ck/g,'k')
+         .replace(/q/g,'k').replace(/x/g,'ks').replace(/w/g,'v')
+         .replace(/c/g,'k').replace(/j/g,'~4~').replace(/y/g,'i')
+         .replace(/~1~/g,'sh').replace(/~2~/g,'ch').replace(/~3~/g,'sh')
+         .replace(/~4~/g,'zh').replace(/~5~/g,'ts');
+  /* двойные буквы схлопываем: klassika = klasika */
+  out=out.replace(/([a-z])\1+/g,'$1');
+  return out;
+}
+function sadikKey(s){
+  if(s._key!=null)return s._key;
+  s._key=translitKey(sadikHay(s));
+  return s._key;
 }
 /* запрос дробится на слова: ищем садики, где встречается КАЖДОЕ */
 function searchTokens(q){
@@ -2375,11 +2403,18 @@ function tokenHit(hay,w){
   }
   return false;
 }
-function suggMatches(toks){
+/* слово найдено: как есть, по основе, или в транслите */
+function matchToken(s,w,wk){
+  if(tokenHit(sadikHay(s),w))return true;
+  if(wk&&tokenHit(sadikKey(s),wk))return true;
+  return false;
+}
+function tokenKeys(toks){return toks.map(translitKey);}
+function suggMatches(toks,keys){
   if(!toks.length)return [];
+  keys=keys||tokenKeys(toks);
   return data.filter(function(s){
-    var hay=sadikHay(s);
-    for(var i=0;i<toks.length;i++){if(!tokenHit(hay,toks[i]))return false;}
+    for(var i=0;i<toks.length;i++){if(!matchToken(s,toks[i],keys[i]))return false;}
     return true;
   });
 }
@@ -2392,13 +2427,17 @@ function stemsOf(w){
 function startsAny(str,w){
   return stemsOf(w).some(function(x){return str.indexOf(x)===0;});
 }
-function suggRank(s,toks){
-  var nm=normText(s.name);
-  var first=toks[0];
-  var words=nm.split(' ');
-  var inName=toks.every(function(w){return stemsOf(w).some(function(x){return nm.indexOf(x)>=0;});});
-  if(startsAny(nm,first))return 0;
-  if(words.some(function(p){return startsAny(p,first);}))return 1;
+function suggRank(s,toks,keys){
+  keys=keys||tokenKeys(toks);
+  var nm=normText(s.name),nmk=translitKey(s.name);
+  var f=toks[0],fk=keys[0];
+  var words=nm.split(' '),wordsk=nmk.split(' ');
+  var inName=toks.every(function(w,i){
+    return stemsOf(w).some(function(x){return nm.indexOf(x)>=0;})
+        || stemsOf(keys[i]).some(function(x){return nmk.indexOf(x)>=0;});
+  });
+  if(startsAny(nm,f)||startsAny(nmk,fk))return 0;
+  if(words.some(function(p){return startsAny(p,f);})||wordsk.some(function(p){return startsAny(p,fk);}))return 1;
   if(inName)return 2;
   return 3;
 }
@@ -2422,19 +2461,20 @@ function shortPrice(p){
 function renderSugg(box,q){
   var toks=searchTokens(q);
   if(!toks.length){box.classList.remove('on');box.innerHTML='';return;}
-  var all=suggMatches(toks);
+  var keys=tokenKeys(toks);
+  var all=suggMatches(toks,keys);
   if(!all.length){
     box.innerHTML='<div class="nores">Такого садика у нас пока нет.<br>Напишите нам — добавим.</div>';
     box.classList.add('on');return;
   }
   var ranked=all.slice().sort(function(a,b){
-    var d=suggRank(a,toks)-suggRank(b,toks);
+    var d=suggRank(a,toks,keys)-suggRank(b,toks,keys);
     if(d)return d;
     return String(a.name||'').localeCompare(String(b.name||''),'ru');
   });
   /* сначала совпадения в названии и адресе; совпадения по описанию добираем, только если первых мало */
   var strong=[],weak=[];
-  ranked.forEach(function(x){(suggRank(x,toks)<=2?strong:weak).push(x);});
+  ranked.forEach(function(x){(suggRank(x,toks,keys)<=2?strong:weak).push(x);});
   var cap=(window.innerWidth||1000)<560?5:7;
   var list=strong.slice(0,cap);
   if(list.length<3)list=list.concat(weak.slice(0,3-list.length));
