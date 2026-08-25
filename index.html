@@ -2435,7 +2435,8 @@ function renderSugg(box,q){
   /* сначала совпадения в названии и адресе; совпадения по описанию добираем, только если первых мало */
   var strong=[],weak=[];
   ranked.forEach(function(x){(suggRank(x,toks)<=2?strong:weak).push(x);});
-  var list=strong.slice(0,7);
+  var cap=(window.innerWidth||1000)<560?5:7;
+  var list=strong.slice(0,cap);
   if(list.length<3)list=list.concat(weak.slice(0,3-list.length));
   var h=list.map(function(s){
     var av=s.logo?'<img src="'+s.logo+'" alt="" onerror="this.remove()">':esc(String(s.name||'?').trim().charAt(0));
@@ -2450,26 +2451,36 @@ function renderSugg(box,q){
   box.innerHTML=h;box.classList.add('on');
 }
 function placeSugg(box,anchor){
-  if(!anchor)return;
+  if(!anchor)return true;
   var r=anchor.getBoundingClientRect();
+  var vv=window.visualViewport;
   var vw=window.innerWidth||document.documentElement.clientWidth;
   var vh=window.innerHeight||document.documentElement.clientHeight;
+  /* высота видимой части с учётом открытой клавиатуры */
+  var visTop=0,visBottom=vh;
+  if(vv){visTop=vv.offsetTop||0;visBottom=visTop+vv.height;}
+  /* поле уехало за экран — прячем подсказки */
+  if(r.bottom<visTop+4||r.top>visBottom-4)return false;
+
   var w=Math.min(r.width,vw-16);
   var left=Math.max(8,Math.min(r.left,vw-w-8));
   box.style.left=left+'px';
   box.style.width=w+'px';
-  var pad=84; /* запас под нижнюю панель навигации */
-  var below=vh-r.bottom-pad-8;
-  var above=r.top-14;
-  if(below<170&&above>below){
+
+  var pad=10;
+  var below=visBottom-r.bottom-pad;   /* сколько влезает под полем */
+  var above=r.top-visTop-pad;         /* сколько влезает над полем */
+
+  if(below<150&&above>below){
     box.style.top='auto';
-    box.style.bottom=(vh-r.top+6)+'px';
-    box.style.maxHeight=Math.max(150,Math.min(360,above))+'px';
+    box.style.bottom=(vh-r.top+6)+'px';          /* низ списка = верх поля */
+    box.style.maxHeight=Math.max(120,Math.min(340,above-6))+'px';
   }else{
     box.style.bottom='auto';
-    box.style.top=(r.bottom+6)+'px';
-    box.style.maxHeight=Math.max(150,Math.min(360,below))+'px';
+    box.style.top=(r.bottom+6)+'px';             /* верх списка = низ поля */
+    box.style.maxHeight=Math.max(120,Math.min(340,below-6))+'px';
   }
+  return true;
 }
 function wireSugg(inputId,boxId,anchorSel){
   var inp=document.getElementById(inputId),box=document.getElementById(boxId);
@@ -2478,8 +2489,20 @@ function wireSugg(inputId,boxId,anchorSel){
   /* .toolbar и .topbar используют backdrop-filter — он превращается в контейнер для position:fixed
      и запирает выпадашку под собой. Поэтому переносим её в конец <body>. */
   if(box.parentNode!==document.body)document.body.appendChild(box);
-  function show(){renderSugg(box,inp.value);if(box.classList.contains('on'))placeSugg(box,anchor);}
-  function hide(){box.classList.remove('on');}
+  var raf=null;
+  function track_(){
+    if(!box.classList.contains('on')){raf=null;return;}
+    if(!placeSugg(box,anchor)){hide();return;}
+    raf=requestAnimationFrame(track_);
+  }
+  function show(){
+    renderSugg(box,inp.value);
+    if(box.classList.contains('on')){
+      placeSugg(box,anchor);
+      if(!raf)raf=requestAnimationFrame(track_);
+    }
+  }
+  function hide(){box.classList.remove('on');if(raf){cancelAnimationFrame(raf);raf=null;}}
   inp.addEventListener('input',show);
   inp.addEventListener('focus',function(){if(inp.value.trim())show();});
   inp.addEventListener('keydown',function(e){
@@ -2510,8 +2533,6 @@ function wireSugg(inputId,boxId,anchorSel){
   document.addEventListener('click',function(e){
     if(e.target!==inp&&!box.contains(e.target))hide();
   });
-  window.addEventListener('scroll',function(){if(box.classList.contains('on'))placeSugg(box,anchor);},true);
-  window.addEventListener('resize',function(){if(box.classList.contains('on'))placeSugg(box,anchor);});
 }
 
 /* ---------- wiring ---------- */
