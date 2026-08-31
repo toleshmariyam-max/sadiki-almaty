@@ -417,6 +417,33 @@ window.sadikProps=function(s){
   .bc.reviews b{color:var(--ink)}
   .bc.safety .slist{font-size:13px;color:var(--ink);line-height:1.9}
   .bc.safety .slist span{display:flex;align-items:center;gap:7px}
+  /* окно с просьбой оставить номер после клика в WhatsApp */
+  .leadwrap{position:fixed;inset:0;background:rgba(18,32,24,.55);z-index:4000;display:none;
+    align-items:flex-end;justify-content:center;padding:0}
+  .leadwrap.on{display:flex}
+  @media(min-width:700px){.leadwrap{align-items:center;padding:20px}}
+  .leadbox{background:var(--paper);width:100%;max-width:400px;border-radius:22px 22px 0 0;
+    padding:20px 20px 22px;box-shadow:0 -8px 40px rgba(18,40,28,.28);animation:leadup .22s ease-out}
+  @media(min-width:700px){.leadbox{border-radius:22px;animation:none}}
+  @keyframes leadup{from{transform:translateY(24px);opacity:.4}to{transform:translateY(0);opacity:1}}
+  .leadbox .li{width:46px;height:46px;border-radius:15px;background:var(--green-soft);
+    display:grid;place-items:center;font-size:23px;margin-bottom:12px}
+  .leadbox h3{font-family:'Outfit',sans-serif;font-size:18px;font-weight:600;margin:0;color:var(--ink);line-height:1.25}
+  .leadbox p{font-size:13px;color:var(--ink2);line-height:1.55;margin:8px 0 15px}
+  .leadbox input{width:100%;box-sizing:border-box;border:1.5px solid var(--line-warm);border-radius:22px;
+    padding:13px 16px;font:inherit;font-size:15px;color:var(--ink);outline:0;background:#fff}
+  .leadbox input:focus{border-color:var(--green)}
+  .leadbox .err{font-size:12px;color:var(--apple);margin-top:7px;display:none}
+  .leadbox .err.on{display:block}
+  .leadbox .go{width:100%;border:0;background:var(--green);color:#fff;font-family:inherit;font-weight:800;
+    font-size:14.5px;padding:14px;border-radius:22px;cursor:pointer;margin-top:10px}
+  .leadbox .go:disabled{opacity:.55;cursor:default}
+  .leadbox .no{width:100%;border:0;background:none;color:var(--ink3);font-family:inherit;font-size:13px;
+    padding:11px;cursor:pointer;margin-top:2px}
+  .leadbox .fine{font-size:11px;color:var(--ink3);line-height:1.45;text-align:center;margin-top:10px}
+  .leadbox .okwrap{text-align:center;padding:6px 0 2px}
+  .leadbox .okwrap .oc{width:52px;height:52px;border-radius:50%;background:var(--green-soft);
+    display:grid;place-items:center;font-size:26px;margin:0 auto 12px}
   .openbar{grid-column:1/-1;display:flex;gap:12px;align-items:center;padding:13px 16px;margin:0;
     background:var(--apricot-soft);border:1px solid #EFCB8E;border-radius:16px}
   .openbar .oi{width:34px;height:34px;border-radius:11px;background:#fff;display:grid;place-items:center;font-size:18px;flex:none}
@@ -826,6 +853,11 @@ window.sadikProps=function(s){
 </section>
 
 <!-- ===================== RESULTS ===================== -->
+
+<!-- ЗАЯВКА: просим номер после клика в WhatsApp -->
+<div class="leadwrap" id="leadWrap">
+  <div class="leadbox" id="leadBox"></div>
+</div>
 
 <!-- STORIES ONBOARDING -->
 <div class="stories" id="storiesBar">
@@ -1645,7 +1677,7 @@ function openProfile(id){
         <div class="bc price">
           <h4>${t('cost')}</h4>
           <div class="bigp"${veryLongPrice?' style="font-size:16px;line-height:1.35"':longPrice?' style="font-size:20px"':''}>${priceDisplay}<small>${priceSub}</small></div>
-          ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener" onclick="track('whatsapp_click',sadikProps(data.find(x=>x.id==='${s.id}')))"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:''}
+          ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener" onclick="track('whatsapp_click',sadikProps(data.find(x=>x.id==='${s.id}')));setTimeout(function(){openLead('${s.id}');},900)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:''}
           ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener" onclick="track('instagram_click',sadikProps(data.find(x=>x.id==='${s.id}')))"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
           ${s.gis?`<a class="iglink" href="${s.gis}" target="_blank" rel="noopener" onclick="track('gis_click',sadikProps(data.find(x=>x.id==='${s.id}')))" style="background:#f0fff4;border-color:#bbf7d0"><span class="igdot" style="background:none;border:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0"><img src="icons/2gis.png" width="28" height="28" style="border-radius:6px" alt="2GIS">></span>${lang==='kz'?'2ГИС-те ашу':'Открыть в 2ГИС'}</a>`:''}
           <button class="favrow" id="pFav">${fav?APPLE_FILL:APPLE_OUTLINE} ${fav?t('inFav'):t('saveFav')}</button>
@@ -1857,7 +1889,7 @@ const T={
     gos:'Мем. дотация',gosFull:'Мем. дотация «Балапан»',
     empty:'Ничего не нашлось', emptyDesc:'Попробуйте смягчить фильтры или сбросить их.',
     free:'Бесплатно', freeDesc:'подбор и заявка',
-    sadikiInCatalog:'садиков в каталоге', districts:'районов города',
+    sadikiInCatalog:'садиков в каталоге', districts:'с указанной ценой', withVoucher:'принимают ваучер',
     trialDay:'Пробный день', trialDesc:'оставьте заявку, садик свяжется.',
     yourName:'Ваше имя', phone:'Телефон', date:'Желаемая дата', childAge:'Возраст ребёнка',
     comment:'Комментарий', cancel:'Отмена', send:'Отправить заявку',
@@ -1904,7 +1936,7 @@ const T={
     gos:'Мем. дотация',gosFull:'Мем. дотация «Балапан»',
     empty:'Ештеңе табылмады',emptyDesc:'Сүзгілерді жұмсартып көріңіз.',
     free:'Тегін',freeDesc:'іріктеу және өтінім',
-    sadikiInCatalog:'каталогтағы балабақша',districts:'қала аудандары',
+    sadikiInCatalog:'каталогтағы балабақша',districts:'бағасы көрсетілген',withVoucher:'ваучер қабылдайды',
     trialDay:'Сынақ күні',trialDesc:'өтінім қалдырыңыз, балабақша хабарласады.',
     yourName:'Атыңыз',phone:'Телефон',date:'Қалаулы күн',childAge:'Бала жасы',
     comment:'Пікір',cancel:'Болдырмау',send:'Өтінім жіберу',
@@ -1979,7 +2011,7 @@ function applyLang(){
   const stats=document.querySelectorAll('.hstat span');
   if(stats[0])stats[0].textContent=t('sadikiInCatalog');
   if(stats[1])stats[1].textContent=t('districts');
-  if(stats[2])stats[2].textContent=t('freeDesc');
+  if(stats[2])stats[2].textContent=t('withVoucher');
   // owner btn
   if(!admin)document.getElementById('ownerBtn').textContent=t('ownerMode');
   // bottom nav labels
@@ -2588,6 +2620,78 @@ function geolocate(){
   },()=>alert('Геолокацию не удалось получить — листайте карту вручную.'));
 }
 
+/* ---------- заявка: номер родителя после клика в WhatsApp ---------- */
+const LEAD={
+  url:'https://docs.google.com/forms/d/e/1FAIpQLSf1uTKvhNHcZwr46zR01FFz5nDlgbMJU1RQ4nuyLfA-wyoYGQ/formResponse',
+  phone:'entry.974575624', district:'entry.1744016077',
+  sadik:'entry.932692040', note:'entry.22902042',
+  DONE:'bq_lead_done', SKIP:'bq_lead_skip'
+};
+function leadDone(){try{return localStorage.getItem(LEAD.DONE)==='1';}catch(e){return false;}}
+function leadSkipped(id){
+  try{return (JSON.parse(localStorage.getItem(LEAD.SKIP)||'[]')||[]).indexOf(id)>=0;}catch(e){return false;}
+}
+function leadSkip(id){
+  try{
+    const a=JSON.parse(localStorage.getItem(LEAD.SKIP)||'[]')||[];
+    if(a.indexOf(id)<0)a.push(id);
+    localStorage.setItem(LEAD.SKIP,JSON.stringify(a.slice(-40)));
+  }catch(e){}
+}
+function closeLead(){const w=document.getElementById('leadWrap');if(w)w.classList.remove('on');}
+function normPhone(v){return String(v||'').replace(/\D/g,'');}
+function validPhone(v){
+  const d=normPhone(v);
+  if(d.length===11&&(d[0]==='7'||d[0]==='8'))return '+7'+d.slice(1);
+  if(d.length===10&&d[0]==='7')return '+7'+d;
+  return null;
+}
+function openLead(id){
+  const s=data.find(x=>x.id===id); if(!s)return;
+  if(leadDone()||leadSkipped(id))return;
+  const w=document.getElementById('leadWrap'), b=document.getElementById('leadBox');
+  if(!w||!b)return;
+  const kz=lang==='kz';
+  b.innerHTML=`
+    <div class="li">💬</div>
+    <h3>${kz?'«'+esc(s.name)+'» чатын аштыңыз':'Открыли чат с «'+esc(s.name)+'»'}</h3>
+    <p>${kz?'Балабақшалар әрдайым тез жауап бермейді. Екі күннен кейін жазып, жауап келді ме деп сұраймыз. Келмесе — жақын жердегі басқа нұсқаларды ұсынамыз.':'Садики отвечают не всегда быстро. Через пару дней напишем и спросим, ответили ли вам. Если нет — подскажем, куда ещё написать рядом.'}</p>
+    <input id="leadPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___ __ __">
+    <div class="err" id="leadErr">${kz?'Нөмірді тексеріңіз':'Проверьте номер — нужно 11 цифр'}</div>
+    <button class="go" id="leadGo">${kz?'Екі күннен кейін еске салыңыз':'Напомнить через 2 дня'}</button>
+    <button class="no" id="leadNo">${kz?'Керегі жоқ, рахмет':'Не надо, спасибо'}</button>
+    <div class="fine">${kz?'Нөмір бізден бір хабарлама үшін ғана қажет. Балабақшаларға бермейміз.':'Номер нужен только для одного сообщения от нас. Садикам его не передаём.'}</div>`;
+  w.classList.add('on');
+  track('lead_ask_shown',sadikProps(s));
+
+  const inp=b.querySelector('#leadPhone'), err=b.querySelector('#leadErr'), go=b.querySelector('#leadGo');
+  setTimeout(()=>{try{inp.focus();}catch(e){}},120);
+  b.querySelector('#leadNo').onclick=()=>{leadSkip(id);track('lead_skip',sadikProps(s));closeLead();};
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')go.click();});
+  inp.addEventListener('input',()=>err.classList.remove('on'));
+
+  go.onclick=()=>{
+    const ph=validPhone(inp.value);
+    if(!ph){err.classList.add('on');return;}
+    go.disabled=true; go.textContent=kz?'Жіберілуде…':'Отправляем…';
+    const fd=new URLSearchParams();
+    fd.append(LEAD.phone,ph);
+    fd.append(LEAD.district,s.district||'');
+    fd.append(LEAD.sadik,s.name||'');
+    fd.append(LEAD.note,[s.price||'цена не указана',s.address||''].filter(Boolean).join(' · '));
+    fetch(LEAD.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:fd.toString()})
+      .catch(()=>{})
+      .finally(()=>{
+        try{localStorage.setItem(LEAD.DONE,'1');}catch(e){}
+        track('lead_sent',Object.assign({},sadikProps(s)));
+        b.innerHTML=`<div class="okwrap"><div class="oc">✅</div>
+          <h3>${kz?'Дайын!':'Готово!'}</h3>
+          <p style="margin-bottom:16px">${kz?'Екі күннен кейін жазамыз да, қалай өткенін сұраймыз. Ал әзірге басқа балабақшаларды қарай беріңіз.':'Через пару дней напишем и спросим, как всё прошло. А пока смотрите другие садики.'}</p>
+          <button class="go" onclick="closeLead()">${kz?'Жақсы':'Хорошо'}</button></div>`;
+      });
+  };
+}
+
 /* ---------- поиск: нормализация и подсказки ---------- */
 /* «ё» → «е», апострофы и пунктуация выкидываются, всё в нижний регистр */
 function normText(v){
@@ -2840,6 +2944,8 @@ if(rbEl)rbEl.addEventListener('input',()=>{
   }
   render();renderMap(false);
 });
+const _lw=document.getElementById('leadWrap');
+if(_lw)_lw.addEventListener('click',e=>{if(e.target===_lw)closeLead();});
 wireSugg('heroq','suggHero','.herosearch');
 wireSugg('q','suggTb','.tb-search');
 document.getElementById('sort').addEventListener('change',()=>refresh(false));
