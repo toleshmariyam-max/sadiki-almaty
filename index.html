@@ -454,6 +454,9 @@ window.sadikProps=function(s){
   .proglist li:last-child{margin-bottom:0}
   .proglist li:before{content:'';position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--green)}
   .card .card-top .badge.soon{color:#8A5405;background:rgba(255,255,255,.96)}
+  .cvouch{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:800;
+    color:var(--green-700);margin-top:3px;line-height:1.2}
+  .cvouch small{font-weight:600;color:var(--ink3);font-size:10px}
   .bc.lic{grid-column:1/4;display:flex;gap:14px;align-items:center;padding:14px 20px}
   .bc.lic .licicon{width:38px;height:38px;border-radius:12px;background:var(--line2);display:grid;place-items:center;flex:none;font-size:18px}
   .bc.lic .licicon.ver{background:var(--green-soft)}
@@ -1250,8 +1253,15 @@ function render(){
           ${s.district?`<div class="caddr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg><span>${esc(s.district)}</span></div>`:''}
           ${s.address?`<div class="cstreet">${esc(shortAddr(s.address))}</div>`:''}
           <div class="cloc">${lang==='kz'?(s.age||'').replace(/лет/g,'жас').replace(/год/g,'жас'):esc(s.age||'')}</div>
+          ${(function(){const pp=priceParts(s.price);return pp.vouch?`<div class="cvouch">🍃 ${lang==='kz'?'ваучермен':'с ваучером'} ${esc(pp.vouch)} ₸</div>`:'';})()}
           <div class="cprice-row">
-            <span class="cprice">${s.price?esc(s.price).replace(/\s*\/.*$/,'').replace(/\s*\(.*?\)/,'').trim()+' <small>'+(lang==='kz'?'тг/айына':'₸/мес')+'</small>':`<small style="color:#bbb">${lang==='kz'?'Баға: сұраныс бойынша':'Цена: уточнить'}</small>`}</span>
+            <span class="cprice">${(function(){
+              const pp=priceParts(s.price);
+              if(!pp.base)return `<small style="color:#bbb">${lang==='kz'?'Баға: сұраныс бойынша':'Цена: уточнить'}</small>`;
+              const unit=lang==='kz'?'тг/айына':'₸/мес';
+              const tail=pp.onlyVouch?` <small style="color:#15704A">${lang==='kz'?'ваучермен':'по ваучеру'}</small>`:'';
+              return esc(pp.base)+' <small>'+unit+'</small>'+tail;
+            })()}</span>
             <button class="cgo" aria-label="${lang==='kz'?'Толығырақ':'Подробнее'}" onclick="event.stopPropagation();openProfile('${s.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 5l7 7-7 7"/></svg></button>
           </div>
         </div>
@@ -1462,6 +1472,21 @@ function drawMarkers(){
     });
     m.addTo(markersLayer);
   });
+}
+/* «190 000 ₸/мес · 150 000 ₸ по ваучеру» → {base:'190 000 ₸', vouch:'150 000 ₸'} */
+const VOUCH_RE=/ваучер|дотац|госзаказ|мемтапсырыс/i;
+function priceParts(raw){
+  const out={base:'',vouch:'',onlyVouch:false};
+  if(!raw)return out;
+  const parts=String(raw).split(/\s·\s|\s\/\s|,\s(?=[^\d])/).map(x=>x.trim()).filter(Boolean);
+  const money=t=>{const m=String(t).replace(/[\u00a0]/g,' ').match(/(\d[\d\s]{2,8}\d)\s*₸?/);return m?m[1].replace(/\s+/g,' ').trim():'';};
+  const vp=parts.find(x=>VOUCH_RE.test(x));
+  const bp=parts.find(x=>!VOUCH_RE.test(x)&&money(x));
+  if(vp)out.vouch=money(vp);
+  if(bp)out.base=money(bp);
+  if(!out.base&&out.vouch){out.base=out.vouch;out.vouch='';out.onlyVouch=true;}
+  if(!out.base)out.base=money(raw);
+  return out;
 }
 function renderMap(fit){
   if(typeof L==='undefined')return setTimeout(()=>renderMap(fit),60);
