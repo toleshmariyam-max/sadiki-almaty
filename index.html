@@ -1712,9 +1712,9 @@ function openProfile(id){
         <div class="bc price">
           <h4>${t('cost')}</h4>
           <div class="bigp"${veryLongPrice?' style="font-size:16px;line-height:1.35"':longPrice?' style="font-size:20px"':''}>${priceDisplay}<small>${priceSub}</small></div>
-          ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener" onclick="track('whatsapp_click',sadikProps(data.find(x=>x.id==='${s.id}')));setTimeout(function(){openLead('${s.id}');},900)"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:''}
-          ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener" onclick="track('instagram_click',sadikProps(data.find(x=>x.id==='${s.id}')))"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
-          ${s.gis?`<a class="iglink" href="${s.gis}" target="_blank" rel="noopener" onclick="track('gis_click',sadikProps(data.find(x=>x.id==='${s.id}')))" style="background:#f0fff4;border-color:#bbf7d0"><span class="igdot" style="background:none;border:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0"><img src="icons/2gis.png" width="28" height="28" style="border-radius:6px" alt="2GIS">></span>${lang==='kz'?'2ГИС-те ашу':'Открыть в 2ГИС'}</a>`:''}
+          ${waLink?`<a class="wabtn" href="${waLink}" target="_blank" rel="noopener" onclick="track('whatsapp_click',sadikProps(data.find(x=>x.id==='${s.id}')));leadOutbound('${s.id}')"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.625.846 5.059 2.284 7.034L.789 23.492a.5.5 0 00.611.611l4.458-1.495A11.944 11.944 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-2.339 0-4.508-.756-6.266-2.038l-.438-.33-3.207 1.075 1.075-3.207-.33-.438A9.956 9.956 0 012 12C2 6.486 6.486 2 12 2s10 4.486 10 10-4.486 10-10 10z"/></svg>${lang==='kz'?'WhatsApp-қа жазу':'Написать в WhatsApp'}</a>`:''}
+          ${igUser?`<a class="iglink" href="${igLink}" target="_blank" rel="noopener" onclick="track('instagram_click',sadikProps(data.find(x=>x.id==='${s.id}')));leadOutbound('${s.id}')"><span class="igdot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/></svg></span>${esc(igUser)}${s.igFollowers?' · '+esc(s.igFollowers):''}</a>`:''}
+          ${s.gis?`<a class="iglink" href="${s.gis}" target="_blank" rel="noopener" onclick="track('gis_click',sadikProps(data.find(x=>x.id==='${s.id}')));leadOutbound('${s.id}')" style="background:#f0fff4;border-color:#bbf7d0"><span class="igdot" style="background:none;border:none;display:flex;align-items:center;justify-content:center;width:28px;height:28px;flex-shrink:0"><img src="icons/2gis.png" width="28" height="28" style="border-radius:6px" alt="2GIS">></span>${lang==='kz'?'2ГИС-те ашу':'Открыть в 2ГИС'}</a>`:''}
           <button class="favrow" id="pFav">${fav?APPLE_FILL:APPLE_OUTLINE} ${fav?t('inFav'):t('saveFav')}</button>
           ${s.availability&&s.availability!=='уточните'&&s.availability!=='Уточните у нас'?`<div class="avail">✓ ${lang==='kz'?kzAvail(s.availability):esc(s.availability)}</div>`:''}
         </div>
@@ -2663,6 +2663,40 @@ const LEAD={
   DONE:'bq_lead_done', SKIP:'bq_lead_skip'
 };
 function leadDone(){try{return localStorage.getItem(LEAD.DONE)==='1';}catch(e){return false;}}
+/* глобальный отказ на 30 дней */
+function leadMuted(){
+  try{
+    const t=parseInt(localStorage.getItem('bq_lead_mute')||'0',10);
+    return t && (Date.now()-t) < 30*24*3600*1000;
+  }catch(e){return false;}
+}
+function leadMute(){try{localStorage.setItem('bq_lead_mute',String(Date.now()));}catch(e){}}
+/* сколько разных садиков человек уже смотрел */
+function leadSeenCount(){
+  try{return (JSON.parse(localStorage.getItem('bq_lead_seen')||'[]')||[]).length;}catch(e){return 0;}
+}
+function leadSeenAdd(id){
+  try{
+    const a=JSON.parse(localStorage.getItem('bq_lead_seen')||'[]')||[];
+    if(a.indexOf(id)<0)a.push(id);
+    localStorage.setItem('bq_lead_seen',JSON.stringify(a.slice(-30)));
+  }catch(e){}
+}
+/* одно окно за визит */
+let LEAD_SHOWN_THIS_VISIT=false;
+/* переход к садику: запоминаем и ждём возвращения на вкладку */
+let LEAD_PENDING=null;
+function leadOutbound(id){
+  leadSeenAdd(id);
+  if(leadDone()||leadMuted()||LEAD_SHOWN_THIS_VISIT)return;
+  if(leadSeenCount()<2)return;          // на первом садике молчим
+  LEAD_PENDING=id;
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState!=='visible'||!LEAD_PENDING)return;
+  const id=LEAD_PENDING; LEAD_PENDING=null;
+  setTimeout(function(){openLead(id);},700);
+});
 function leadSkipped(id){
   try{return (JSON.parse(localStorage.getItem(LEAD.SKIP)||'[]')||[]).indexOf(id)>=0;}catch(e){return false;}
 }
@@ -2683,14 +2717,15 @@ function validPhone(v){
 }
 function openLead(id){
   const s=data.find(x=>x.id===id); if(!s)return;
-  if(leadDone()||leadSkipped(id))return;
+  if(leadDone()||leadMuted()||LEAD_SHOWN_THIS_VISIT)return;
+  LEAD_SHOWN_THIS_VISIT=true;
   const w=document.getElementById('leadWrap'), b=document.getElementById('leadBox');
   if(!w||!b)return;
   const kz=lang==='kz';
   b.innerHTML=`
     <div class="li">💬</div>
-    <h3>${kz?'«'+esc(s.name)+'» чатын аштыңыз':'Открыли чат с «'+esc(s.name)+'»'}</h3>
-    <p>${kz?'Балабақшалар әрдайым тез жауап бермейді. Екі күннен кейін жазып, жауап келді ме деп сұраймыз. Келмесе — жақын жердегі басқа нұсқаларды ұсынамыз.':'Садики отвечают не всегда быстро. Через пару дней напишем и спросим, ответили ли вам. Если нет — подскажем, куда ещё написать рядом.'}</p>
+    <h3>${kz?'«'+esc(s.name)+'» қарадыңыз ба?':'Смотрите «'+esc(s.name)+'»?'}</h3>
+    <p>${kz?'Балабақшалар әрдайым тез жауап бермейді. Екі күннен кейін жазып, таңдауға көмектесеміз бе деп сұраймыз.':'Садики отвечают не всегда быстро. Через пару дней напишем и спросим, получилось ли связаться. Если нет — подскажем, куда ещё написать рядом.'}</p>
     <input id="leadPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___ __ __">
     <div class="err" id="leadErr">${kz?'Нөмірді тексеріңіз':'Проверьте номер — нужно 11 цифр'}</div>
     <button class="go" id="leadGo">${kz?'Екі күннен кейін еске салыңыз':'Напомнить через 2 дня'}</button>
@@ -2701,7 +2736,7 @@ function openLead(id){
 
   const inp=b.querySelector('#leadPhone'), err=b.querySelector('#leadErr'), go=b.querySelector('#leadGo');
   setTimeout(()=>{try{inp.focus();}catch(e){}},120);
-  b.querySelector('#leadNo').onclick=()=>{leadSkip(id);track('lead_skip',sadikProps(s));closeLead();};
+  b.querySelector('#leadNo').onclick=()=>{leadMute();track('lead_skip',sadikProps(s));closeLead();};
   inp.addEventListener('keydown',e=>{if(e.key==='Enter')go.click();});
   inp.addEventListener('input',()=>err.classList.remove('on'));
 
