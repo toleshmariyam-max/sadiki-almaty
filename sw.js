@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sadiki-almaty-v167';
+const CACHE_NAME = 'sadiki-almaty-v169';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
