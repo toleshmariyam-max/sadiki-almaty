@@ -128,7 +128,16 @@ window.sadikProps=function(s){
   .herochips{margin-top:14px;display:flex;flex-wrap:wrap;gap:7px;align-items:center}
   /* одна строка поиска: чипсы переехали в шапку */
   .tb-search{display:none!important}
-  .hero .chips{margin-top:13px;flex-wrap:wrap;overflow:visible;gap:7px}
+  .herofilters{margin-top:13px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .hero .chips{margin-top:0;flex-wrap:wrap;overflow:visible;gap:7px;flex:0 1 auto}
+  .cntrow{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:16px 0 0}
+  .cntrow .countline{margin:0}
+  @media(max-width:760px){
+    .herofilters{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-top:10px}
+    .herofilters::-webkit-scrollbar{display:none}
+    .hero .chips{flex-wrap:nowrap;overflow:visible}
+    .herofilters .hquiz{flex:none;white-space:nowrap}
+  }
   .tbline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:34px}
   .tbfilt{flex:none;display:inline-flex;align-items:center;gap:6px;background:var(--paper);
     border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;
@@ -609,6 +618,16 @@ window.sadikProps=function(s){
   /* ---------- STORIES ONBOARDING ---------- */
   .stories{display:flex;gap:14px;padding:14px 20px;overflow-x:auto;scrollbar-width:none;background:#fff;border-bottom:1px solid #f0f0f0}
   .stories::-webkit-scrollbar{display:none}
+  .hero .stories{background:transparent;border-bottom:0;padding:18px 0 2px;margin:0}
+  .hero .story .circle{width:52px;height:52px}
+  .hero .story .circle .inner{background:#fff!important}
+  .hero .sname{font-size:11.5px}
+  @media(max-width:760px){
+    .hero .stories{padding:12px 0 0;gap:11px}
+    .hero .story .circle{width:46px;height:46px;border-width:2px}
+    .hero .story .circle .inner{font-size:19px}
+    .hero .sname{font-size:10.5px}
+  }
   .story{display:flex;flex-direction:column;align-items:center;gap:5px;flex:none;cursor:pointer;border:0;background:none;padding:0;font-family:inherit}
   .story .circle{width:56px;height:56px;border-radius:50%;border:2.5px solid #22c55e;padding:3px;display:grid;place-items:center}
   .story .circle .inner{width:100%;height:100%;border-radius:50%;display:grid;place-items:center;font-size:22px}
@@ -684,7 +703,6 @@ window.sadikProps=function(s){
     .herostats{margin-top:14px;gap:26px}
     .hstat b{font-size:18px}
     .hstat span{font-size:12px}
-    .stories{display:none}
     .bottomnav{display:none}
     body{padding-bottom:0}
   }
@@ -815,6 +833,14 @@ window.sadikProps=function(s){
       <span class="eyebrow">🍎 Детские сады Алматы</span>
       <h1>Частные садики Алматы — <em>сразу с ценами</em></h1>
       <p class="lede">Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и напишите ему напрямую в WhatsApp.</p>
+      <!-- STORIES ONBOARDING -->
+      <div class="stories" id="storiesBar">
+        <button class="story" onclick="openVaucher()"><div class="circle" style="background:linear-gradient(0deg,#1F8A5B,#1F8A5B)"><div class="inner" style="background:#E1F5EE">🍃</div></div><div class="sname">Ваучер</div></button>
+        <button class="story" onclick="showStory(0)"><div class="circle"><div class="inner" style="background:#f0fdf4">🔍</div></div><div class="sname" id="sn0">Как найти садик</div></button>
+        <button class="story" onclick="showStory(1)"><div class="circle"><div class="inner" style="background:#fef3c7">⚡</div></div><div class="sname" id="sn1">Фильтры</div></button>
+        <button class="story" onclick="showStory(2)"><div class="circle"><div class="inner" style="background:#fce7f3">❤️</div></div><div class="sname" id="sn2">Избранное</div></button>
+        <button class="story" onclick="showStory(3)"><div class="circle"><div class="inner" style="background:#dcfce7">💬</div></div><div class="sname" id="sn3">WhatsApp</div></button>
+      </div>
       <div class="herosearch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <div class="htoks" id="heroToks"></div>
@@ -822,7 +848,16 @@ window.sadikProps=function(s){
         <button class="btn-find" id="heroFind">Показать</button>
         <div class="sugg" id="suggHero" role="listbox"></div>
       </div>
-      <div class="chips" id="filters"></div>
+      <div class="herofilters">
+        <div class="chips" id="filters"></div>
+        <button class="hquiz" id="quizBtn">✨ Подобрать за меня</button>
+        <div class="viewtog" role="tablist" aria-label="Вид">
+          <button id="viewList" class="on">Список</button>
+          <button id="viewMap">Карта</button>
+        </div>
+        <button class="btn-ghost owner-only" id="addBtn" style="display:none">+ Добавить садик</button>
+        <button class="btn-ghost owner-only" id="exportBtn" style="display:none">⤓ Экспорт JSON</button>
+      </div>
       <div class="herochips" id="heroChips" style="display:none"></div>
       <div class="hlive">
         <div class="hlive-row">
@@ -935,45 +970,13 @@ window.sadikProps=function(s){
   <div class="leadbox" id="leadBox"></div>
 </div>
 
-<!-- STORIES ONBOARDING -->
-<div class="stories" id="storiesBar">
-  <button class="story" onclick="openVaucher()"><div class="circle" style="background:linear-gradient(0deg,#1F8A5B,#1F8A5B)"><div class="inner" style="background:#E1F5EE">🍃</div></div><div class="sname">Ваучер</div></button>
-  <button class="story" onclick="showStory(0)"><div class="circle"><div class="inner" style="background:#f0fdf4">🔍</div></div><div class="sname" id="sn0">Как найти садик</div></button>
-  <button class="story" onclick="showStory(1)"><div class="circle"><div class="inner" style="background:#fef3c7">⚡</div></div><div class="sname" id="sn1">Фильтры</div></button>
-  <button class="story" onclick="showStory(2)"><div class="circle"><div class="inner" style="background:#fce7f3">❤️</div></div><div class="sname" id="sn2">Избранное</div></button>
-  <button class="story" onclick="showStory(3)"><div class="circle"><div class="inner" style="background:#dcfce7">💬</div></div><div class="sname" id="sn3">WhatsApp</div></button>
-</div>
 
 <button class="map-back" onclick="var ly=document.querySelector('.layout');ly.classList.remove('show-map');ly.classList.add('show-list');document.querySelectorAll('.bni').forEach(b=>b.classList.remove('on'));document.querySelector('.bni[data-tab=home]').classList.add('on');window.scrollTo({top:0});" id="mapBackBtn">← Назад к списку</button>
 <main class="results" id="results">
-  <div class="toolbar">
-    <div class="toolbar-in">
-      <div class="tb-row">
-        <div class="tb-search">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <input id="q" placeholder="Поиск по названию или адресу…" aria-label="Поиск">
-          <div class="sugg" id="suggTb" role="listbox"></div>
-        </div>
-        <div class="selwrap">
-          <select id="sort" class="sortsel" aria-label="Сортировка">
-            <option value="reco">Сначала рекомендуем</option>
-            <option value="price">Сначала дешевле</option>
-            <option value="name">По названию</option>
-          </select>
-        </div>
-        <div class="viewtog" role="tablist" aria-label="Вид">
-          <button id="viewList" class="on">Список</button>
-          <button id="viewMap">Карта</button>
-        </div>
-        <button class="hquiz" id="quizBtn">✨ Подобрать за меня</button>
-        <button class="btn-ghost owner-only" id="addBtn" style="display:none">+ Добавить садик</button>
-        <button class="btn-ghost owner-only" id="exportBtn" style="display:none">⤓ Экспорт JSON</button>
-      </div>
-      <div class="tbline">
-        <button class="tbfilt" id="tbFilt">⚙ Фильтры<span class="afn" id="tbAf"></span></button>
-        <div class="tbtoks" id="tbToks" data-empty="Показаны все садики"></div>
-        <button class="tbclear" id="tbClear">Сбросить</button>
-      </div>
+  <div class="toolbar" style="display:none" aria-hidden="true">
+    <div class="tb-search">
+      <input id="q" aria-label="Поиск" tabindex="-1">
+      <div class="sugg" id="suggTb" role="listbox"></div>
     </div>
   </div>
 
@@ -988,7 +991,16 @@ window.sadikProps=function(s){
   <div id="recentList" style="display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px"></div>
 </div>
 
-    <p class="countline" id="countline"></p>
+    <div class="cntrow">
+      <p class="countline" id="countline"></p>
+      <div class="selwrap">
+        <select id="sort" class="sortsel" aria-label="Сортировка">
+          <option value="reco">Сначала рекомендуем</option>
+          <option value="price">Сначала дешевле</option>
+          <option value="name">По названию</option>
+        </select>
+      </div>
+    </div>
     <div class="layout show-list" id="layout">
       <div class="left">
         <div class="grid" id="grid"></div>
