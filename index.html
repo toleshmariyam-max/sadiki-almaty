@@ -673,6 +673,13 @@ window.sadikProps=function(s){
     backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#1a1a1a;font-weight:700;font-size:14px;
     padding:8px 16px;border-radius:20px;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.1)}
   .backbtn:hover{background:#fff}
+  .sharebtn{position:absolute;top:14px;right:14px;z-index:10;border:0;background:rgba(255,255,255,.9);
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#1a1a1a;font-weight:700;font-size:14px;
+    padding:8px 14px;border-radius:20px;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.1);
+    display:inline-flex;align-items:center;gap:6px}
+  .sharebtn:hover{background:#fff}
+  .sharebtn svg{width:15px;height:15px;flex:none}
+  .sharebtn.done{background:#E2F1E8;color:#15704A}
 
 
   .reset-chip{background:#fee2e2!important;color:#dc2626!important;border-color:#fecaca!important}
@@ -1868,6 +1875,7 @@ function openProfile(id){
         <span class="pat"></span>
         ${s.logo?'<img class="plogo" src="'+esc(s.logo)+'" alt="'+esc(s.name)+'" onerror="this.outerHTML=\'<span class=mono>'+esc(monogram(s.name))+'</span>\'">':'<span class="mono">'+esc(monogram(s.name))+'</span>'}
         <button class="backbtn" id="closeX" aria-label="Назад">${lang==='kz'?'← Артқа':'← Назад'}</button>
+        <button class="sharebtn" id="shareBtn" aria-label="${lang==='kz'?'Сілтемені бөлісу':'Поделиться ссылкой'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 15V3"/><path d="m8 7 4-4 4 4"/></svg>${lang==='kz'?'Бөлісу':'Поделиться'}</button>
         <span class="ptrust">${t_.svg}${t_.label}</span>
       </div>
       <div class="bento">
@@ -1912,7 +1920,10 @@ function openProfile(id){
     </div>
   </div>`;
   openDrawer();
+  setSadikUrl(s);
   d.querySelector('#closeX').onclick=closeDrawer;
+  const sb=d.querySelector('#shareBtn');
+  if(sb)sb.onclick=()=>shareSadik(s,sb);
   d.querySelector('#pFav').onclick=async()=>{await toggleFav(id);d.querySelector('#pFav').innerHTML=(isFav(id)?APPLE_FILL:APPLE_OUTLINE)+' '+(isFav(id)?t('inFav'):t('saveFav'));render();};
 }
 
@@ -2046,6 +2057,7 @@ function openDrawer(){
 function closeDrawer(){
   document.getElementById('drawer').classList.remove('on');
   document.getElementById('scrim').classList.remove('on');
+  clearSadikUrl();
   renderRecent();
 }
 window.addEventListener('popstate',e=>{
@@ -3215,9 +3227,66 @@ function setView(v){
 document.getElementById('viewList').onclick=()=>setView('list');
 document.getElementById('viewMap').onclick=()=>setView('map');
 
+
+/* ---------- прямые ссылки на карточку ---------- */
+const BASE_TITLE=document.title;
+const BASE_DESC=(document.querySelector('meta[name="description"]')||{}).content||'';
+function sadikUrl(s){return location.origin+location.pathname+'?s='+encodeURIComponent(s.id);}
+function setSadikUrl(s){
+  try{
+    history.replaceState({drawer:true,sadik:s.id},'',sadikUrl(s));
+    const price=s.price?' — '+String(s.price).replace(/<[^>]*>/g,' ').trim():'';
+    document.title=s.name+price+' · Садики Алматы';
+    const m=document.querySelector('meta[name="description"]');
+    if(m)m.content=[s.name,s.district?s.district+' район':'',s.address||'',s.price||''].filter(Boolean).join(' · ');
+  }catch(e){}
+}
+function clearSadikUrl(){
+  try{
+    if(location.search)history.replaceState({},'',location.pathname);
+    document.title=BASE_TITLE;
+    const m=document.querySelector('meta[name="description"]');
+    if(m)m.content=BASE_DESC;
+  }catch(e){}
+}
+async function shareSadik(s,btn){
+  const url=sadikUrl(s);
+  const kz=lang==='kz';
+  const price=s.price?String(s.price).replace(/<[^>]*>/g,' ').trim():(kz?'бағасы сұраныс бойынша':'цена по запросу');
+  const text=[s.name,s.address||'',price].filter(Boolean).join(' · ');
+  try{track('share_click',sadikProps(s));}catch(e){}
+  if(navigator.share){
+    try{await navigator.share({title:s.name,text:text,url:url});return;}catch(e){if(e&&e.name==='AbortError')return;}
+  }
+  const done=()=>{
+    if(!btn)return;
+    const old=btn.innerHTML;
+    btn.classList.add('done');
+    btn.innerHTML=kz?'Сілтеме көшірілді':'Ссылка скопирована';
+    setTimeout(()=>{btn.classList.remove('done');btn.innerHTML=old;},1800);
+  };
+  try{
+    await navigator.clipboard.writeText(url);done();
+  }catch(e){
+    const ta=document.createElement('textarea');
+    ta.value=url;ta.style.cssText='position:fixed;opacity:0';
+    document.body.appendChild(ta);ta.select();
+    try{document.execCommand('copy');done();}catch(e2){prompt(kz?'Сілтемені көшіріңіз:':'Скопируйте ссылку:',url);}
+    ta.remove();
+  }
+}
+function openSadikFromUrl(){
+  try{
+    const id=new URLSearchParams(location.search).get('s');
+    if(!id)return;
+    if(!data.find(x=>x.id===id)){clearSadikUrl();return;}
+    setTimeout(()=>openProfile(id),60);
+  }catch(e){}
+}
+
 /* ---------- init ---------- */
 buildFilters();
-loadFavs().then(()=>load().then(()=>{buildFilters();render();renderMap(true);renderRecent();}));
+loadFavs().then(()=>load().then(()=>{buildFilters();render();renderMap(true);renderRecent();openSadikFromUrl();}));
 loadBookings();
 loadLang();
 loadAuth();

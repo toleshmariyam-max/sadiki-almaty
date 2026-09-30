@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sadiki-almaty-v195';
+const CACHE_NAME = 'sadiki-almaty-v196';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -37,10 +37,16 @@ self.addEventListener('fetch', event => {
   if (event.request.mode === 'navigate' || event.request.headers.get('accept')?.includes('text/html')) {
     event.respondWith(
       fetch(event.request).then(response => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        if (!url.search) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        }
         return response;
-      }).catch(() => caches.match(event.request) || caches.match('/'))
+      }).catch(() =>
+        caches.match(event.request, { ignoreSearch: true })
+          .then(hit => hit || caches.match('/index.html'))
+          .then(hit => hit || caches.match('/'))
+      )
     );
     return;
   }
