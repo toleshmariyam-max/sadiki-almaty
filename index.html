@@ -3161,9 +3161,40 @@ function sadikKey(s){
   s._key=translitKey(sadikHay(s));
   return s._key;
 }
-/* запрос дробится на слова: ищем садики, где встречается КАЖДОЕ */
+/* слова, которые ничего не сужают: родитель пишет «ауезовский район»,
+   а слова «район» в карточках нет — без этого списка находилось бы 5 садиков вместо 43 */
+var SEARCH_STOP=['район','районе','района','районы','ауданы','ауданда','аудан',
+ 'садик','садики','садика','садиков','садике','сад','сады','садов','саду',
+ 'детский','детские','детского','детсад','детсады','дет',
+ 'балабақша','балабақшасы','балабақшалар','бала бақша',
+ 'частный','частные','частный садик','лучший','лучшие',
+ 'для','в','на','по','с','и'];
+var SEARCH_STOP_SET=null;
+function searchStopSet(){
+  if(SEARCH_STOP_SET)return SEARCH_STOP_SET;
+  SEARCH_STOP_SET={};
+  SEARCH_STOP.forEach(function(phrase){
+    normText(phrase).split(' ').forEach(function(w){
+      if(!w)return;
+      SEARCH_STOP_SET[w]=1;
+      var k=translitKey(w);
+      if(k)SEARCH_STOP_SET['@'+k]=1;
+    });
+  });
+  return SEARCH_STOP_SET;
+}
+function isStopWord(w){
+  var st=searchStopSet();
+  return st[w]===1||st['@'+translitKey(w)]===1;
+}
+/* запрос дробится на слова: ищем садики, где встречается КАЖДОЕ.
+   Стоп-слова выбрасываем. Если выбросить пришлось всё («детский сад») —
+   значит сужать нечем, показываем весь каталог. */
 function searchTokens(q){
-  return normText(q).split(' ').filter(function(w){return w.length>=1;});
+  var all=normText(q).split(' ').filter(function(w){return w.length>=1;});
+  if(!all.length)return [];
+  var kept=all.filter(function(w){return !isStopWord(w);});
+  return kept;
 }
 /* всё текстовое поле карточки в одну строку (кэшируется) */
 function sadikHay(s){
