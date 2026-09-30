@@ -133,6 +133,27 @@ window.sadikProps=function(s){
     padding:8px 15px;border-radius:var(--pill);cursor:pointer;transition:.13s;display:inline-flex;gap:6px;align-items:center}
   .hquiz:hover{background:#fbdfac}
   .herostats{margin-top:22px;display:flex;gap:22px;flex-wrap:wrap}
+  .htoks{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+  .htok{display:inline-flex;align-items:center;gap:5px;background:var(--green-soft);color:var(--green-700);
+    border-radius:9px;padding:5px 7px 5px 10px;font-size:13.5px;white-space:nowrap;font-weight:500;
+    animation:htokIn .18s ease-out}
+  @keyframes htokIn{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+  .htok button{background:none;border:0;color:var(--green-700);cursor:pointer;padding:0;font-size:15px;
+    line-height:1;opacity:.65;font-family:inherit}
+  .htok button:hover{opacity:1}
+  .herosearch.hasTok{border-color:#9FD3B8;box-shadow:0 0 0 3px rgba(31,138,91,.08)}
+  .hlive{margin-top:20px}
+  .hlive-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .hlive-n{font-family:'Outfit',sans-serif;font-weight:600;font-size:34px;line-height:1;color:var(--green);
+    font-variant-numeric:tabular-nums}
+  .hlive-w{font-size:14.5px;color:var(--ink2)}
+  .hbars{flex:1;min-width:130px;display:flex;gap:3px;align-items:flex-end;height:30px}
+  .hbars i{flex:1;border-radius:2px;background:var(--green);transition:background .4s,height .4s cubic-bezier(.2,.8,.2,1)}
+  .hclear{flex:none;background:transparent;border:1px solid var(--line);color:var(--ink2);border-radius:999px;
+    padding:6px 13px;font-size:13px;cursor:pointer;font-family:inherit;display:none}
+  .hclear.on{display:inline-block}
+  .hsub{margin:10px 0 0;font-size:12.5px;color:var(--ink3);line-height:1.5}
+  @media(max-width:560px){.hlive-n{font-size:28px}.hbars{display:none}}
   .hstat b{font-family:'Outfit',sans-serif;font-weight:600;font-size:21px;display:block;line-height:1;color:var(--ink)}
   .hstat span{font-size:12.5px;color:var(--ink2)}
   .hero-art{position:relative}
@@ -764,12 +785,22 @@ window.sadikProps=function(s){
       <p class="lede">Сравниваем цену, условия и режим. Лицензию помечаем честно — проверенную видно сразу. Выберите садик рядом с домом и напишите ему напрямую в WhatsApp.</p>
       <div class="herosearch">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <div class="htoks" id="heroToks"></div>
         <input id="heroq" placeholder="Название или адрес — например, «Капитошка» или «Мирас»" aria-label="Поиск садика">
         <button class="btn-find" id="heroFind">Показать</button>
         <div class="sugg" id="suggHero" role="listbox"></div>
       </div>
       <div class="herochips" id="heroChips"></div>
-      <div class="herostats">
+      <div class="hlive">
+        <div class="hlive-row">
+          <span class="hlive-n" id="hLiveN">0</span>
+          <span class="hlive-w" id="hLiveW">садиков в каталоге</span>
+          <span class="hbars" id="hBars"></span>
+          <button class="hclear" id="hClear">Сбросить</button>
+        </div>
+        <p class="hsub" id="hSub"></p>
+      </div>
+      <div class="herostats" style="display:none">
         <div class="hstat"><b id="stTotal">0</b><span>садиков в каталоге</span></div>
         <div class="hstat"><b id="stPrice">0</b><span>с указанной ценой</span></div>
         <div class="hstat"><b id="stVoucher">0</b><span>принимают ваучер</span></div>
@@ -1414,6 +1445,89 @@ function getFiltered(){
 
 /* ---------- render cards ---------- */
 function fact(icon,val){return val&&String(val).trim()?`<li>${icon} ${esc(val)}</li>`:'';}
+
+/* ---------- живая шапка: токены + счётчик ---------- */
+const HERO_BARS=40;
+let heroPrev=null;
+function heroTokenList(){
+  const kz=lang==='kz', out=[];
+  const q=(document.getElementById('q')||{}).value||'';
+  if(q.trim())out.push({l:'🔍 «'+q.trim()+'»',clear:()=>{document.getElementById('q').value='';const h=document.getElementById('heroq');if(h)h.value='';}});
+  if(filters.nearKm!=null)out.push({l:(kz?'📍 Жақын жерде':'📍 Рядом'),clear:()=>{filters.nearKm=null;data.forEach(x=>{delete x._dist;});const nb=document.querySelector('.fchip.nearby');if(nb){nb.classList.remove('on');nb.textContent=kz?'📍 Жақын жерде':'📍 Рядом';}}});
+  if(filters.district)out.push({l:'📍 '+filters.district,clear:()=>{filters.district='';}});
+  if(filters.gosorder)out.push({l:(kz?'🍃 Мем. дотация':'🍃 Гос. дотация'),clear:()=>{filters.gosorder=false;}});
+  if(filters.maxPrice)out.push({l:'💰 '+(kz?'':'до ')+filters.maxPrice.toLocaleString('ru-RU').replace(/,/g,' ')+(kz?'-ға дейін':''),clear:()=>{filters.maxPrice=null;}});
+  if(filters.lang){
+    const L=kz?{'казах':'🗣 Қазақша','рус':'🗣 Орысша','английский':'🗣 Ағылшынша'}:{'казах':'🗣 Казахский','рус':'🗣 Русский','английский':'🗣 Английский'};
+    out.push({l:L[filters.lang]||('🗣 '+filters.lang),clear:()=>{filters.lang='';}});
+  }
+  if(filters.license)out.push({l:(kz?'🎓 Лицензиясы бар':'🎓 С лицензией'),clear:()=>{filters.license='';}});
+  if(filters.montessori)out.push({l:'🧠 Монтессори',clear:()=>{filters.montessori=false;}});
+  if(filters.correction)out.push({l:(kz?'🧩 Түзету':'🧩 Коррекционный'),clear:()=>{filters.correction=false;}});
+  if(filters.pool)out.push({l:'🏊 Бассейн',clear:()=>{filters.pool=false;}});
+  if(filters.salt)out.push({l:(kz?'🧂 Тұзды шахта':'🧂 Соляная шахта'),clear:()=>{filters.salt=false;}});
+  if(filters.cams)out.push({l:(kz?'📹 Онлайн камера':'📹 Камеры онлайн'),clear:()=>{filters.cams=false;}});
+  if(filters.bus)out.push({l:(kz?'🚐 Тасымалдау':'🚐 Развозка'),clear:()=>{filters.bus=false;}});
+  if(filters.fav)out.push({l:(kz?'❤️ Таңдаулы':'❤️ Избранное'),clear:()=>{filters.fav=false;}});
+  return out;
+}
+function heroCountUp(to){
+  const el=document.getElementById('hLiveN');if(!el)return;
+  const from=heroPrev==null?to:heroPrev;heroPrev=to;
+  if(from===to){el.textContent=to;return;}
+  let i=0;const steps=14;
+  clearInterval(el._iv);
+  el._iv=setInterval(()=>{i++;const e=1-Math.pow(1-i/steps,3);
+    el.textContent=Math.round(from+(to-from)*e);
+    if(i>=steps){clearInterval(el._iv);el.textContent=to;}},20);
+}
+function renderHero(list){
+  const box=document.getElementById('heroToks');if(!box)return;
+  const kz=lang==='kz';
+  const toks=heroTokenList();
+  box.innerHTML='';
+  toks.forEach(tk=>{
+    const sp=document.createElement('span');sp.className='htok';
+    sp.appendChild(document.createTextNode(tk.l));
+    const x=document.createElement('button');x.type='button';x.textContent='×';
+    x.setAttribute('aria-label',(kz?'Алып тастау: ':'Убрать: ')+tk.l);
+    x.onclick=ev=>{ev.stopPropagation();tk.clear();syncChips();refresh(true);};
+    sp.appendChild(x);box.appendChild(sp);
+  });
+  const hs=document.querySelector('.herosearch');
+  if(hs)hs.classList.toggle('hasTok',toks.length>0);
+  const inp=document.getElementById('heroq');
+  if(inp)inp.placeholder=toks.length?(kz?'Тағы...':'Ещё…'):t('searchPh');
+
+  const total=data.length||1;
+  const n=list?list.length:getFiltered().length;
+  heroCountUp(n);
+  const w=document.getElementById('hLiveW');
+  if(w)w.textContent=toks.length
+    ?(kz?'балабақша табылды':plural(n,'садик подходит','садика подходит','садиков подходит'))
+    :(kz?'балабақша каталогта':plural(n,'садик в каталоге','садика в каталоге','садиков в каталоге'));
+
+  const bars=document.getElementById('hBars');
+  if(bars){
+    if(!bars.children.length)for(let i=0;i<HERO_BARS;i++){const b=document.createElement('i');b.style.height=(9+((i*31)%21))+'px';bars.appendChild(b);}
+    const lit=Math.round(HERO_BARS*(n/total));
+    [].forEach.call(bars.children,(b,i)=>{
+      b.style.background=i<lit?'var(--green)':'#E8E4DA';
+      b.style.height=(9+((i*31)%21)*(i<lit?1:0.45))+'px';});
+  }
+  const cl=document.getElementById('hClear');
+  if(cl){cl.classList.toggle('on',toks.length>0);cl.textContent=kz?'Қалпына келтіру':'Сбросить';cl.onclick=resetAll;}
+
+  const sub=document.getElementById('hSub');
+  if(sub){
+    const wp=data.filter(x=>x.price&&String(x.price).trim()).length;
+    const gv=data.filter(x=>x.gosorder).length;
+    sub.textContent=toks.length
+      ?(kz?('Барлығы '+data.length+' балабақшадан'):('Из '+data.length+' садиков каталога'))
+      :(kz?(wp+' бағасымен · '+gv+' мем. дотациямен'):('У '+wp+' известна цена · '+gv+' принимают государственную дотацию'));
+  }
+}
+
 function render(){
   const list=getFiltered();
   const grid=document.getElementById('grid');
@@ -1465,6 +1579,7 @@ function render(){
   if(elV)elV.textContent=data.filter(x=>x.gosorder).length;
   const elD=document.getElementById('stDistricts');
   if(elD)elD.textContent=new Set(data.map(s=>s.district).filter(Boolean)).size||DISTRICTS.length;
+  renderHero(list);
   const cl=document.getElementById('countline');
   cl.innerHTML=lang==='kz'?`<b>${list.length}</b> балабақша табылды${activeFilterText()}`:`Найдено <b>${list.length}</b> ${plural(list.length,'садик','садика','садиков')}${activeFilterText()}`;
   // bind
