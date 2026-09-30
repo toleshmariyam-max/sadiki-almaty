@@ -403,6 +403,32 @@ window.sadikProps=function(s){
   .empty{grid-column:1/-1;text-align:center;color:var(--ink2);padding:54px 20px;background:var(--paper);
     border:1px dashed var(--line);border-radius:var(--r)}
   .empty b{display:block;font-size:16px;color:var(--ink);margin-bottom:6px}
+  .empty{text-align:left;padding:30px 24px}
+  .empty b{font-size:17px}
+  .empty .eq{color:var(--green-700)}
+  .empty p{margin:0 0 16px;font-size:14px;line-height:1.6;color:var(--ink2)}
+  .esim{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 16px}
+  .esim button{border:1px solid var(--line);background:var(--paper);border-radius:var(--pill);
+    padding:7px 13px;font:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+  .esim button:hover{border-color:#9FD3B8;background:var(--green-soft)}
+  .eacts{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 20px}
+  .eacts button{border:1px solid var(--line);background:transparent;border-radius:var(--pill);
+    padding:9px 16px;font:inherit;font-size:13.5px;font-weight:600;color:var(--ink2);cursor:pointer}
+  .eacts button.pri{background:var(--green);border-color:var(--green);color:#fff}
+  .enf{border-top:1px solid var(--line);padding-top:18px}
+  .enf h4{margin:0 0 4px;font-family:'Outfit',sans-serif;font-size:15px;font-weight:700;color:var(--ink)}
+  .enf p{margin:0 0 12px;font-size:13px}
+  .enf input{width:100%;box-sizing:border-box;border:1px solid var(--line);border-radius:12px;
+    padding:11px 14px;font:inherit;font-size:14px;margin-bottom:8px;background:var(--paper);color:var(--ink)}
+  .enf input:focus{outline:0;border-color:#9FD3B8;box-shadow:0 0 0 3px rgba(31,138,91,.08)}
+  .enf .err{display:none;font-size:12.5px;color:#B3261E;margin:-4px 0 8px}
+  .enf .err.on{display:block}
+  .enf .go{width:100%;border:0;background:var(--green);color:#fff;border-radius:12px;padding:12px;
+    font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+  .enf .go:disabled{opacity:.6;cursor:default}
+  .enf .fine{font-size:11.5px;color:var(--ink3);margin-top:9px;line-height:1.5}
+  .enf .okwrap{text-align:center;padding:6px 0}
+  .enf .okwrap .oc{font-size:34px;margin-bottom:6px}
 
   /* ---------- OVERLAY (profile + editor) ---------- */
   .scrim{position:fixed;inset:0;background:rgba(16,30,22,.5);opacity:0;pointer-events:none;transition:.22s;z-index:1000}
@@ -1590,11 +1616,102 @@ function renderHero(list){
   }
 }
 
+
+/* ---------- умный пустой экран ---------- */
+/* похожие по названию: берём самое длинное слово запроса и ищем по началу названия */
+function emptySimilar(q){
+  var toks=searchTokens(q).filter(function(w){return w.length>=3;});
+  if(!toks.length)return [];
+  toks.sort(function(a,b){return b.length-a.length;});
+  var w=toks[0], k=translitKey(w), stem=k.slice(0,Math.min(4,Math.max(3,k.length-1)));
+  if(stem.length<3)return [];
+  var hits=data.filter(function(s){
+    var nk=translitKey(s.name);
+    return nk.indexOf(stem)>-1;
+  });
+  return hits.slice(0,6);
+}
+function renderEmpty(grid){
+  var kz=lang==='kz';
+  var q=(document.getElementById('q').value||'').trim();
+  var box=document.createElement('div');
+  box.className='empty';
+
+  if(!q){
+    box.innerHTML='<b>'+(kz?'Ештеңе табылмады':'Ничего не нашлось')+'</b>'+
+      '<p>'+(kz?'Таңдалған сүзгілерге сай балабақша жоқ. Біреуін алып тастап көріңіз.'
+               :'Под выбранные фильтры пока нет ни одного садика. Попробуйте убрать один из них.')+'</p>'+
+      '<div class="eacts"><button class="pri" id="eReset">'+(kz?'Сүзгілерді тазалау':'Сбросить фильтры')+'</button></div>';
+    grid.innerHTML='';grid.appendChild(box);
+    var rb=box.querySelector('#eReset');if(rb)rb.onclick=resetAll;
+    try{track('empty_shown',{query:'',reason:'filters'});}catch(e){}
+    return;
+  }
+
+  var sim=emptySimilar(q);
+  var qHtml='«<span class="eq">'+esc(q)+'</span>»';
+  var title=kz?(qHtml+' бойынша ештеңе табылмады'):('Ничего не нашлось по запросу '+qHtml);
+  var html='<b>'+title+'</b>'+
+    '<p>'+(kz?'Мүмкін, бұл балабақша әлі каталогта жоқ — біз жаңаларын апта сайын қосып отырамыз.'
+             :'Возможно, этого садика ещё нет в каталоге — мы добавляем новые каждую неделю.')+'</p>';
+  if(sim.length){
+    html+='<p style="margin-bottom:8px">'+(kz?'Мынаны іздедіңіз бе?':'Может быть, вы искали:')+'</p><div class="esim">'+
+      sim.map(function(s){return '<button data-id="'+esc(s.id)+'">'+esc(s.name)+'</button>';}).join('')+'</div>';
+  }
+  html+='<div class="eacts">'+
+    '<button class="pri" id="eAll">'+(kz?'Барлық балабақшаны көрсету':'Показать все '+data.length+' садиков')+'</button>'+
+    '</div>'+
+    '<div class="enf" id="eNf">'+
+      '<h4>'+(kz?'Бұл балабақшаны білесіз бе?':'Знаете этот садик?')+'</h4>'+
+      '<p>'+(kz?'Атауын жазыңыз — тексеріп, каталогқа қосамыз.'
+               :'Напишите название — проверим и добавим в каталог. Обычно это занимает несколько дней.')+'</p>'+
+      '<input id="nfName" placeholder="'+(kz?'Балабақша атауы немесе мекенжайы':'Название садика или адрес')+'" value="'+esc(q)+'">'+
+      '<input id="nfWa" type="tel" inputmode="tel" placeholder="'+(kz?'WhatsApp (міндетті емес)':'Ваш WhatsApp (необязательно)')+'">'+
+      '<div class="err" id="nfErr">'+(kz?'Атауын жазыңыз':'Напишите название садика')+'</div>'+
+      '<button class="go" id="nfGo">'+(kz?'Жіберу':'Отправить')+'</button>'+
+      '<div class="fine">'+(kz?'Егер нөміріңізді қалдырсаңыз — қосқан кезде хабарлаймыз. Басқа ешкімге бермейміз.'
+                              :'Если оставите номер — напишем, когда добавим. Никому больше его не передаём.')+'</div>'+
+    '</div>';
+  box.innerHTML=html;
+  grid.innerHTML='';grid.appendChild(box);
+  try{track('empty_shown',{query:q,reason:'search',similar:sim.length});}catch(e){}
+
+  [].forEach.call(box.querySelectorAll('.esim button'),function(b){
+    b.onclick=function(){openProfile(b.dataset.id);};
+  });
+  var ab=box.querySelector('#eAll');
+  if(ab)ab.onclick=function(){resetAll();};
+
+  var nm=box.querySelector('#nfName'), wa=box.querySelector('#nfWa'),
+      er=box.querySelector('#nfErr'), go=box.querySelector('#nfGo');
+  if(nm)nm.addEventListener('input',function(){er.classList.remove('on');});
+  if(go)go.onclick=function(){
+    var name=(nm.value||'').trim();
+    if(!name){er.classList.add('on');nm.focus();return;}
+    go.disabled=true; go.textContent=kz?'Жіберілуде…':'Отправляем…';
+    var phone=(wa.value||'').trim()||(kz?'көрсетілмеген':'не указан');
+    var fd=new URLSearchParams();
+    fd.append(LEAD.phone,phone);
+    fd.append(LEAD.district,'');
+    fd.append(LEAD.sadik,name);
+    fd.append(LEAD.note,'НЕТ В КАТАЛОГЕ · запрос: '+q);
+    fetch(LEAD.url,{method:'POST',mode:'no-cors',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:fd.toString()})
+      .catch(function(){})
+      .then(function(){
+        try{track('missing_sadik_sent',{name:name,query:q,with_phone:phone!=='не указан'});}catch(e){}
+        var nf=box.querySelector('#eNf');
+        nf.innerHTML='<div class="okwrap"><div class="oc">✅</div>'+
+          '<h4>'+(kz?'Рахмет!':'Спасибо!')+'</h4>'+
+          '<p>'+(kz?'Тексеріп, каталогқа қосамыз.':'Проверим и добавим в каталог.')+'</p></div>';
+      });
+  };
+}
+
 function render(){
   const list=getFiltered();
   const grid=document.getElementById('grid');
   if(!list.length){
-    grid.innerHTML=`<div class="empty"><b>Ничего не нашлось</b>Попробуйте смягчить фильтры или сбросить их — садиков в этом наборе пока нет.</div>`;
+    renderEmpty(grid);
   }else{
     grid.innerHTML=list.map(s=>{
       const t=trust(s.license);
